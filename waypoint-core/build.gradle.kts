@@ -45,8 +45,19 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+            implementation(compose.uiTest)
+        }
+        val jvmTest by getting {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+            }
         }
     }
+}
+
+tasks.withType<Test> {
+    systemProperty("golden.dir", file("src/jvmTest/resources/goldens").absolutePath)
 }
 
 android {

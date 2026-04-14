@@ -45,6 +45,16 @@ kotlin {
             implementation(libs.compose.ui)
             implementation(libs.compose.animation)
         }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+            implementation(compose.uiTest)
+        }
+        val jvmTest by getting {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+            }
+        }
     }
 }
 

@@ -82,17 +82,23 @@ internal class WaypointPositionProvider(
         // Calculate arrow offset
         when (placement) {
             ResolvedPlacement.Top, ResolvedPlacement.Bottom -> {
-                arrowHorizontalOffset = (targetBounds.center.x - x).coerceIn(
-                    ARROW_HALF_SIZE,
-                    tooltipWidth - ARROW_HALF_SIZE,
-                )
+                val minOffset = ARROW_HALF_SIZE
+                val maxOffset = tooltipWidth - ARROW_HALF_SIZE
+                arrowHorizontalOffset = if (maxOffset >= minOffset) {
+                    (targetBounds.center.x - x).coerceIn(minOffset, maxOffset)
+                } else {
+                    tooltipWidth / 2f
+                }
             }
 
             ResolvedPlacement.Start, ResolvedPlacement.End -> {
-                arrowVerticalOffset = (targetBounds.center.y - y).coerceIn(
-                    ARROW_HALF_SIZE,
-                    tooltipHeight - ARROW_HALF_SIZE,
-                )
+                val minOffset = ARROW_HALF_SIZE
+                val maxOffset = tooltipHeight - ARROW_HALF_SIZE
+                arrowVerticalOffset = if (maxOffset >= minOffset) {
+                    (targetBounds.center.y - y).coerceIn(minOffset, maxOffset)
+                } else {
+                    tooltipHeight / 2f
+                }
             }
         }
 

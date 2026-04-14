@@ -56,13 +56,24 @@ public fun <K> WaypointHost(
     // Animated highlight bounds
     val animatedBounds = remember { Animatable(Rect.Zero, Rect.VectorConverter) }
 
+    // Reset animated bounds when the tour becomes inactive so the next
+    // start() snaps to the first target instead of animating from the
+    // previous tour's last position.
+    LaunchedEffect(state.isActive) {
+        if (!state.isActive) {
+            animatedBounds.snapTo(Rect.Zero)
+        }
+    }
+
     val targetBounds = state.currentTargetBounds
 
     LaunchedEffect(targetBounds) {
         if (targetBounds != null) {
             if (animatedBounds.value == Rect.Zero) {
+                // First step of a tour (or after reset) — snap immediately
                 animatedBounds.snapTo(targetBounds)
             } else {
+                // Mid-tour step transition — animate smoothly
                 animatedBounds.animateTo(
                     targetValue = targetBounds,
                     animationSpec = tween(
@@ -178,9 +189,13 @@ public fun <K> WaypointHost(
                 },
             )
 
+            // Tooltip uses raw (snapped) bounds, not the animated bounds.
+            // The spotlight animates its cutout position smoothly, but the tooltip
+            // should snap to the new target immediately to avoid drifting through
+            // intermediate positions during the 400ms transition.
             TooltipPopup(
                 visible = true,
-                targetBounds = animatedBounds.value,
+                targetBounds = targetBounds,
                 placement = step.placement,
                 tooltipSpacing = tooltipSpacingPx,
                 screenMargin = screenMarginPx,

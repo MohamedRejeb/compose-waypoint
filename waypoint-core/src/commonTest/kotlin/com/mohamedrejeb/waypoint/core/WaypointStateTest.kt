@@ -1,5 +1,6 @@
 package com.mohamedrejeb.waypoint.core
 
+import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.ui.geometry.Rect
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -557,5 +558,39 @@ class WaypointStateTest {
         state.next()
 
         assertEquals(boundsB, state.currentTargetBounds)
+    }
+
+    // -- BringIntoViewRequester Registration --
+
+    @Test
+    fun `registerBringIntoViewRequester stores requester`() {
+        val state = WaypointState(steps = threeSteps())
+        val requester = BringIntoViewRequester()
+
+        state.registerBringIntoViewRequester("a", requester)
+
+        assertEquals(requester, state.bringIntoViewRequesters["a"])
+    }
+
+    @Test
+    fun `unregisterTarget also removes BringIntoViewRequester`() {
+        val state = WaypointState(steps = threeSteps())
+        state.registerTarget("a", Rect(10f, 20f, 100f, 80f))
+        state.registerBringIntoViewRequester("a", BringIntoViewRequester())
+
+        state.unregisterTarget("a")
+
+        assertNull(state.targetCoordinates["a"])
+        assertNull(state.bringIntoViewRequesters["a"])
+    }
+
+    @Test
+    fun `unregisterTarget is safe when no requester registered`() {
+        val state = WaypointState(steps = threeSteps())
+        state.registerTarget("a", Rect(10f, 20f, 100f, 80f))
+
+        state.unregisterTarget("a") // should not crash
+
+        assertNull(state.targetCoordinates["a"])
     }
 }

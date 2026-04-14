@@ -4,13 +4,21 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 
@@ -22,6 +30,7 @@ import androidx.compose.ui.unit.Dp
  * @param state the [WaypointState] managing the tour
  * @param highlightStyle default highlight style for all steps (overridable per-step)
  * @param overlayClickBehavior what happens when the overlay is clicked (only applies to Spotlight)
+ * @param keyboardConfig keyboard navigation settings (arrow keys, Escape)
  * @param tooltipSpacing spacing between tooltip and target
  * @param screenMargin minimum margin from screen edges for the tooltip
  * @param onTourComplete callback when the tour finishes all steps
@@ -35,6 +44,7 @@ public fun <K> WaypointHost(
     modifier: Modifier = Modifier,
     highlightStyle: HighlightStyle = WaypointDefaults.HighlightStyle,
     overlayClickBehavior: OverlayClickBehavior = WaypointDefaults.OverlayClickBehavior,
+    keyboardConfig: KeyboardConfig = WaypointDefaults.KeyboardConfig,
     tooltipSpacing: Dp = WaypointDefaults.TooltipSpacing,
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
     onTourComplete: (() -> Unit)? = null,
@@ -88,7 +98,48 @@ public fun <K> WaypointHost(
     val shouldShowHighlight = state.isActive && !state.isPaused && targetBounds != null
     val currentStep = state.currentStep
 
-    Box(modifier = modifier) {
+    // Keyboard navigation: request focus when tour is active so key events are captured
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(state.isActive) {
+        if (state.isActive) {
+            focusRequester.requestFocus()
+        }
+    }
+
+    val keyboardModifier = if (keyboardConfig.enabled) {
+        Modifier
+            .focusRequester(focusRequester)
+            .focusable()
+            .onKeyEvent { event ->
+                if (!state.isActive || event.type != KeyEventType.KeyDown) return@onKeyEvent false
+
+                when {
+                    event.key in keyboardConfig.nextKeys -> {
+                        val wasLastStep = state.currentStepIndex == state.steps.lastIndex
+                        state.next()
+                        if (wasLastStep && !state.isActive) {
+                            onTourComplete?.invoke()
+                        }
+                        true
+                    }
+                    event.key in keyboardConfig.previousKeys -> {
+                        state.previous()
+                        true
+                    }
+                    event.key in keyboardConfig.dismissKeys -> {
+                        state.stop()
+                        onTourCancel?.invoke()
+                        true
+                    }
+                    else -> false
+                }
+            }
+    } else {
+        Modifier
+    }
+
+    Box(modifier = modifier.then(keyboardModifier)) {
         // 1. Screen content
         content()
 

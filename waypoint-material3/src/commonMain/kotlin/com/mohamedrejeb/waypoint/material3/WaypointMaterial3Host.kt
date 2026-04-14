@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import com.mohamedrejeb.waypoint.core.HighlightStyle
+import com.mohamedrejeb.waypoint.core.KeyboardConfig
 import com.mohamedrejeb.waypoint.core.OverlayClickBehavior
 import com.mohamedrejeb.waypoint.core.WaypointDefaults
 import com.mohamedrejeb.waypoint.core.WaypointHost
@@ -25,6 +26,7 @@ public fun <K> WaypointMaterial3Host(
     modifier: Modifier = Modifier,
     highlightStyle: HighlightStyle = WaypointDefaults.HighlightStyle,
     overlayClickBehavior: OverlayClickBehavior = WaypointDefaults.OverlayClickBehavior,
+    keyboardConfig: KeyboardConfig = WaypointDefaults.KeyboardConfig,
     tooltipSpacing: Dp = WaypointDefaults.TooltipSpacing,
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
     onTourComplete: (() -> Unit)? = null,
@@ -41,6 +43,7 @@ public fun <K> WaypointMaterial3Host(
         modifier = modifier,
         highlightStyle = highlightStyle,
         overlayClickBehavior = overlayClickBehavior,
+        keyboardConfig = keyboardConfig,
         tooltipSpacing = tooltipSpacing,
         screenMargin = screenMargin,
         onTourComplete = onTourComplete,

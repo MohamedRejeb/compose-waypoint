@@ -22,4 +22,7 @@ public object WaypointDefaults {
 
     /** Minimum margin from screen edges for the tooltip */
     public val ScreenMargin: Dp = 16.dp
+
+    /** Default keyboard navigation config */
+    public val KeyboardConfig: KeyboardConfig = com.mohamedrejeb.waypoint.core.KeyboardConfig.Default
 }

@@ -50,41 +50,75 @@ class WaypointStepBuilderTest {
     }
 
     @Test
-    fun `step with spotlight shape override`() {
+    fun `step with highlight style spotlight circle`() {
         val builder = WaypointStepBuilder<String>()
         builder.step("target") {
-            spotlightShape = SpotlightShape.Circle
+            highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.Circle)
         }
 
         val step = builder.build().single()
+        val style = step.highlightStyle
 
-        assertEquals(SpotlightShape.Circle, step.spotlightShape)
+        assertTrue(style is HighlightStyle.Spotlight)
+        assertEquals(SpotlightShape.Circle, style.shape)
     }
 
     @Test
-    fun `step with rounded rect shape and corner radius`() {
+    fun `step with highlight style spotlight rounded rect`() {
         val builder = WaypointStepBuilder<String>()
         builder.step("target") {
-            spotlightShape = SpotlightShape.RoundedRect(cornerRadius = 16.dp)
+            highlightStyle = HighlightStyle.Spotlight(
+                shape = SpotlightShape.RoundedRect(cornerRadius = 16.dp),
+            )
         }
 
         val step = builder.build().single()
-        val shape = step.spotlightShape
+        val style = step.highlightStyle
 
+        assertTrue(style is HighlightStyle.Spotlight)
+        val shape = style.shape
         assertTrue(shape is SpotlightShape.RoundedRect)
         assertEquals(16.dp, shape.cornerRadius)
     }
 
     @Test
-    fun `step with spotlight padding override`() {
+    fun `step with highlight style spotlight custom padding`() {
         val builder = WaypointStepBuilder<String>()
         builder.step("target") {
-            spotlightPadding = SpotlightPadding(all = 12.dp)
+            highlightStyle = HighlightStyle.Spotlight(
+                padding = SpotlightPadding(all = 12.dp),
+            )
+        }
+
+        val step = builder.build().single()
+        val style = step.highlightStyle
+
+        assertTrue(style is HighlightStyle.Spotlight)
+        assertEquals(SpotlightPadding(12.dp, 12.dp, 12.dp, 12.dp), style.padding)
+    }
+
+    @Test
+    fun `step with highlight style pulse`() {
+        val builder = WaypointStepBuilder<String>()
+        builder.step("target") {
+            highlightStyle = HighlightStyle.Pulse(color = androidx.compose.ui.graphics.Color.Blue)
         }
 
         val step = builder.build().single()
 
-        assertEquals(SpotlightPadding(12.dp, 12.dp, 12.dp, 12.dp), step.spotlightPadding)
+        assertTrue(step.highlightStyle is HighlightStyle.Pulse)
+    }
+
+    @Test
+    fun `step with highlight style none`() {
+        val builder = WaypointStepBuilder<String>()
+        builder.step("target") {
+            highlightStyle = HighlightStyle.None
+        }
+
+        val step = builder.build().single()
+
+        assertEquals(HighlightStyle.None, step.highlightStyle)
     }
 
     @Test
@@ -154,8 +188,7 @@ class WaypointStepBuilderTest {
         assertNull(step.description)
         assertNull(step.content)
         assertEquals(TooltipPlacement.Auto, step.placement)
-        assertEquals(SpotlightShape.Default, step.spotlightShape)
-        assertEquals(SpotlightPadding.Default, step.spotlightPadding)
+        assertEquals(HighlightStyle.Default, step.highlightStyle)
         assertEquals(TargetInteraction.None, step.interaction)
         assertNull(step.showIf)
         assertNull(step.onEnter)

@@ -5,18 +5,14 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import kotlin.math.max
-import kotlin.math.min
 
 /**
  * Renders a semi-transparent overlay with a transparent cutout (spotlight)
@@ -25,10 +21,7 @@ import kotlin.math.min
 @Composable
 internal fun SpotlightOverlay(
     targetBounds: Rect,
-    spotlightShape: SpotlightShape,
-    spotlightPadding: SpotlightPadding,
-    overlayColor: Color,
-    overlayAlpha: Float,
+    style: HighlightStyle.Spotlight,
     onOverlayClick: () -> Unit,
     onTargetClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -37,10 +30,10 @@ internal fun SpotlightOverlay(
 
     val paddedBounds = with(density) {
         Rect(
-            left = targetBounds.left - spotlightPadding.start.toPx(),
-            top = targetBounds.top - spotlightPadding.top.toPx(),
-            right = targetBounds.right + spotlightPadding.end.toPx(),
-            bottom = targetBounds.bottom + spotlightPadding.bottom.toPx(),
+            left = targetBounds.left - style.padding.start.toPx(),
+            top = targetBounds.top - style.padding.top.toPx(),
+            right = targetBounds.right + style.padding.end.toPx(),
+            bottom = targetBounds.bottom + style.padding.bottom.toPx(),
         )
     }
 
@@ -58,10 +51,10 @@ internal fun SpotlightOverlay(
             },
     ) {
         // Draw the scrim
-        drawRect(color = overlayColor.copy(alpha = overlayAlpha))
+        drawRect(color = style.overlayColor.copy(alpha = style.overlayAlpha))
 
         // Draw the cutout
-        when (spotlightShape) {
+        when (style.shape) {
             is SpotlightShape.Circle -> {
                 val radius = max(paddedBounds.width, paddedBounds.height) / 2f
                 drawCircle(
@@ -82,7 +75,7 @@ internal fun SpotlightOverlay(
             }
 
             is SpotlightShape.RoundedRect -> {
-                val cornerRadiusPx = with(density) { spotlightShape.cornerRadius.toPx() }
+                val cornerRadiusPx = with(density) { style.shape.cornerRadius.toPx() }
                 drawRoundRect(
                     color = Color.Black,
                     topLeft = paddedBounds.topLeft,

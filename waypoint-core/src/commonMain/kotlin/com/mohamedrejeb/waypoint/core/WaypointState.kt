@@ -1,5 +1,6 @@
 package com.mohamedrejeb.waypoint.core
 
+import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -11,7 +12,7 @@ import androidx.compose.ui.geometry.Rect
  * Central state holder for a Waypoint tour.
  *
  * Create via [rememberWaypointState]. Manages step progression, target coordinate
- * tracking, and tour lifecycle.
+ * tracking, auto-scrolling, and tour lifecycle.
  *
  * @param K the type of the target key (typically an enum)
  */
@@ -38,6 +39,9 @@ public class WaypointState<K>(
 
     /** Registered target coordinates, keyed by target key */
     internal val targetCoordinates = mutableStateMapOf<K, Rect>()
+
+    /** BringIntoViewRequesters for auto-scrolling targets into view */
+    internal val bringIntoViewRequesters = mutableMapOf<K, BringIntoViewRequester>()
 
     /** The bounds of the current step's target, or null if not available */
     public val currentTargetBounds: Rect?
@@ -113,14 +117,33 @@ public class WaypointState<K>(
         isPaused = false
     }
 
+    // -- Auto-scroll --
+
+    /**
+     * Scrolls the current step's target into view using [BringIntoViewRequester].
+     * This propagates through nested scroll containers automatically.
+     *
+     * Call this before showing the highlight/tooltip for a step.
+     */
+    internal suspend fun scrollCurrentTargetIntoView() {
+        val step = currentStep ?: return
+        val requester = bringIntoViewRequesters[step.targetKey] ?: return
+        requester.bringIntoView()
+    }
+
     // -- Target registration (called by Modifier.waypointTarget) --
 
     internal fun registerTarget(key: K, bounds: Rect) {
         targetCoordinates[key] = bounds
     }
 
+    internal fun registerBringIntoViewRequester(key: K, requester: BringIntoViewRequester) {
+        bringIntoViewRequesters[key] = requester
+    }
+
     internal fun unregisterTarget(key: K) {
         targetCoordinates.remove(key)
+        bringIntoViewRequesters.remove(key)
     }
 
     // -- Internal --

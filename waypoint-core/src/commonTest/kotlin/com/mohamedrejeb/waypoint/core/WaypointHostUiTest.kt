@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
@@ -17,6 +18,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class WaypointHostUiTest {
@@ -408,6 +410,159 @@ class WaypointHostUiTest {
         waitUntil(timeoutMillis = 3000) {
             onAllNodesWithText("Visible").fetchSemanticsNodes().isNotEmpty()
         }
+        onNodeWithTag("tooltip").assertIsDisplayed()
+    }
+
+    // -- Highlight Style Variants --
+
+    /**
+     * Helper: create a host with a given highlight style, start the tour,
+     * and verify the tooltip appears (tooltip should show regardless of highlight style).
+     */
+    private fun runHighlightStyleTest(
+        highlightStyle: HighlightStyle,
+        block: androidx.compose.ui.test.ComposeUiTest.() -> Unit = {},
+    ) = runComposeUiTest {
+        val state = WaypointState(
+            steps = listOf(
+                WaypointStep(
+                    targetKey = "target",
+                    highlightStyle = highlightStyle,
+                ),
+            ),
+        )
+
+        setContent {
+            WaypointHost(
+                state = state,
+                tooltipContent = { _, _ ->
+                    BasicText("Tooltip Text", Modifier.testTag("tooltip"))
+                },
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(Modifier.size(100.dp).waypointTarget(state, "target"))
+                }
+            }
+        }
+
+        runOnIdle { state.start() }
+        waitUntil(timeoutMillis = 3000) {
+            onAllNodesWithText("Tooltip Text").fetchSemanticsNodes().isNotEmpty()
+        }
+        onNodeWithTag("tooltip").assertIsDisplayed()
+
+        block()
+    }
+
+    @Test
+    fun `HighlightStyle Default resolves to Spotlight`() {
+        assertTrue(HighlightStyle.Default is HighlightStyle.Spotlight)
+    }
+
+    @Test
+    fun `tooltip shows with Spotlight highlight`() = runHighlightStyleTest(
+        highlightStyle = HighlightStyle.Spotlight(),
+    )
+
+    @Test
+    fun `tooltip shows with Pulse highlight`() = runHighlightStyleTest(
+        highlightStyle = HighlightStyle.Pulse(color = Color.Blue),
+    )
+
+    @Test
+    fun `tooltip shows with Border highlight`() = runHighlightStyleTest(
+        highlightStyle = HighlightStyle.Border(color = Color.Red),
+    )
+
+    @Test
+    fun `tooltip shows with Ripple highlight`() = runHighlightStyleTest(
+        highlightStyle = HighlightStyle.Ripple(color = Color.Green),
+    )
+
+    @Test
+    fun `tooltip shows with None highlight`() = runHighlightStyleTest(
+        highlightStyle = HighlightStyle.None,
+    )
+
+    @Test
+    fun `tooltip shows with Custom highlight`() = runHighlightStyleTest(
+        highlightStyle = HighlightStyle.Custom { _, _ -> },
+    )
+
+    @Test
+    fun `step-level highlightStyle overrides host-level`() = runComposeUiTest {
+        val state = WaypointState(
+            steps = listOf(
+                WaypointStep(
+                    targetKey = "target",
+                    highlightStyle = HighlightStyle.None, // step overrides host
+                ),
+            ),
+        )
+
+        setContent {
+            WaypointHost(
+                state = state,
+                highlightStyle = HighlightStyle.Spotlight(), // host default
+                tooltipContent = { _, _ ->
+                    BasicText("Tooltip", Modifier.testTag("tooltip"))
+                },
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(Modifier.size(100.dp).waypointTarget(state, "target"))
+                }
+            }
+        }
+
+        runOnIdle { state.start() }
+        waitUntil(timeoutMillis = 3000) {
+            onAllNodesWithText("Tooltip").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Tooltip is visible (no highlight, but tooltip still shows)
+        onNodeWithTag("tooltip").assertIsDisplayed()
+        // Tour is active
+        assertTrue(state.isActive)
+    }
+
+    @Test
+    fun `host-level highlightStyle used when step uses default`() = runComposeUiTest {
+        // Step uses HighlightStyle.Default → should resolve to host's Pulse
+        val state = WaypointState(
+            steps = listOf(
+                WaypointStep(targetKey = "target"), // default highlightStyle
+            ),
+        )
+
+        setContent {
+            WaypointHost(
+                state = state,
+                highlightStyle = HighlightStyle.Pulse(color = Color.Magenta),
+                tooltipContent = { _, _ ->
+                    BasicText("Tooltip", Modifier.testTag("tooltip"))
+                },
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(Modifier.size(100.dp).waypointTarget(state, "target"))
+                }
+            }
+        }
+
+        runOnIdle { state.start() }
+        waitUntil(timeoutMillis = 3000) {
+            onAllNodesWithText("Tooltip").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Tour renders — tooltip visible means the host dispatched to Pulse (no crash)
         onNodeWithTag("tooltip").assertIsDisplayed()
     }
 }

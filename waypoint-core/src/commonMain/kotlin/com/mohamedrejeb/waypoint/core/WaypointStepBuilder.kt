@@ -36,11 +36,8 @@ public class StepBuilder<K> internal constructor(private val targetKey: K) {
     /** Tooltip placement relative to target */
     public var placement: TooltipPlacement = TooltipPlacement.Auto
 
-    /** Spotlight cutout shape */
-    public var spotlightShape: SpotlightShape = SpotlightShape.Default
-
-    /** Padding around the target in the spotlight */
-    public var spotlightPadding: SpotlightPadding = SpotlightPadding.Default
+    /** How the target is visually highlighted */
+    public var highlightStyle: HighlightStyle = HighlightStyle.Default
 
     /** How the target responds to interaction */
     public var interaction: TargetInteraction = TargetInteraction.None
@@ -75,8 +72,7 @@ public class StepBuilder<K> internal constructor(private val targetKey: K) {
         description = description,
         content = content,
         placement = placement,
-        spotlightShape = spotlightShape,
-        spotlightPadding = spotlightPadding,
+        highlightStyle = highlightStyle,
         interaction = interaction,
         showIf = showIf,
         onEnter = onEnter,

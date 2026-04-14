@@ -47,10 +47,12 @@ class SpotlightShapeScreenshotTest {
             ) {
                 SpotlightOverlay(
                     targetBounds = targetBounds,
-                    spotlightShape = shape,
-                    spotlightPadding = padding,
-                    overlayColor = Color.Black,
-                    overlayAlpha = 0.6f,
+                    style = HighlightStyle.Spotlight(
+                        shape = shape,
+                        padding = padding,
+                        overlayColor = Color.Black,
+                        overlayAlpha = 0.6f,
+                    ),
                     onOverlayClick = {},
                     onTargetClick = {},
                     modifier = Modifier.fillMaxSize(),

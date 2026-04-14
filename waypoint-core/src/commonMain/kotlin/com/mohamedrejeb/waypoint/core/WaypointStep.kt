@@ -20,10 +20,8 @@ public data class WaypointStep<K>(
     val content: (@Composable (StepScope) -> Unit)? = null,
     /** Where the tooltip should be placed relative to the target */
     val placement: TooltipPlacement = TooltipPlacement.Auto,
-    /** Shape of the spotlight cutout */
-    val spotlightShape: SpotlightShape = SpotlightShape.Default,
-    /** Padding around the target within the spotlight */
-    val spotlightPadding: SpotlightPadding = SpotlightPadding.Default,
+    /** How the target is visually highlighted (spotlight, pulse, border, etc.) */
+    val highlightStyle: HighlightStyle = HighlightStyle.Default,
     /** How the target responds to interaction during this step */
     val interaction: TargetInteraction = TargetInteraction.None,
     /** Condition evaluated at runtime to determine if this step should be shown */

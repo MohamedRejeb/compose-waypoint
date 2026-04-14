@@ -1,5 +1,7 @@
 package com.mohamedrejeb.waypoint.core
 
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -12,7 +14,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
  * Marks this composable as a Waypoint tour target.
  *
  * The composable's position and size will be tracked and used to render the
- * spotlight overlay and position the tooltip when this target's step is active.
+ * highlight and position the tooltip when this target's step is active.
+ * A [BringIntoViewRequester] is automatically attached so the tour can
+ * scroll this target into view before showing the step.
  *
  * ```kotlin
  * Button(
@@ -29,19 +33,23 @@ public fun <K> Modifier.waypointTarget(
     key: K,
 ): Modifier = composed {
     val currentKey = remember(key) { key }
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
 
     DisposableEffect(currentKey) {
+        state.registerBringIntoViewRequester(currentKey, bringIntoViewRequester)
         onDispose {
             state.unregisterTarget(currentKey)
         }
     }
 
-    onGloballyPositioned { coordinates ->
-        if (coordinates.isAttached) {
-            val bounds = coordinates.boundsInRoot()
-            if (bounds != Rect.Zero) {
-                state.registerTarget(currentKey, bounds)
+    this
+        .bringIntoViewRequester(bringIntoViewRequester)
+        .onGloballyPositioned { coordinates ->
+            if (coordinates.isAttached) {
+                val bounds = coordinates.boundsInRoot()
+                if (bounds != Rect.Zero) {
+                    state.registerTarget(currentKey, bounds)
+                }
             }
         }
-    }
 }

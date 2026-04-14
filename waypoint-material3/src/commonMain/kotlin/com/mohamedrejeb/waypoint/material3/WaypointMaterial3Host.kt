@@ -2,8 +2,8 @@ package com.mohamedrejeb.waypoint.material3
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import com.mohamedrejeb.waypoint.core.HighlightStyle
 import com.mohamedrejeb.waypoint.core.OverlayClickBehavior
 import com.mohamedrejeb.waypoint.core.WaypointDefaults
 import com.mohamedrejeb.waypoint.core.WaypointHost
@@ -23,8 +23,7 @@ import com.mohamedrejeb.waypoint.core.WaypointState
 public fun <K> WaypointMaterial3Host(
     state: WaypointState<K>,
     modifier: Modifier = Modifier,
-    overlayColor: Color = WaypointDefaults.OverlayColor,
-    overlayAlpha: Float = WaypointDefaults.OverlayAlpha,
+    highlightStyle: HighlightStyle = WaypointDefaults.HighlightStyle,
     overlayClickBehavior: OverlayClickBehavior = WaypointDefaults.OverlayClickBehavior,
     tooltipSpacing: Dp = WaypointDefaults.TooltipSpacing,
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
@@ -40,8 +39,7 @@ public fun <K> WaypointMaterial3Host(
     WaypointHost(
         state = state,
         modifier = modifier,
-        overlayColor = overlayColor,
-        overlayAlpha = overlayAlpha,
+        highlightStyle = highlightStyle,
         overlayClickBehavior = overlayClickBehavior,
         tooltipSpacing = tooltipSpacing,
         screenMargin = screenMargin,

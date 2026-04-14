@@ -1,6 +1,5 @@
 package com.mohamedrejeb.waypoint.core
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -8,17 +7,8 @@ import androidx.compose.ui.unit.dp
  * Default values for Waypoint configuration.
  */
 public object WaypointDefaults {
-    /** Default overlay color */
-    public val OverlayColor: Color = Color.Black
-
-    /** Default overlay alpha */
-    public const val OverlayAlpha: Float = 0.6f
-
-    /** Default spotlight shape */
-    public val SpotlightShape: SpotlightShape = com.mohamedrejeb.waypoint.core.SpotlightShape.Default
-
-    /** Default spotlight padding */
-    public val SpotlightPadding: SpotlightPadding = com.mohamedrejeb.waypoint.core.SpotlightPadding.Default
+    /** Default highlight style */
+    public val HighlightStyle: HighlightStyle = com.mohamedrejeb.waypoint.core.HighlightStyle.Default
 
     /** Default tooltip placement */
     public val TooltipPlacement: TooltipPlacement = com.mohamedrejeb.waypoint.core.TooltipPlacement.Auto

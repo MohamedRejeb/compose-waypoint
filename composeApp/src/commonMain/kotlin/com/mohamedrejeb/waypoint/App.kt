@@ -26,9 +26,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mohamedrejeb.waypoint.core.HighlightStyle
+import com.mohamedrejeb.waypoint.core.SpotlightPadding
 import com.mohamedrejeb.waypoint.core.SpotlightShape
 import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
@@ -48,30 +51,50 @@ fun App() {
         var tourStarted by remember { mutableStateOf(false) }
 
         val waypointState = rememberWaypointState {
+            // Step 1: Classic spotlight
             step(DemoTargets.MenuButton) {
                 title = "Navigation Menu"
                 description = "Tap here to open the navigation drawer and explore different sections."
-                spotlightShape = SpotlightShape.Circle
+                highlightStyle = HighlightStyle.Spotlight(
+                    shape = SpotlightShape.Circle,
+                )
             }
+            // Step 2: Pulse highlight (no overlay)
             step(DemoTargets.SearchButton) {
                 title = "Search"
                 description = "Quickly find what you're looking for using the search feature."
-                spotlightShape = SpotlightShape.Circle
+                highlightStyle = HighlightStyle.Pulse(
+                    color = Color(0xFF6200EE),
+                    shape = SpotlightShape.Circle,
+                    padding = SpotlightPadding(4.dp),
+                )
             }
+            // Step 3: Ripple highlight
             step(DemoTargets.ProfileButton) {
                 title = "Your Profile"
                 description = "View and manage your account settings and preferences."
-                spotlightShape = SpotlightShape.Circle
+                highlightStyle = HighlightStyle.Ripple(
+                    color = Color(0xFF03DAC5),
+                    maxRadius = 40.dp,
+                )
             }
+            // Step 4: Border highlight
             step(DemoTargets.FabButton) {
                 title = "Create New"
                 description = "Tap this button to create a new item. You can add notes, tasks, and more."
-                spotlightShape = SpotlightShape.RoundedRect(cornerRadius = 16.dp)
+                highlightStyle = HighlightStyle.Border(
+                    color = Color(0xFFFF5722),
+                    shape = SpotlightShape.RoundedRect(cornerRadius = 16.dp),
+                    borderWidth = 3.dp,
+                )
             }
+            // Step 5: Default spotlight with rounded rect
             step(DemoTargets.ContentArea) {
                 title = "Welcome to Waypoint!"
                 description = "This is your main content area. Here you'll see all your items and recent activity."
-                spotlightShape = SpotlightShape.RoundedRect(cornerRadius = 12.dp)
+                highlightStyle = HighlightStyle.Spotlight(
+                    shape = SpotlightShape.RoundedRect(cornerRadius = 12.dp),
+                )
             }
         }
 
@@ -96,7 +119,6 @@ fun App() {
                             .padding(horizontal = 8.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        // Menu button
                         Box(
                             modifier = Modifier
                                 .waypointTarget(waypointState, DemoTargets.MenuButton)
@@ -119,7 +141,6 @@ fun App() {
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
 
-                        // Search button
                         Box(
                             modifier = Modifier
                                 .waypointTarget(waypointState, DemoTargets.SearchButton)
@@ -128,15 +149,11 @@ fun App() {
                                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                             contentAlignment = Alignment.Center,
                         ) {
-                            Text(
-                                text = "\uD83D\uDD0D",
-                                fontSize = 18.sp,
-                            )
+                            Text(text = "\uD83D\uDD0D", fontSize = 18.sp)
                         }
 
                         Spacer(Modifier.size(8.dp))
 
-                        // Profile button
                         Box(
                             modifier = Modifier
                                 .waypointTarget(waypointState, DemoTargets.ProfileButton)

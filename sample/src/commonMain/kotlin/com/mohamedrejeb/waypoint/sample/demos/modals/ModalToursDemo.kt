@@ -145,7 +145,7 @@ private fun DialogTourContent(onDismiss: () -> Unit) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+                Column(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
                     Text(
                         text = "Settings",
                         style = MaterialTheme.typography.titleLarge,
@@ -381,7 +381,7 @@ private fun SectionCard(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     contentAlignment = Alignment.Center,

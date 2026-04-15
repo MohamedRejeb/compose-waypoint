@@ -5,11 +5,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import org.jetbrains.compose.resources.Font
-import waypoint.sample.generated.resources.PlusJakartaSans_Bold
-import waypoint.sample.generated.resources.PlusJakartaSans_Medium
-import waypoint.sample.generated.resources.PlusJakartaSans_Regular
-import waypoint.sample.generated.resources.PlusJakartaSans_SemiBold
-import waypoint.sample.generated.resources.Res
+import com.mohamedrejeb.waypoint.sample.generated.resources.PlusJakartaSans_Bold
+import com.mohamedrejeb.waypoint.sample.generated.resources.PlusJakartaSans_Medium
+import com.mohamedrejeb.waypoint.sample.generated.resources.PlusJakartaSans_Regular
+import com.mohamedrejeb.waypoint.sample.generated.resources.PlusJakartaSans_SemiBold
+import com.mohamedrejeb.waypoint.sample.generated.resources.Res
 
 @Composable
 fun SampleTypography(): Typography {

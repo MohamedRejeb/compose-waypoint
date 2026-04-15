@@ -8,3 +8,10 @@ plugins {
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
 }
+
+val waypointVersion = System.getenv("VERSION") ?: "${libs.versions.waypoint.get()}-SNAPSHOT"
+
+allprojects {
+    group = "com.mohamedrejeb.waypoint"
+    version = waypointVersion
+}

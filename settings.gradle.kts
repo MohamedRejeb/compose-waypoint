@@ -1,7 +1,9 @@
 rootProject.name = "Waypoint"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 
 pluginManagement {
+    includeBuild("convention-plugins")
     repositories {
         google {
             mavenContent {

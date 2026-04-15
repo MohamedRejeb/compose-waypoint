@@ -18,7 +18,9 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.Dp
@@ -261,9 +263,21 @@ public fun <K> WaypointHost(
             // The spotlight animates its cutout position smoothly, but the tooltip
             // should snap to the new target immediately to avoid drifting through
             // intermediate positions during the 400ms transition.
+            //
+            // The Popup system positions relative to the window, so we need
+            // window-relative bounds (not host-relative). Convert by adding
+            // the host's position in the window.
+            val hostCoords = state.hostCoordinates
+            val tooltipTargetBounds = if (hostCoords != null && hostCoords.isAttached) {
+                val hostWindowPos = hostCoords.positionInWindow()
+                targetBounds.translate(hostWindowPos)
+            } else {
+                targetBounds
+            }
+
             TooltipPopup(
                 visible = true,
-                targetBounds = targetBounds,
+                targetBounds = tooltipTargetBounds,
                 placement = step.placement,
                 tooltipSpacing = tooltipSpacingPx,
                 screenMargin = screenMarginPx,

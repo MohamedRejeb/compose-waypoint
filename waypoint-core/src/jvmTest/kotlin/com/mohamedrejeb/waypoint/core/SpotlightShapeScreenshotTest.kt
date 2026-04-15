@@ -47,6 +47,7 @@ class SpotlightShapeScreenshotTest {
             ) {
                 SpotlightOverlay(
                     targetBounds = targetBounds,
+                    additionalBounds = emptyList(),
                     style = HighlightStyle.Spotlight(
                         shape = shape,
                         padding = padding,

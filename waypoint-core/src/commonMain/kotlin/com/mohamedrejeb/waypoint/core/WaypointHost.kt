@@ -186,11 +186,17 @@ public fun <K> WaypointHost(
                 }
             }
 
+            // Resolve additional target bounds for multi-element highlight
+            val additionalBounds = step.additionalTargets.mapNotNull { key ->
+                state.targetCoordinates[key]
+            }
+
             // Dispatch highlight rendering
             when (resolvedStyle) {
                 is HighlightStyle.Spotlight -> {
                     SpotlightOverlay(
                         targetBounds = animatedBounds.value,
+                        additionalBounds = additionalBounds,
                         style = resolvedStyle,
                         allowTargetInteraction = step.interaction == TargetInteraction.AllowClick,
                         onOverlayClick = overlayClickHandler,
@@ -202,6 +208,7 @@ public fun <K> WaypointHost(
                 is HighlightStyle.Pulse -> {
                     PulseHighlight(
                         targetBounds = animatedBounds.value,
+                        additionalBounds = additionalBounds,
                         style = resolvedStyle,
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -210,6 +217,7 @@ public fun <K> WaypointHost(
                 is HighlightStyle.Border -> {
                     BorderHighlight(
                         targetBounds = animatedBounds.value,
+                        additionalBounds = additionalBounds,
                         style = resolvedStyle,
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -218,6 +226,7 @@ public fun <K> WaypointHost(
                 is HighlightStyle.Ripple -> {
                     RippleHighlight(
                         targetBounds = animatedBounds.value,
+                        additionalBounds = additionalBounds,
                         style = resolvedStyle,
                         modifier = Modifier.fillMaxSize(),
                     )

@@ -9,36 +9,46 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 
 /**
- * Renders a static colored shape around the target element.
- * No animation, no overlay. Supports both stroke and filled rendering.
+ * Renders a static colored shape around the target elements.
+ * No animation, no overlay. Supports both stroke and filled rendering,
+ * and multiple targets.
  */
 @Composable
 internal fun BorderHighlight(
     targetBounds: Rect,
+    additionalBounds: List<Rect>,
     style: HighlightStyle.Border,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
     val borderWidthPx = with(density) { style.borderWidth.toPx() }
 
-    val paddedBounds = with(density) {
-        Rect(
-            left = targetBounds.left - style.padding.start.toPx(),
-            top = targetBounds.top - style.padding.top.toPx(),
-            right = targetBounds.right + style.padding.end.toPx(),
-            bottom = targetBounds.bottom + style.padding.bottom.toPx(),
-        )
+    val allBounds = buildList {
+        add(padBounds(targetBounds, style.padding, density))
+        additionalBounds.forEach { add(padBounds(it, style.padding, density)) }
     }
 
     val drawStyle = if (style.filled) Fill else Stroke(width = borderWidthPx)
 
     Canvas(modifier = modifier) {
-        drawShape(
-            shape = style.shape,
-            bounds = paddedBounds,
-            color = style.color,
-            drawStyle = drawStyle,
-            density = density,
-        )
+        for (bounds in allBounds) {
+            drawShape(
+                shape = style.shape,
+                bounds = bounds,
+                color = style.color,
+                drawStyle = drawStyle,
+                density = density,
+            )
+        }
     }
 }
+
+private fun padBounds(bounds: Rect, padding: SpotlightPadding, density: androidx.compose.ui.unit.Density): Rect =
+    with(density) {
+        Rect(
+            left = bounds.left - padding.start.toPx(),
+            top = bounds.top - padding.top.toPx(),
+            right = bounds.right + padding.end.toPx(),
+            bottom = bounds.bottom + padding.bottom.toPx(),
+        )
+    }

@@ -95,11 +95,12 @@ fun App() {
         var showDialogTour by remember { mutableStateOf(false) }
 
         val waypointState = rememberWaypointState {
-            // Step 1: Spotlight + Circle shape + forced Top placement
+            // Step 1: Multi-element highlight -- all toolbar buttons at once
             step(DemoTargets.MenuButton) {
-                title = "Navigation Menu"
-                description = "Open the drawer to explore sections."
+                title = "Toolbar Actions"
+                description = "These buttons help you navigate, search, and manage your profile."
                 placement = TooltipPlacement.Bottom
+                additionalTargets = listOf(DemoTargets.SearchButton, DemoTargets.ProfileButton)
                 highlightStyle = HighlightStyle.Spotlight(
                     shape = SpotlightShape.Circle,
                 )

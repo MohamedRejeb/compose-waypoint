@@ -18,26 +18,23 @@ import androidx.compose.ui.platform.LocalDensity
 import kotlin.math.max
 
 /**
- * Renders an animated pulsing shape around the target element.
+ * Renders an animated pulsing shape around the target elements.
  * No dimming overlay -- the shape breathes (scales) to draw attention.
- * Supports both stroke (border) and filled rendering.
+ * Supports both stroke (border) and filled rendering, and multiple targets.
  */
 @Composable
 internal fun PulseHighlight(
     targetBounds: Rect,
+    additionalBounds: List<Rect>,
     style: HighlightStyle.Pulse,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
     val borderWidthPx = with(density) { style.borderWidth.toPx() }
 
-    val paddedBounds = with(density) {
-        Rect(
-            left = targetBounds.left - style.padding.start.toPx(),
-            top = targetBounds.top - style.padding.top.toPx(),
-            right = targetBounds.right + style.padding.end.toPx(),
-            bottom = targetBounds.bottom + style.padding.bottom.toPx(),
-        )
+    val allBounds = buildList {
+        add(padBounds(targetBounds, style.padding, density))
+        additionalBounds.forEach { add(padBounds(it, style.padding, density)) }
     }
 
     val infiniteTransition = rememberInfiniteTransition()
@@ -63,35 +60,47 @@ internal fun PulseHighlight(
     val drawStyle: DrawStyle = if (style.filled) Fill else Stroke(width = borderWidthPx)
 
     Canvas(modifier = modifier) {
-        val center = paddedBounds.center
-        val halfWidth = paddedBounds.width / 2f
-        val halfHeight = paddedBounds.height / 2f
+        for (bounds in allBounds) {
+            val center = bounds.center
+            val halfWidth = bounds.width / 2f
+            val halfHeight = bounds.height / 2f
 
-        // Inner shape (static, full alpha)
-        drawShape(
-            shape = style.shape,
-            bounds = paddedBounds,
-            color = style.color,
-            drawStyle = drawStyle,
-            density = density,
-        )
+            // Inner shape (static, full alpha)
+            drawShape(
+                shape = style.shape,
+                bounds = bounds,
+                color = style.color,
+                drawStyle = drawStyle,
+                density = density,
+            )
 
-        // Outer shape (animated scale + fading)
-        val scaledBounds = Rect(
-            left = center.x - halfWidth * scale,
-            top = center.y - halfHeight * scale,
-            right = center.x + halfWidth * scale,
-            bottom = center.y + halfHeight * scale,
-        )
-        drawShape(
-            shape = style.shape,
-            bounds = scaledBounds,
-            color = style.color.copy(alpha = alpha),
-            drawStyle = drawStyle,
-            density = density,
-        )
+            // Outer shape (animated scale + fading)
+            val scaledBounds = Rect(
+                left = center.x - halfWidth * scale,
+                top = center.y - halfHeight * scale,
+                right = center.x + halfWidth * scale,
+                bottom = center.y + halfHeight * scale,
+            )
+            drawShape(
+                shape = style.shape,
+                bounds = scaledBounds,
+                color = style.color.copy(alpha = alpha),
+                drawStyle = drawStyle,
+                density = density,
+            )
+        }
     }
 }
+
+private fun padBounds(bounds: Rect, padding: SpotlightPadding, density: androidx.compose.ui.unit.Density): Rect =
+    with(density) {
+        Rect(
+            left = bounds.left - padding.start.toPx(),
+            top = bounds.top - padding.top.toPx(),
+            right = bounds.right + padding.end.toPx(),
+            bottom = bounds.bottom + padding.bottom.toPx(),
+        )
+    }
 
 /**
  * Draws a shape at the given bounds with the specified [DrawStyle] (Fill or Stroke).

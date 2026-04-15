@@ -65,6 +65,16 @@ public class WaypointState<K>(
         isStepReady = ready
     }
 
+    /**
+     * Restores state after process death or configuration change.
+     * Called by the [Saver] in [rememberWaypointState].
+     */
+    internal fun restoreState(savedStepIndex: Int, savedIsActive: Boolean, savedIsPaused: Boolean) {
+        currentStepIndex = savedStepIndex
+        isActive = savedIsActive
+        isPaused = savedIsPaused
+    }
+
     /** Whether this tour has been completed (requires tourId and persistence) */
     public val hasCompleted: Boolean
         get() {

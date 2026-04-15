@@ -21,7 +21,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -40,7 +39,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalTestApi::class)
 class DialogSpotlightPositionTest {
 
-    @Ignore("Known bug: boundsInRoot() misaligned with Canvas inside Dialog. See AGENT-SYNC.md.")
+    // Fixed: bounds now computed relative to WaypointHost via localBoundingBoxOf
     @Test
     fun `spotlight cutout aligns with target inside Dialog`() = runComposeUiTest {
         val state = WaypointState(
@@ -129,7 +128,7 @@ class DialogSpotlightPositionTest {
         )
     }
 
-    @Ignore("Known bug: boundsInRoot() misaligned with Canvas inside Dialog. See AGENT-SYNC.md.")
+    // Fixed: bounds now computed relative to WaypointHost via localBoundingBoxOf
     @Test
     fun `spotlight cutout tracks target at non-center position inside Dialog`() = runComposeUiTest {
         val state = WaypointState(

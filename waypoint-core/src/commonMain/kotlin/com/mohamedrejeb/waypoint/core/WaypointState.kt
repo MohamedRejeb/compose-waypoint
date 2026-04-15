@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.LayoutCoordinates
 
 /**
  * Central state holder for a Waypoint tour.
@@ -42,6 +43,13 @@ public class WaypointState<K>(
 
     /** BringIntoViewRequesters for auto-scrolling targets into view */
     internal val bringIntoViewRequesters = mutableMapOf<K, BringIntoViewRequester>()
+
+    /**
+     * LayoutCoordinates of the WaypointHost Box.
+     * Used to compute target bounds relative to the host rather than the window root,
+     * which fixes coordinate misalignment when the host is inside a Dialog or Sheet.
+     */
+    internal var hostCoordinates: LayoutCoordinates? = null
 
     /** The bounds of the current step's target, or null if not available */
     public val currentTargetBounds: Rect?

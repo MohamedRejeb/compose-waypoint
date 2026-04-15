@@ -18,6 +18,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.Dp
@@ -148,7 +149,13 @@ public fun <K> WaypointHost(
         Modifier
     }
 
-    Box(modifier = modifier.then(keyboardModifier)) {
+    Box(
+        modifier = modifier
+            .then(keyboardModifier)
+            .onGloballyPositioned { coordinates ->
+                state.hostCoordinates = coordinates
+            },
+    ) {
         // 1. Screen content
         content()
 

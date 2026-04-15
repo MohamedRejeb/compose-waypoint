@@ -5,11 +5,16 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 
@@ -43,7 +48,13 @@ internal fun TooltipPopup(
             enter = fadeIn() + slideInVertically { it / 4 },
             exit = fadeOut() + slideOutVertically { it / 4 },
         ) {
-            content(positionProvider.resolvedPlacement)
+            Box(
+                modifier = Modifier.semantics {
+                    liveRegion = LiveRegionMode.Polite
+                },
+            ) {
+                content(positionProvider.resolvedPlacement)
+            }
         }
     }
 }

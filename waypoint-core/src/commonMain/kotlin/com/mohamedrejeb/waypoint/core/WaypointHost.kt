@@ -6,7 +6,7 @@ import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -206,7 +206,7 @@ public fun <K> WaypointHost(
                         allowTargetInteraction = step.interaction == TargetInteraction.AllowClick,
                         onOverlayClick = overlayClickHandler,
                         onTargetClick = targetClickHandler,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.matchParentSize(),
                     )
                 }
 
@@ -215,7 +215,7 @@ public fun <K> WaypointHost(
                         targetBounds = animatedBounds.value,
                         additionalBounds = additionalBounds,
                         style = resolvedStyle,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.matchParentSize(),
                     )
                 }
 
@@ -224,7 +224,7 @@ public fun <K> WaypointHost(
                         targetBounds = animatedBounds.value,
                         additionalBounds = additionalBounds,
                         style = resolvedStyle,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.matchParentSize(),
                     )
                 }
 
@@ -233,7 +233,7 @@ public fun <K> WaypointHost(
                         targetBounds = animatedBounds.value,
                         additionalBounds = additionalBounds,
                         style = resolvedStyle,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.matchParentSize(),
                     )
                 }
 

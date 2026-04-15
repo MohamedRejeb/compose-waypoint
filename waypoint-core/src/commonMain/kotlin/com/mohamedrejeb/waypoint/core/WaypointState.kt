@@ -25,6 +25,8 @@ public class WaypointState<K>(
     public val tourId: String? = null,
     /** Optional analytics tracker */
     public val analytics: WaypointAnalytics? = null,
+    /** Optional persistence for remembering tour completion */
+    public val persistence: WaypointPersistence? = null,
 ) {
     /** Index of the current step, or -1 if the tour is not active */
     public var currentStepIndex: Int by mutableStateOf(-1)
@@ -55,6 +57,13 @@ public class WaypointState<K>(
      */
     internal var hostCoordinates: LayoutCoordinates? = null
 
+    /** Whether this tour has been completed (requires tourId and persistence) */
+    public val hasCompleted: Boolean
+        get() {
+            val id = tourId ?: return false
+            return persistence?.isCompleted(id) ?: false
+        }
+
     /** The bounds of the current step's target, or null if not available */
     public val currentTargetBounds: Rect?
         get() {
@@ -67,6 +76,7 @@ public class WaypointState<K>(
     /** Start the tour from the first visible step */
     public fun start() {
         if (isActive) return
+        if (hasCompleted) return
         val firstIndex = resolveNextVisibleStep(fromIndex = -1, direction = 1) ?: return
         isActive = true
         isPaused = false
@@ -172,6 +182,20 @@ public class WaypointState<K>(
         isPaused = false
         currentStepIndex = -1
         analytics?.onTourCompleted(tourId, steps.size)
+        val id = tourId
+        if (id != null) persistence?.markCompleted(id)
+    }
+
+    /** Force-marks this tour as completed in persistence */
+    public fun markCompleted() {
+        val id = tourId ?: return
+        persistence?.markCompleted(id)
+    }
+
+    /** Resets the completion state so the tour can be shown again */
+    public fun resetCompletion() {
+        val id = tourId ?: return
+        persistence?.reset(id)
     }
 
     private fun transitionTo(newIndex: Int) {

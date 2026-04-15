@@ -20,8 +20,10 @@ import com.mohamedrejeb.waypoint.sample.catalog.CatalogScreen
 import com.mohamedrejeb.waypoint.sample.demos.discovery.FeatureDiscoveryDemo
 import com.mohamedrejeb.waypoint.sample.demos.highlights.HighlightGalleryDemo
 import com.mohamedrejeb.waypoint.sample.demos.multitarget.MultiTargetDemo
+import com.mohamedrejeb.waypoint.sample.demos.analytics.AnalyticsDashboardDemo
 import com.mohamedrejeb.waypoint.sample.demos.onboarding.OnboardingDemo
 import com.mohamedrejeb.waypoint.sample.demos.theming.ThemingPlaygroundDemo
+import com.mohamedrejeb.waypoint.sample.demos.modals.ModalToursDemo
 import com.mohamedrejeb.waypoint.sample.demos.tutorial.InteractiveTutorialDemo
 import com.mohamedrejeb.waypoint.sample.navigation.Route
 import com.mohamedrejeb.waypoint.sample.theme.SampleTheme
@@ -58,10 +60,10 @@ fun App() {
                     ThemingPlaygroundDemo(onBack = { backStack.removeLastOrNull() })
                 }
                 entry<Route.AnalyticsDashboard> {
-                    DemoPlaceholder("Analytics Dashboard") { backStack.removeLastOrNull() }
+                    AnalyticsDashboardDemo(onBack = { backStack.removeLastOrNull() })
                 }
                 entry<Route.ModalTours> {
-                    DemoPlaceholder("Modal Tours") { backStack.removeLastOrNull() }
+                    ModalToursDemo(onBack = { backStack.removeLastOrNull() })
                 }
             },
         )

@@ -21,6 +21,10 @@ import androidx.compose.ui.layout.LayoutCoordinates
 public class WaypointState<K>(
     /** Immutable list of steps in this tour */
     public val steps: List<WaypointStep<K>>,
+    /** Optional tour identifier for analytics */
+    public val tourId: String? = null,
+    /** Optional analytics tracker */
+    public val analytics: WaypointAnalytics? = null,
 ) {
     /** Index of the current step, or -1 if the tour is not active */
     public var currentStepIndex: Int by mutableStateOf(-1)
@@ -66,6 +70,7 @@ public class WaypointState<K>(
         val firstIndex = resolveNextVisibleStep(fromIndex = -1, direction = 1) ?: return
         isActive = true
         isPaused = false
+        analytics?.onTourStarted(tourId, steps.size)
         transitionTo(firstIndex)
     }
 
@@ -106,11 +111,13 @@ public class WaypointState<K>(
     /** Stop/cancel the tour */
     public fun stop() {
         if (!isActive && !isPaused) return
+        val cancelledAtIndex = currentStepIndex
         val exitingStep = currentStep
         isActive = false
         isPaused = false
         currentStepIndex = -1
         exitingStep?.onExit?.invoke()
+        analytics?.onTourCancelled(tourId, cancelledAtIndex, steps.size)
     }
 
     /** Pause the tour (hide overlay, preserve state) */
@@ -158,17 +165,26 @@ public class WaypointState<K>(
 
     private fun complete() {
         val exitingStep = currentStep
+        val exitingIndex = currentStepIndex
         exitingStep?.onExit?.invoke()
+        analytics?.onStepCompleted(tourId, exitingIndex, exitingStep?.targetKey)
         isActive = false
         isPaused = false
         currentStepIndex = -1
+        analytics?.onTourCompleted(tourId, steps.size)
     }
 
     private fun transitionTo(newIndex: Int) {
         val exitingStep = currentStep
+        val exitingIndex = currentStepIndex
         exitingStep?.onExit?.invoke()
+        if (exitingIndex >= 0) {
+            analytics?.onStepCompleted(tourId, exitingIndex, exitingStep?.targetKey)
+        }
         currentStepIndex = newIndex
-        currentStep?.onEnter?.invoke()
+        val enteringStep = currentStep
+        enteringStep?.onEnter?.invoke()
+        analytics?.onStepViewed(tourId, newIndex, enteringStep?.targetKey)
     }
 
     /**

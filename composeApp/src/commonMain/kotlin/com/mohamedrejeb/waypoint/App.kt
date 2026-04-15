@@ -38,6 +38,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -59,6 +60,7 @@ import com.mohamedrejeb.waypoint.core.SpotlightShape
 import com.mohamedrejeb.waypoint.core.StepScope
 import com.mohamedrejeb.waypoint.core.TargetInteraction
 import com.mohamedrejeb.waypoint.core.TooltipPlacement
+import com.mohamedrejeb.waypoint.core.WaypointAnalytics
 import com.mohamedrejeb.waypoint.core.WaypointHost
 import com.mohamedrejeb.waypoint.core.WaypointTrigger
 import com.mohamedrejeb.waypoint.core.rememberWaypointState
@@ -93,8 +95,32 @@ fun App() {
         var searchQuery by remember { mutableStateOf("") }
         var showSheetTour by remember { mutableStateOf(false) }
         var showDialogTour by remember { mutableStateOf(false) }
+        val analyticsEvents = remember { mutableStateListOf<String>() }
 
-        val waypointState = rememberWaypointState {
+        val demoAnalytics = remember {
+            object : WaypointAnalytics {
+                override fun onTourStarted(tourId: String?, totalSteps: Int) {
+                    analyticsEvents.add("Tour started ($totalSteps steps)")
+                }
+                override fun onTourCompleted(tourId: String?, totalSteps: Int) {
+                    analyticsEvents.add("Tour completed")
+                }
+                override fun onTourCancelled(tourId: String?, stepIndex: Int, totalSteps: Int) {
+                    analyticsEvents.add("Tour cancelled at step $stepIndex")
+                }
+                override fun onStepViewed(tourId: String?, stepIndex: Int, targetKey: Any?) {
+                    analyticsEvents.add("Step $stepIndex viewed ($targetKey)")
+                }
+                override fun onStepCompleted(tourId: String?, stepIndex: Int, targetKey: Any?) {
+                    analyticsEvents.add("Step $stepIndex completed")
+                }
+            }
+        }
+
+        val waypointState = rememberWaypointState(
+            tourId = "demo",
+            analytics = demoAnalytics,
+        ) {
             // Step 1: Multi-element highlight -- all toolbar buttons at once
             step(DemoTargets.MenuButton) {
                 title = "Toolbar Actions"
@@ -448,6 +474,50 @@ fun App() {
                                 modifier = Modifier.weight(1f),
                             ) {
                                 Text("Dialog Tour")
+                            }
+                        }
+
+                        // Analytics event log
+                        if (analyticsEvents.isNotEmpty()) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+                                ),
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            "Analytics Events",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                        TextButton(onClick = { analyticsEvents.clear() }) {
+                                            Text("Clear", style = MaterialTheme.typography.labelSmall)
+                                        }
+                                    }
+                                    val hiddenCount = (analyticsEvents.size - 8).coerceAtLeast(0)
+                                    if (hiddenCount > 0) {
+                                        Text(
+                                            text = "... $hiddenCount earlier event${if (hiddenCount > 1) "s" else ""}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                            modifier = Modifier.padding(vertical = 1.dp),
+                                        )
+                                    }
+                                    analyticsEvents.takeLast(8).forEach { event ->
+                                        Text(
+                                            text = event,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.padding(vertical = 1.dp),
+                                        )
+                                    }
+                                }
                             }
                         }
 

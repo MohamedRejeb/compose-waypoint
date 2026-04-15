@@ -107,9 +107,10 @@ fun App() {
                 placement = TooltipPlacement.Bottom
                 interaction = TargetInteraction.ClickToAdvance
                 highlightStyle = HighlightStyle.Pulse(
-                    color = Color(0xFF6200EE),
+                    color = Color(0xFF6200EE).copy(alpha = 0.25f),
                     shape = SpotlightShape.Circle,
                     padding = SpotlightPadding(4.dp),
+                    filled = true,
                 )
             }
 
@@ -120,6 +121,7 @@ fun App() {
                 highlightStyle = HighlightStyle.Ripple(
                     color = Color(0xFF03DAC5),
                     maxRadius = 40.dp,
+                    filled = true,
                 )
                 onEnter { enterCount++ }
             }

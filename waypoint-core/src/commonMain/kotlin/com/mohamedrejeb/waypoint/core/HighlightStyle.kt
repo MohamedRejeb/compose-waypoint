@@ -27,36 +27,45 @@ public sealed interface HighlightStyle {
     ) : HighlightStyle
 
     /**
-     * Animated pulsing border/glow around the target. No dimming overlay.
-     * The border breathes (scales) to draw attention.
+     * Animated pulsing shape around the target. No dimming overlay.
+     * The shape breathes (scales) to draw attention.
+     *
+     * @param filled when true, draws a filled shape instead of a stroke border
      */
     public data class Pulse(
         val color: Color,
         val shape: SpotlightShape = SpotlightShape.Default,
         val padding: SpotlightPadding = SpotlightPadding.Default,
         val borderWidth: Dp = 3.dp,
+        val filled: Boolean = false,
         val pulseScale: Float = 1.15f,
         val durationMillis: Int = 1200,
     ) : HighlightStyle
 
     /**
-     * Static colored border around the target. No animation, no overlay.
+     * Static colored shape around the target. No animation, no overlay.
+     *
+     * @param filled when true, draws a filled shape instead of a stroke border
      */
     public data class Border(
         val color: Color,
         val shape: SpotlightShape = SpotlightShape.Default,
         val padding: SpotlightPadding = SpotlightPadding.Default,
         val borderWidth: Dp = 2.dp,
+        val filled: Boolean = false,
     ) : HighlightStyle
 
     /**
      * Expanding concentric rings radiating from the target center.
+     *
+     * @param filled when true, draws filled circles instead of stroke rings
      */
     public data class Ripple(
         val color: Color,
         val ringCount: Int = 3,
         val durationMillis: Int = 2000,
         val maxRadius: Dp = 60.dp,
+        val filled: Boolean = false,
     ) : HighlightStyle
 
     /**

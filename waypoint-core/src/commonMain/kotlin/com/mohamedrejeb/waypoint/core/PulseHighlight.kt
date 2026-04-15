@@ -1,6 +1,5 @@
 package com.mohamedrejeb.waypoint.core
 
-import androidx.compose.animation.core.InfiniteTransition
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -11,16 +10,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.DrawStyle
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import kotlin.math.max
 
 /**
- * Renders an animated pulsing border around the target element.
- * No dimming overlay -- the border breathes (scales) to draw attention.
+ * Renders an animated pulsing shape around the target element.
+ * No dimming overlay -- the shape breathes (scales) to draw attention.
+ * Supports both stroke (border) and filled rendering.
  */
 @Composable
 internal fun PulseHighlight(
@@ -42,7 +42,6 @@ internal fun PulseHighlight(
 
     val infiniteTransition = rememberInfiniteTransition()
 
-    // Animate scale: 1.0 → pulseScale → 1.0
     val scale by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = style.pulseScale,
@@ -52,7 +51,6 @@ internal fun PulseHighlight(
         ),
     )
 
-    // Fade the outer (scaled) ring
     val alpha by infiniteTransition.animateFloat(
         initialValue = 0.8f,
         targetValue = 0.2f,
@@ -62,50 +60,50 @@ internal fun PulseHighlight(
         ),
     )
 
+    val drawStyle: DrawStyle = if (style.filled) Fill else Stroke(width = borderWidthPx)
+
     Canvas(modifier = modifier) {
         val center = paddedBounds.center
         val halfWidth = paddedBounds.width / 2f
         val halfHeight = paddedBounds.height / 2f
 
-        // Inner ring (static, full alpha)
-        drawShapeBorder(
+        // Inner shape (static, full alpha)
+        drawShape(
             shape = style.shape,
             bounds = paddedBounds,
             color = style.color,
-            strokeWidth = borderWidthPx,
+            drawStyle = drawStyle,
             density = density,
         )
 
-        // Outer ring (animated scale + fading)
+        // Outer shape (animated scale + fading)
         val scaledBounds = Rect(
             left = center.x - halfWidth * scale,
             top = center.y - halfHeight * scale,
             right = center.x + halfWidth * scale,
             bottom = center.y + halfHeight * scale,
         )
-        drawShapeBorder(
+        drawShape(
             shape = style.shape,
             bounds = scaledBounds,
             color = style.color.copy(alpha = alpha),
-            strokeWidth = borderWidthPx,
+            drawStyle = drawStyle,
             density = density,
         )
     }
 }
 
 /**
- * Draws a shape border (stroke only) at the given bounds.
- * Shared between PulseHighlight and BorderHighlight.
+ * Draws a shape at the given bounds with the specified [DrawStyle] (Fill or Stroke).
+ * Shared between PulseHighlight, BorderHighlight, and others.
  */
-internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawShapeBorder(
+internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawShape(
     shape: SpotlightShape,
     bounds: Rect,
     color: androidx.compose.ui.graphics.Color,
-    strokeWidth: Float,
+    drawStyle: DrawStyle,
     density: androidx.compose.ui.unit.Density,
 ) {
-    val stroke = Stroke(width = strokeWidth)
-
     when (shape) {
         is SpotlightShape.Circle -> {
             val radius = max(bounds.width, bounds.height) / 2f
@@ -113,7 +111,7 @@ internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawShapeBorder(
                 color = color,
                 center = bounds.center,
                 radius = radius,
-                style = stroke,
+                style = drawStyle,
             )
         }
 
@@ -122,7 +120,7 @@ internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawShapeBorder(
                 color = color,
                 topLeft = bounds.topLeft,
                 size = bounds.size,
-                style = stroke,
+                style = drawStyle,
             )
         }
 
@@ -133,7 +131,7 @@ internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawShapeBorder(
                 topLeft = bounds.topLeft,
                 size = bounds.size,
                 cornerRadius = CornerRadius(cornerRadiusPx),
-                style = stroke,
+                style = drawStyle,
             )
         }
 
@@ -144,7 +142,7 @@ internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawShapeBorder(
                 topLeft = bounds.topLeft,
                 size = bounds.size,
                 cornerRadius = CornerRadius(cornerRadiusPx),
-                style = stroke,
+                style = drawStyle,
             )
         }
     }

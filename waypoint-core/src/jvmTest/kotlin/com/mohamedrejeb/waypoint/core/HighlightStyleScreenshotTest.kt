@@ -207,4 +207,123 @@ class HighlightStyleScreenshotTest {
         val image = onNodeWithTag("screenshot").captureToImage()
         ScreenshotTestHelper.assertMatchesGolden("highlight-ripple-custom", image)
     }
+
+    // -- Filled variants --
+
+    @Test
+    fun `highlight style - border filled`() = runComposeUiTest {
+        setContent {
+            Box(
+                modifier = Modifier
+                    .size(containerWidth, containerHeight)
+                    .background(Color.White)
+                    .testTag("screenshot"),
+            ) {
+                BorderHighlight(
+                    targetBounds = targetBounds,
+                    style = HighlightStyle.Border(
+                        color = Color(0x4D2196F3), // semi-transparent blue
+                        shape = SpotlightShape.RoundedRect(cornerRadius = 12.dp),
+                        filled = true,
+                    ),
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+
+        waitForIdle()
+        val image = onNodeWithTag("screenshot").captureToImage()
+        ScreenshotTestHelper.assertMatchesGolden("highlight-border-filled", image)
+    }
+
+    @Test
+    fun `highlight style - pulse filled`() = runComposeUiTest {
+        mainClock.autoAdvance = false
+
+        setContent {
+            Box(
+                modifier = Modifier
+                    .size(containerWidth, containerHeight)
+                    .background(Color.White)
+                    .testTag("screenshot"),
+            ) {
+                PulseHighlight(
+                    targetBounds = targetBounds,
+                    style = HighlightStyle.Pulse(
+                        color = Color(0x4D6200EE),
+                        shape = SpotlightShape.Circle,
+                        filled = true,
+                    ),
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+
+        mainClock.advanceTimeBy(300)
+
+        val image = onNodeWithTag("screenshot").captureToImage()
+        ScreenshotTestHelper.assertMatchesGolden("highlight-pulse-filled", image)
+    }
+
+    @Test
+    fun `highlight style - ripple filled`() = runComposeUiTest {
+        mainClock.autoAdvance = false
+
+        setContent {
+            Box(
+                modifier = Modifier
+                    .size(containerWidth, containerHeight)
+                    .background(Color.White)
+                    .testTag("screenshot"),
+            ) {
+                RippleHighlight(
+                    targetBounds = targetBounds,
+                    style = HighlightStyle.Ripple(
+                        color = Color(0x4D03DAC5),
+                        ringCount = 3,
+                        maxRadius = 60.dp,
+                        filled = true,
+                    ),
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+
+        mainClock.advanceTimeBy(500)
+
+        val image = onNodeWithTag("screenshot").captureToImage()
+        ScreenshotTestHelper.assertMatchesGolden("highlight-ripple-filled", image)
+    }
+
+    // -- Verify default (filled=false) still renders stroke --
+
+    @Test
+    fun `highlight style - pulse default is stroke not filled`() = runComposeUiTest {
+        mainClock.autoAdvance = false
+
+        setContent {
+            Box(
+                modifier = Modifier
+                    .size(containerWidth, containerHeight)
+                    .background(Color.White)
+                    .testTag("screenshot"),
+            ) {
+                PulseHighlight(
+                    targetBounds = targetBounds,
+                    style = HighlightStyle.Pulse(
+                        color = Color(0xFF6200EE),
+                        shape = SpotlightShape.Circle,
+                        // filled defaults to false — should match existing "highlight-pulse-circle" golden
+                    ),
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+
+        mainClock.advanceTimeBy(300)
+
+        val image = onNodeWithTag("screenshot").captureToImage()
+        // Compare against the existing stroke golden — should match
+        ScreenshotTestHelper.assertMatchesGolden("highlight-pulse-circle", image)
+    }
 }

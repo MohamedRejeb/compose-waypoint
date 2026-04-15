@@ -18,8 +18,10 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.mohamedrejeb.waypoint.sample.catalog.CatalogScreen
 import com.mohamedrejeb.waypoint.sample.demos.discovery.FeatureDiscoveryDemo
+import com.mohamedrejeb.waypoint.sample.demos.highlights.HighlightGalleryDemo
 import com.mohamedrejeb.waypoint.sample.demos.multitarget.MultiTargetDemo
 import com.mohamedrejeb.waypoint.sample.demos.onboarding.OnboardingDemo
+import com.mohamedrejeb.waypoint.sample.demos.theming.ThemingPlaygroundDemo
 import com.mohamedrejeb.waypoint.sample.demos.tutorial.InteractiveTutorialDemo
 import com.mohamedrejeb.waypoint.sample.navigation.Route
 import com.mohamedrejeb.waypoint.sample.theme.SampleTheme
@@ -50,10 +52,10 @@ fun App() {
                     MultiTargetDemo(onBack = { backStack.removeLastOrNull() })
                 }
                 entry<Route.HighlightGallery> {
-                    DemoPlaceholder("Highlight Gallery") { backStack.removeLastOrNull() }
+                    HighlightGalleryDemo(onBack = { backStack.removeLastOrNull() })
                 }
                 entry<Route.ThemingPlayground> {
-                    DemoPlaceholder("Theming Playground") { backStack.removeLastOrNull() }
+                    ThemingPlaygroundDemo(onBack = { backStack.removeLastOrNull() })
                 }
                 entry<Route.AnalyticsDashboard> {
                     DemoPlaceholder("Analytics Dashboard") { backStack.removeLastOrNull() }

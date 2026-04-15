@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -19,13 +17,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.waypoint.core.ResolvedPlacement
 import com.mohamedrejeb.waypoint.core.StepScope
-import com.mohamedrejeb.waypoint.core.WaypointStep
 
 /**
  * Default Material3-styled tooltip for Waypoint tours.
  *
- * Renders the step's title, description, progress indicator, and navigation buttons
- * using Material3 theming.
+ * Reads colors, typography, and dimensions from [WaypointMaterial3Theme].
+ * If no theme is provided, falls back to Material3 defaults.
  */
 @Composable
 public fun WaypointMaterial3Tooltip(
@@ -40,23 +37,25 @@ public fun WaypointMaterial3Tooltip(
     finishText: String = "Finish",
     showProgress: Boolean = true,
 ) {
-    val shape = RoundedCornerShape(16.dp)
+    val colors = WaypointMaterial3Theme.colors
+    val typography = WaypointMaterial3Theme.typography
+    val dims = WaypointMaterial3Theme.dimensions
 
     Column(
         modifier = modifier
-            .widthIn(min = 200.dp, max = 320.dp)
-            .shadow(elevation = 8.dp, shape = shape)
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .widthIn(min = dims.tooltipMinWidth, max = dims.tooltipMaxWidth)
+            .shadow(elevation = dims.tooltipElevation, shape = dims.tooltipShape)
+            .clip(dims.tooltipShape)
+            .background(colors.tooltipBackground)
+            .padding(dims.tooltipPadding),
+        verticalArrangement = Arrangement.spacedBy(dims.contentSpacing),
     ) {
         // Progress indicator
         if (showProgress) {
             Text(
                 text = "${stepScope.currentStepIndex + 1} of ${stepScope.totalSteps}",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = typography.progress,
+                color = colors.progress,
             )
         }
 
@@ -64,8 +63,8 @@ public fun WaypointMaterial3Tooltip(
         if (title != null) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
+                style = typography.title,
+                color = colors.title,
             )
         }
 
@@ -73,8 +72,8 @@ public fun WaypointMaterial3Tooltip(
         if (description != null) {
             Text(
                 text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = typography.description,
+                color = colors.description,
             )
         }
 
@@ -85,36 +84,31 @@ public fun WaypointMaterial3Tooltip(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // Left side: Skip button
-            TextButton(
-                onClick = stepScope.onSkip,
-            ) {
+            TextButton(onClick = stepScope.onSkip) {
                 Text(
                     text = skipText,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = typography.button,
+                    color = colors.skipButton,
                 )
             }
 
             // Right side: Back + Next/Finish
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 if (!stepScope.isFirstStep) {
-                    TextButton(
-                        onClick = stepScope.onPrevious,
-                    ) {
+                    TextButton(onClick = stepScope.onPrevious) {
                         Text(
                             text = backText,
-                            color = MaterialTheme.colorScheme.primary,
+                            style = typography.button,
+                            color = colors.secondaryButton,
                         )
                     }
                 }
 
-                TextButton(
-                    onClick = stepScope.onNext,
-                ) {
+                TextButton(onClick = stepScope.onNext) {
                     Text(
                         text = if (stepScope.isLastStep) finishText else nextText,
-                        color = MaterialTheme.colorScheme.primary,
+                        style = typography.button,
+                        color = colors.primaryButton,
                     )
                 }
             }

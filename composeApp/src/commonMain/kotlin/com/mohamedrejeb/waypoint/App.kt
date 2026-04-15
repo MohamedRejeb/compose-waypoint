@@ -61,6 +61,7 @@ import com.mohamedrejeb.waypoint.core.WaypointTrigger
 import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
+import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Theme
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
@@ -261,12 +262,29 @@ fun App() {
             }
         }
 
-        WaypointMaterial3Host(
-            state = waypointState,
-            overlayClickBehavior = OverlayClickBehavior.Dismiss,
-            onTourComplete = { tourStarted = false },
-            onTourCancel = { tourStarted = false },
+        WaypointMaterial3Theme(
+            colors = WaypointMaterial3Theme.colors(
+                tooltipBackground = Color(0xFF1A1A2E),
+                title = Color.White,
+                description = Color(0xFFB8B8D0),
+                progress = Color(0xFF7C7C9A),
+                primaryButton = Color(0xFF8B5CF6),
+                secondaryButton = Color(0xFF7C3AED),
+                skipButton = Color(0xFF6B7280),
+            ),
+            dimensions = WaypointMaterial3Theme.dimensions(
+                tooltipShape = RoundedCornerShape(20.dp),
+                tooltipElevation = 16.dp,
+                tooltipPadding = 24.dp,
+                contentSpacing = 10.dp,
+            ),
         ) {
+            WaypointMaterial3Host(
+                state = waypointState,
+                overlayClickBehavior = OverlayClickBehavior.Dismiss,
+                onTourComplete = { tourStarted = false },
+                onTourCancel = { tourStarted = false },
+            ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     // -- Top bar --
@@ -459,6 +477,7 @@ fun App() {
                     Text("+", fontSize = 24.sp)
                 }
             }
+        }
         }
     }
 }

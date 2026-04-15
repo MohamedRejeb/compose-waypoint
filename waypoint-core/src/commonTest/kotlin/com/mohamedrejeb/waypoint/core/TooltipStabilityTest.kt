@@ -252,5 +252,9 @@ class TooltipStabilityTest {
         )
     }
 
-    private fun Float.format(): String = "%.1f".format(this)
+    private fun Float.format(): String {
+        val int = toInt()
+        val frac = ((this - int) * 10).toInt().let { if (it < 0) -it else it }
+        return "$int.$frac"
+    }
 }

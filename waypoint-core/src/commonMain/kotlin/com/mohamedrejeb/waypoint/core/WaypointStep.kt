@@ -34,4 +34,6 @@ public data class WaypointStep<K>(
     val onEnter: (() -> Unit)? = null,
     /** Callback invoked when this step is exited */
     val onExit: (() -> Unit)? = null,
+    /** Suspend function that must complete before this step's tooltip/highlight are shown */
+    val beforeShow: (suspend () -> Unit)? = null,
 )

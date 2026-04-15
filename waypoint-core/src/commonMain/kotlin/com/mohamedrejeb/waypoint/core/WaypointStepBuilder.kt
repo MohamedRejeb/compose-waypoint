@@ -51,6 +51,7 @@ public class StepBuilder<K> internal constructor(private val targetKey: K) {
     private var showIf: (() -> Boolean)? = null
     private var onEnter: (() -> Unit)? = null
     private var onExit: (() -> Unit)? = null
+    private var beforeShow: (suspend () -> Unit)? = null
 
     /** Set a condition for when this step should be shown */
     public fun showIf(condition: () -> Boolean) {
@@ -65,6 +66,11 @@ public class StepBuilder<K> internal constructor(private val targetKey: K) {
     /** Set a callback for when this step is exited */
     public fun onExit(action: () -> Unit) {
         onExit = action
+    }
+
+    /** Set a suspend function that must complete before this step's tooltip/highlight are shown */
+    public fun beforeShow(action: suspend () -> Unit) {
+        beforeShow = action
     }
 
     /** Set custom composable content for the tooltip */
@@ -85,5 +91,6 @@ public class StepBuilder<K> internal constructor(private val targetKey: K) {
         showIf = showIf,
         onEnter = onEnter,
         onExit = onExit,
+        beforeShow = beforeShow,
     )
 }

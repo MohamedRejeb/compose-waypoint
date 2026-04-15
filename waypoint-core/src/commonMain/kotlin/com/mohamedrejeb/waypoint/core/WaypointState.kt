@@ -40,6 +40,10 @@ public class WaypointState<K>(
     public var isPaused: Boolean by mutableStateOf(false)
         private set
 
+    /** Whether the current step's beforeShow gate has completed */
+    internal var isStepReady: Boolean by mutableStateOf(true)
+        private set
+
     /** The current step, or null if the tour is not active */
     public val currentStep: WaypointStep<K>?
         get() = if (currentStepIndex in steps.indices) steps[currentStepIndex] else null
@@ -56,6 +60,10 @@ public class WaypointState<K>(
      * which fixes coordinate misalignment when the host is inside a Dialog or Sheet.
      */
     internal var hostCoordinates: LayoutCoordinates? = null
+
+    internal fun setStepReady(ready: Boolean) {
+        isStepReady = ready
+    }
 
     /** Whether this tour has been completed (requires tourId and persistence) */
     public val hasCompleted: Boolean
@@ -126,6 +134,7 @@ public class WaypointState<K>(
         isActive = false
         isPaused = false
         currentStepIndex = -1
+        isStepReady = true
         exitingStep?.onExit?.invoke()
         analytics?.onTourCancelled(tourId, cancelledAtIndex, steps.size)
     }
@@ -181,6 +190,7 @@ public class WaypointState<K>(
         isActive = false
         isPaused = false
         currentStepIndex = -1
+        isStepReady = true
         analytics?.onTourCompleted(tourId, steps.size)
         val id = tourId
         if (id != null) persistence?.markCompleted(id)
@@ -209,6 +219,10 @@ public class WaypointState<K>(
         val enteringStep = currentStep
         enteringStep?.onEnter?.invoke()
         analytics?.onStepViewed(tourId, newIndex, enteringStep?.targetKey)
+        // Gate highlight/tooltip if step has beforeShow
+        if (steps[newIndex].beforeShow != null) {
+            isStepReady = false
+        }
     }
 
     /**

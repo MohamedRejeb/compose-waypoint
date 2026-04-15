@@ -74,6 +74,20 @@ public fun <K> WaypointHost(
         }
     }
 
+    // Async gate: run beforeShow and mark step ready when complete
+    LaunchedEffect(state.currentStepIndex) {
+        val step = state.currentStep ?: return@LaunchedEffect
+        val gate = step.beforeShow ?: run {
+            state.setStepReady(true)
+            return@LaunchedEffect
+        }
+        try {
+            gate()
+        } finally {
+            state.setStepReady(true)
+        }
+    }
+
     // Animated highlight bounds
     val animatedBounds = remember { Animatable(Rect.Zero, Rect.VectorConverter) }
 
@@ -113,7 +127,7 @@ public fun <K> WaypointHost(
         (targetBounds.bottom > 0f && targetBounds.top < hostSize.height.toFloat() &&
          targetBounds.right > 0f && targetBounds.left < hostSize.width.toFloat()))
 
-    val shouldShowHighlight = state.isActive && !state.isPaused && isTargetVisible
+    val shouldShowHighlight = state.isActive && !state.isPaused && isTargetVisible && state.isStepReady
     val currentStep = state.currentStep
 
     // Keyboard navigation: focusable host with onPreviewKeyEvent.
@@ -250,7 +264,7 @@ public fun <K> WaypointHost(
 
         // 3. Tooltip + navigation (always shown while tour is active, even if
         //    target is scrolled off-screen -- keeps Next/Skip buttons accessible)
-        val shouldShowTooltip = state.isActive && !state.isPaused
+        val shouldShowTooltip = state.isActive && !state.isPaused && state.isStepReady
         if (shouldShowTooltip && currentStep != null) {
             val step = currentStep
 

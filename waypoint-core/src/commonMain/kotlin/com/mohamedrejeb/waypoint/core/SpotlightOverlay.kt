@@ -12,7 +12,9 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import kotlin.math.max
 
 /**
@@ -36,11 +38,12 @@ internal fun SpotlightOverlay(
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
 
-    val paddedBounds = padBounds(targetBounds, style.padding, density)
+    val paddedBounds = padBounds(targetBounds, style.padding, density, layoutDirection)
     val allPaddedBounds = buildList {
         add(paddedBounds)
-        additionalBounds.forEach { add(padBounds(it, style.padding, density)) }
+        additionalBounds.forEach { add(padBounds(it, style.padding, density, layoutDirection)) }
     }
 
     val touchModifier = if (!allowTargetInteraction) {
@@ -73,15 +76,23 @@ internal fun SpotlightOverlay(
     }
 }
 
-private fun padBounds(bounds: Rect, padding: SpotlightPadding, density: Density): Rect =
-    with(density) {
-        Rect(
-            left = bounds.left - padding.start.toPx(),
-            top = bounds.top - padding.top.toPx(),
-            right = bounds.right + padding.end.toPx(),
-            bottom = bounds.bottom + padding.bottom.toPx(),
-        )
-    }
+private fun padBounds(
+    bounds: Rect,
+    padding: SpotlightPadding,
+    density: Density,
+    layoutDirection: LayoutDirection,
+): Rect = with(density) {
+    val startPx = padding.start.toPx()
+    val endPx = padding.end.toPx()
+    val leftPad = if (layoutDirection == LayoutDirection.Ltr) startPx else endPx
+    val rightPad = if (layoutDirection == LayoutDirection.Ltr) endPx else startPx
+    Rect(
+        left = bounds.left - leftPad,
+        top = bounds.top - padding.top.toPx(),
+        right = bounds.right + rightPad,
+        bottom = bounds.bottom + padding.bottom.toPx(),
+    )
+}
 
 private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCutout(
     bounds: Rect,

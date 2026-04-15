@@ -27,11 +27,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -88,6 +91,8 @@ fun App() {
         var showAdvanced by remember { mutableStateOf(true) }
         var enterCount by remember { mutableStateOf(0) }
         var searchQuery by remember { mutableStateOf("") }
+        var showSheetTour by remember { mutableStateOf(false) }
+        var showDialogTour by remember { mutableStateOf(false) }
 
         val waypointState = rememberWaypointState {
             // Step 1: Spotlight + Circle shape + forced Top placement
@@ -426,6 +431,25 @@ fun App() {
                             Text("Start Tour")
                         }
 
+                        // Sheet & Dialog tour buttons
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            OutlinedButton(
+                                onClick = { showSheetTour = true },
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                Text("Sheet Tour")
+                            }
+                            OutlinedButton(
+                                onClick = { showDialogTour = true },
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                Text("Dialog Tour")
+                            }
+                        }
+
                         // Spacer to push content below the fold
                         Spacer(Modifier.height(200.dp))
 
@@ -480,6 +504,148 @@ fun App() {
                 }
             }
         }
+        }
+
+        // -- Bottom Sheet Tour --
+        if (showSheetTour) {
+            SheetTourDemo(onDismiss = { showSheetTour = false })
+        }
+
+        // -- Dialog Tour --
+        if (showDialogTour) {
+            DialogTourDemo(onDismiss = { showDialogTour = false })
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SheetTourDemo(onDismiss: () -> Unit) {
+    val sheetState = rememberWaypointState {
+        step("header") {
+            title = "Sheet Header"
+            description = "This is the top of the bottom sheet."
+            highlightStyle = HighlightStyle.Spotlight(
+                shape = SpotlightShape.RoundedRect(cornerRadius = 8.dp),
+            )
+        }
+        step("action") {
+            title = "Sheet Action"
+            description = "Tap this button to perform an action."
+            highlightStyle = HighlightStyle.Pulse(
+                color = Color(0xFF8B5CF6).copy(alpha = 0.3f),
+                shape = SpotlightShape.RoundedRect(cornerRadius = 24.dp),
+                filled = true,
+            )
+        }
+    }
+
+    LaunchedEffect(Unit) { sheetState.start() }
+
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        WaypointMaterial3Host(
+            state = sheetState,
+            onTourComplete = onDismiss,
+            onTourCancel = onDismiss,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Text(
+                    text = "Bottom Sheet",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.waypointTarget(sheetState, "header"),
+                )
+                Text(
+                    text = "Waypoint tours work inside bottom sheets. The spotlight, tooltip, and navigation all render correctly within the sheet's layer.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Button(
+                    onClick = {},
+                    modifier = Modifier
+                        .waypointTarget(sheetState, "action")
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                ) {
+                    Text("Sheet Action")
+                }
+                Spacer(Modifier.height(16.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun DialogTourDemo(onDismiss: () -> Unit) {
+    val dialogState = rememberWaypointState {
+        step("title") {
+            title = "Dialog Title"
+            description = "Tours work inside dialogs too."
+            highlightStyle = HighlightStyle.Border(
+                color = Color(0xFF03DAC5),
+                shape = SpotlightShape.RoundedRect(cornerRadius = 4.dp),
+                borderWidth = 2.dp,
+            )
+        }
+        step("confirm") {
+            title = "Confirm Button"
+            description = "Tap to confirm and close the dialog."
+            highlightStyle = HighlightStyle.Ripple(
+                color = Color(0xFF8B5CF6),
+                maxRadius = 50.dp,
+                filled = true,
+            )
+        }
+    }
+
+    LaunchedEffect(Unit) { dialogState.start() }
+
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+        ) {
+            WaypointMaterial3Host(
+                state = dialogState,
+                onTourComplete = onDismiss,
+                onTourCancel = onDismiss,
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        text = "Dialog Demo",
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.waypointTarget(dialogState, "title"),
+                    )
+                    Text(
+                        text = "Waypoint supports tours inside dialogs. The highlight and tooltip render within the dialog's bounds.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        TextButton(onClick = onDismiss) {
+                            Text("Cancel")
+                        }
+                        Spacer(Modifier.width(8.dp))
+                        Button(
+                            onClick = {},
+                            modifier = Modifier.waypointTarget(dialogState, "confirm"),
+                        ) {
+                            Text("Confirm")
+                        }
+                    }
+                }
+            }
         }
     }
 }

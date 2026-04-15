@@ -42,6 +42,9 @@ public class StepBuilder<K> internal constructor(private val targetKey: K) {
     /** How the target responds to interaction */
     public var interaction: TargetInteraction = TargetInteraction.None
 
+    /** How this step advances to the next */
+    public var advanceOn: WaypointTrigger = WaypointTrigger.Default
+
     private var showIf: (() -> Boolean)? = null
     private var onEnter: (() -> Unit)? = null
     private var onExit: (() -> Unit)? = null
@@ -74,6 +77,7 @@ public class StepBuilder<K> internal constructor(private val targetKey: K) {
         placement = placement,
         highlightStyle = highlightStyle,
         interaction = interaction,
+        advanceOn = advanceOn,
         showIf = showIf,
         onEnter = onEnter,
         onExit = onExit,

@@ -38,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,14 +57,20 @@ import com.mohamedrejeb.waypoint.core.StepScope
 import com.mohamedrejeb.waypoint.core.TargetInteraction
 import com.mohamedrejeb.waypoint.core.TooltipPlacement
 import com.mohamedrejeb.waypoint.core.WaypointHost
+import com.mohamedrejeb.waypoint.core.WaypointTrigger
 import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 
 enum class DemoTargets {
     MenuButton,
     SearchButton,
     ProfileButton,
+    SearchField,
     FabButton,
     WelcomeCard,
     SettingsToggle,
@@ -72,12 +79,14 @@ enum class DemoTargets {
     BottomAction,
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 fun App() {
     MaterialTheme {
         var tourStarted by remember { mutableStateOf(false) }
         var showAdvanced by remember { mutableStateOf(true) }
         var enterCount by remember { mutableStateOf(0) }
+        var searchQuery by remember { mutableStateOf("") }
 
         val waypointState = rememberWaypointState {
             // Step 1: Spotlight + Circle shape + forced Top placement
@@ -114,7 +123,24 @@ fun App() {
                 onEnter { enterCount++ }
             }
 
-            // Step 4: Conditional step -- only shown when showAdvanced is true
+            // Step 4: Event-driven progression -- auto-advances when user types
+            step(DemoTargets.SearchField) {
+                title = "Try Searching"
+                description = "Type something and pause to auto-advance..."
+                interaction = TargetInteraction.AllowClick
+                highlightStyle = HighlightStyle.Spotlight(
+                    shape = SpotlightShape.RoundedRect(cornerRadius = 8.dp),
+                )
+                advanceOn = WaypointTrigger.Custom {
+                    // Debounce: wait for user to stop typing for 800ms
+                    snapshotFlow { searchQuery }
+                        .filter { it.isNotEmpty() }
+                        .debounce(800)
+                        .first()
+                }
+            }
+
+            // Step 5: Conditional step -- only shown when showAdvanced is true
             step(DemoTargets.SettingsToggle) {
                 title = "Advanced Settings"
                 description = "This step only appears when advanced mode is on."
@@ -304,6 +330,18 @@ fun App() {
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
+                        // Search field (event-driven trigger target)
+                        androidx.compose.material3.OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            label = { Text("Search") },
+                            placeholder = { Text("Type to search...") },
+                            singleLine = true,
+                            modifier = Modifier
+                                .waypointTarget(waypointState, DemoTargets.SearchField)
+                                .fillMaxWidth(),
+                        )
+
                         // Settings toggle (conditional step target)
                         Row(
                             modifier = Modifier

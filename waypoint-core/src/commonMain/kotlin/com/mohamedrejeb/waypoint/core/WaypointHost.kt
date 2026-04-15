@@ -14,12 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.Dp
 
 /**
@@ -55,10 +55,18 @@ public fun <K> WaypointHost(
     val density = LocalDensity.current
     val tooltipSpacingPx = with(density) { tooltipSpacing.toPx() }
     val screenMarginPx = with(density) { screenMargin.toPx() }
+    val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
 
-    // Auto-scroll the current target into view when the step changes
+    // Clear child focus (e.g. text fields) when transitioning between steps
+    // or when the tour stops, so focused inputs don't persist into the next step.
+    // Then re-request focus on the host for keyboard navigation.
     LaunchedEffect(state.currentStepIndex) {
+        focusManager.clearFocus()
         if (state.isActive && !state.isPaused) {
+            if (keyboardConfig.enabled) {
+                focusRequester.requestFocus()
+            }
             state.scrollCurrentTargetIntoView()
         }
     }
@@ -98,11 +106,12 @@ public fun <K> WaypointHost(
     val shouldShowHighlight = state.isActive && !state.isPaused && targetBounds != null
     val currentStep = state.currentStep
 
-    // Keyboard navigation: request focus when tour is active so key events are captured
-    val focusRequester = remember { FocusRequester() }
-
+    // Keyboard navigation: focusable host with onPreviewKeyEvent.
+    // onPreviewKeyEvent intercepts during the preview phase, before children.
+    // Tour navigation keys (arrows, escape) are consumed; other keys pass through
+    // to child composables (text fields, etc.) when AllowClick is active.
     LaunchedEffect(state.isActive) {
-        if (state.isActive) {
+        if (state.isActive && keyboardConfig.enabled) {
             focusRequester.requestFocus()
         }
     }
@@ -110,9 +119,8 @@ public fun <K> WaypointHost(
     val keyboardModifier = if (keyboardConfig.enabled) {
         Modifier
             .focusRequester(focusRequester)
-            .focusable()
-            .onKeyEvent { event ->
-                if (!state.isActive || event.type != KeyEventType.KeyDown) return@onKeyEvent false
+            .onPreviewKeyEvent { event ->
+                if (!state.isActive || event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
 
                 when {
                     event.key in keyboardConfig.nextKeys -> {
@@ -135,6 +143,7 @@ public fun <K> WaypointHost(
                     else -> false
                 }
             }
+            .focusable()
     } else {
         Modifier
     }
@@ -174,6 +183,7 @@ public fun <K> WaypointHost(
                     SpotlightOverlay(
                         targetBounds = animatedBounds.value,
                         style = resolvedStyle,
+                        allowTargetInteraction = step.interaction == TargetInteraction.AllowClick,
                         onOverlayClick = overlayClickHandler,
                         onTargetClick = targetClickHandler,
                         modifier = Modifier.fillMaxSize(),
@@ -256,6 +266,24 @@ public fun <K> WaypointHost(
                     customContent(stepScope)
                 } else {
                     tooltipContent(stepScope, resolvedPlacement)
+                }
+            }
+
+            // 4. Event-driven progression trigger
+            // When a step uses a Custom trigger, launch a coroutine that
+            // awaits the trigger condition and auto-advances when it returns.
+            // The coroutine is cancelled when the step changes or tour stops
+            // (because this composable leaves composition).
+            val trigger = step.advanceOn
+            if (trigger is WaypointTrigger.Custom) {
+                LaunchedEffect(state.currentStepIndex) {
+                    trigger.await()
+                    // Trigger completed -- advance to next step
+                    val wasLastStep = state.currentStepIndex == state.steps.lastIndex
+                    state.next()
+                    if (wasLastStep && !state.isActive) {
+                        onTourComplete?.invoke()
+                    }
                 }
             }
         }

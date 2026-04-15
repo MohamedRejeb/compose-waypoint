@@ -17,11 +17,15 @@ import kotlin.math.max
 /**
  * Renders a semi-transparent overlay with a transparent cutout (spotlight)
  * around the target element.
+ *
+ * When [allowTargetInteraction] is true, the overlay becomes visual-only
+ * with no touch interception, so all taps pass through to content underneath.
  */
 @Composable
 internal fun SpotlightOverlay(
     targetBounds: Rect,
     style: HighlightStyle.Spotlight,
+    allowTargetInteraction: Boolean,
     onOverlayClick: () -> Unit,
     onTargetClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -37,18 +41,26 @@ internal fun SpotlightOverlay(
         )
     }
 
+    // When allowTargetInteraction is true, no touch handling at all --
+    // the overlay is purely visual so taps pass through to content below.
+    val touchModifier = if (!allowTargetInteraction) {
+        Modifier.pointerInput(targetBounds) {
+            detectTapGestures { offset ->
+                if (paddedBounds.contains(offset)) {
+                    onTargetClick()
+                } else {
+                    onOverlayClick()
+                }
+            }
+        }
+    } else {
+        Modifier
+    }
+
     Canvas(
         modifier = modifier
             .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-            .pointerInput(targetBounds) {
-                detectTapGestures { offset ->
-                    if (paddedBounds.contains(offset)) {
-                        onTargetClick()
-                    } else {
-                        onOverlayClick()
-                    }
-                }
-            },
+            .then(touchModifier),
     ) {
         // Draw the scrim
         drawRect(color = style.overlayColor.copy(alpha = style.overlayAlpha))

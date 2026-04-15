@@ -24,6 +24,8 @@ public data class WaypointStep<K>(
     val highlightStyle: HighlightStyle = HighlightStyle.Default,
     /** How the target responds to interaction during this step */
     val interaction: TargetInteraction = TargetInteraction.None,
+    /** How this step advances to the next (Next button, or custom trigger) */
+    val advanceOn: WaypointTrigger = WaypointTrigger.Default,
     /** Condition evaluated at runtime to determine if this step should be shown */
     val showIf: (() -> Boolean)? = null,
     /** Callback invoked when this step becomes active */

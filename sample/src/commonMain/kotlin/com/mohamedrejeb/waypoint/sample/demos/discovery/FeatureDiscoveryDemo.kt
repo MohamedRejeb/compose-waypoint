@@ -16,9 +16,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChatBubble
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.rounded.ChatBubble
+import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -92,7 +92,7 @@ fun FeatureDiscoveryDemo(onBack: () -> Unit) {
 
     DemoScaffold(
         title = "Feature Discovery",
-        description = "Beacons highlight new features. Tap a beacon to learn more.",
+        description = "Pulsing beacons mark unseen features. Tap a beacon to start its tour and learn more. Reset All restores all beacons.",
         onBack = onBack,
         onStartTour = {},
         fabVisible = false,
@@ -128,7 +128,7 @@ fun FeatureDiscoveryDemo(onBack: () -> Unit) {
                         )
 
                         FeatureCard(
-                            icon = Icons.Default.ChatBubble,
+                            icon = Icons.Rounded.ChatBubble,
                             iconColor = VioletPrimary,
                             title = "Smart Messaging",
                             description = "AI-powered replies and thread summaries",
@@ -139,7 +139,7 @@ fun FeatureDiscoveryDemo(onBack: () -> Unit) {
                         )
 
                         FeatureCard(
-                            icon = Icons.Default.FilterList,
+                            icon = Icons.Rounded.FilterList,
                             iconColor = TealSecondary,
                             title = "Advanced Filters",
                             description = "Complex filter chains with saved presets",
@@ -150,12 +150,12 @@ fun FeatureDiscoveryDemo(onBack: () -> Unit) {
                         )
 
                         FeatureCard(
-                            icon = Icons.Default.DarkMode,
+                            icon = Icons.Rounded.DarkMode,
                             iconColor = AmberTertiary,
                             title = "Dark Mode",
                             description = "Automatic switching with custom accents",
                             beaconVisible = !state.hasSeenDarkMode,
-                            beaconStyle = BeaconStyle.Dot(color = AmberTertiary),
+                            beaconStyle = BeaconStyle.Pulse(color = AmberTertiary),
                             onBeaconClick = { darkModeState.start() },
                             targetModifier = Modifier.waypointTarget(darkModeState, DarkModeTarget.Card),
                         )

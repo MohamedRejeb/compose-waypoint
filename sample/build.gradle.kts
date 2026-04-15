@@ -31,13 +31,23 @@ kotlin {
     jvm()
 
     js {
-        browser()
+        outputModuleName = "web"
+        browser {
+            commonWebpackConfig {
+                outputFileName = "web.js"
+            }
+        }
         binaries.executable()
     }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        browser()
+        outputModuleName = "web"
+        browser {
+            commonWebpackConfig {
+                outputFileName = "web.js"
+            }
+        }
         binaries.executable()
     }
 

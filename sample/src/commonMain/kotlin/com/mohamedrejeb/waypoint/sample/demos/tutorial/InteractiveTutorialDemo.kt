@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,11 +15,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,6 +37,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import com.mohamedrejeb.waypoint.core.TargetInteraction
 import com.mohamedrejeb.waypoint.core.TooltipPlacement
 import com.mohamedrejeb.waypoint.core.WaypointTrigger
@@ -42,12 +46,15 @@ import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 private enum class TutorialTarget { Name, Email, Plans, Terms, Submit }
 
+@OptIn(FlowPreview::class)
 @Composable
 fun InteractiveTutorialDemo(onBack: () -> Unit) {
     val viewModel = viewModel { TutorialViewModel() }
@@ -62,9 +69,11 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
             advanceOn = WaypointTrigger.Custom {
                 viewModel.state
                     .map { it.name }
+                    .debounce(800)
                     .filter { it.length >= 2 }
                     .first()
             }
+            content { ActionTooltip("Enter Your Name", "Type at least 2 characters to continue.") }
         }
         step(TutorialTarget.Email) {
             title = "Enter Your Email"
@@ -74,9 +83,11 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
             advanceOn = WaypointTrigger.Custom {
                 viewModel.state
                     .map { it.email }
+                    .debounce(800)
                     .filter { "@" in it }
                     .first()
             }
+            content { ActionTooltip("Enter Your Email", "Type an email address with '@' to continue.") }
         }
         step(TutorialTarget.Plans) {
             title = "Choose a Plan"
@@ -88,6 +99,7 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
                     .filter { it.plan != null }
                     .first()
             }
+            content { ActionTooltip("Choose a Plan", "Select one of the plans below to continue.") }
         }
         step(TutorialTarget.Terms) {
             title = "Accept Terms"
@@ -95,6 +107,7 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
             placement = TooltipPlacement.Top
             interaction = TargetInteraction.ClickToAdvance
             showIf { !formState.agreedToTerms }
+            content { ActionTooltip("Accept Terms", "Check the box to agree to the Terms of Service.") }
         }
         step(TutorialTarget.Submit) {
             title = "Submit"
@@ -102,6 +115,7 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
             placement = TooltipPlacement.Top
             interaction = TargetInteraction.ClickToAdvance
             onEnter { viewModel.onEvent(TutorialEvent.TermsToggled(true)) }
+            content { ActionTooltip("Submit", "You're all set! Click Create Account to finish.") }
         }
     }
 
@@ -216,7 +230,7 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
                             modifier = Modifier.padding(20.dp),
                         ) {
                             Icon(
-                                imageVector = Icons.Default.CheckCircle,
+                                imageVector = Icons.Rounded.CheckCircle,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(32.dp),
@@ -296,5 +310,34 @@ private fun PlanCard(
                 },
             )
         }
+    }
+}
+
+@Composable
+private fun ActionTooltip(
+    title: String,
+    description: String,
+) {
+    val shape = RoundedCornerShape(12.dp)
+    Column(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier
+            .widthIn(min = 200.dp, max = 280.dp)
+            .shadow(elevation = 4.dp, shape = shape)
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.inverseSurface)
+            .padding(16.dp),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.inverseOnSurface,
+        )
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.8f),
+        )
     }
 }

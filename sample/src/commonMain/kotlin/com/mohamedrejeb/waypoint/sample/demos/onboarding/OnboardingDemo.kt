@@ -18,11 +18,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Circle
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -78,7 +78,9 @@ fun OnboardingDemo(onBack: () -> Unit) {
             title = "Your Dashboard"
             description = "Quick overview of your day"
             placement = TooltipPlacement.Bottom
-            highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.Pill)
+            highlightStyle = HighlightStyle.Spotlight(
+                shape = SpotlightShape.RoundedRect(16.dp),
+            )
         }
         step(OnboardingTarget.Stats) {
             title = "Statistics"
@@ -138,7 +140,7 @@ fun OnboardingDemo(onBack: () -> Unit) {
                         .waypointTarget(state, OnboardingTarget.Fab),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Add,
+                        imageVector = Icons.Rounded.Add,
                         contentDescription = "New Task",
                     )
                 }
@@ -191,7 +193,7 @@ private fun TopBar(
                 modifier = Modifier.waypointTarget(state, OnboardingTarget.Search),
             ) {
                 Icon(
-                    imageVector = Icons.Default.Search,
+                    imageVector = Icons.Rounded.Search,
                     contentDescription = "Search",
                 )
             }
@@ -201,7 +203,7 @@ private fun TopBar(
                 modifier = Modifier.waypointTarget(state, OnboardingTarget.Bell),
             ) {
                 Icon(
-                    imageVector = Icons.Default.Notifications,
+                    imageVector = Icons.Rounded.Notifications,
                     contentDescription = "Notifications",
                 )
             }
@@ -334,7 +336,7 @@ private fun TaskCard(task: TaskItem) {
                 .padding(16.dp),
         ) {
             Icon(
-                imageVector = if (task.done) Icons.Default.CheckCircle else Icons.Outlined.Circle,
+                imageVector = if (task.done) Icons.Rounded.CheckCircle else Icons.Outlined.Circle,
                 contentDescription = null,
                 tint = if (task.done) {
                     MaterialTheme.colorScheme.primary

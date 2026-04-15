@@ -14,20 +14,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
-import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.automirrored.rounded.Sort
+import androidx.compose.material.icons.automirrored.rounded.TrendingUp
+import androidx.compose.material.icons.rounded.AttachMoney
+import androidx.compose.material.icons.rounded.CalendarToday
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.rounded.Group
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -75,19 +76,19 @@ fun MultiTargetDemo(onBack: () -> Unit) {
                     scope = scope,
                 ) {
                     ControlDescription(
-                        icon = Icons.AutoMirrored.Filled.TrendingUp,
+                        icon = Icons.AutoMirrored.Rounded.TrendingUp,
                         label = "Logo",
                         description = "Your brand identity and home navigation",
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     ControlDescription(
-                        icon = Icons.Default.CalendarToday,
+                        icon = Icons.Rounded.CalendarToday,
                         label = "Date Range",
                         description = "Filter data by time period",
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     ControlDescription(
-                        icon = Icons.Default.Share,
+                        icon = Icons.Rounded.Share,
                         label = "Export",
                         description = "Share or download reports",
                     )
@@ -215,7 +216,7 @@ private fun HeaderRow(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.CalendarToday,
+                        imageVector = Icons.Rounded.CalendarToday,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -236,7 +237,7 @@ private fun HeaderRow(
                 modifier = Modifier.waypointTarget(state, DashTarget.Export),
             ) {
                 Icon(
-                    imageVector = Icons.Default.Share,
+                    imageVector = Icons.Rounded.Share,
                     contentDescription = "Export",
                 )
             }
@@ -261,10 +262,10 @@ private data class KpiData(
 )
 
 private val kpiItems = listOf(
-    KpiData(Icons.Default.AttachMoney, "Revenue", "$24.5k", "+8.2%", KpiBlue, DashTarget.Revenue),
-    KpiData(Icons.Default.Group, "Users", "1,847", "+3.1%", KpiGreen, DashTarget.Users),
-    KpiData(Icons.Default.ShoppingCart, "Orders", "384", "+5.4%", KpiPurple, DashTarget.Orders),
-    KpiData(Icons.AutoMirrored.Filled.TrendingUp, "Growth", "+12.3%", "+2.1%", KpiOrange, DashTarget.Growth),
+    KpiData(Icons.Rounded.AttachMoney, "Revenue", "$24.5k", "+8.2%", KpiBlue, DashTarget.Revenue),
+    KpiData(Icons.Rounded.Group, "Users", "1,847", "+3.1%", KpiGreen, DashTarget.Users),
+    KpiData(Icons.Rounded.ShoppingCart, "Orders", "384", "+5.4%", KpiPurple, DashTarget.Orders),
+    KpiData(Icons.AutoMirrored.Rounded.TrendingUp, "Growth", "+12.3%", "+2.1%", KpiOrange, DashTarget.Growth),
 )
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -408,7 +409,7 @@ private fun ActionBar(
                 .waypointTarget(state, DashTarget.Filter),
         ) {
             Icon(
-                imageVector = Icons.Default.FilterList,
+                imageVector = Icons.Rounded.FilterList,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
             )
@@ -423,7 +424,7 @@ private fun ActionBar(
                 .waypointTarget(state, DashTarget.Sort),
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.Sort,
+                imageVector = Icons.AutoMirrored.Rounded.Sort,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
             )
@@ -438,7 +439,7 @@ private fun ActionBar(
                 .waypointTarget(state, DashTarget.Download),
         ) {
             Icon(
-                imageVector = Icons.Default.Download,
+                imageVector = Icons.Rounded.Download,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
             )
@@ -463,6 +464,7 @@ private fun TooltipCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
+        modifier = Modifier.widthIn(max = 360.dp),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),

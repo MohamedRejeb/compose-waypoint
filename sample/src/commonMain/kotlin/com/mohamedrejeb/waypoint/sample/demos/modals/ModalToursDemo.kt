@@ -15,17 +15,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChatBubble
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material.icons.filled.VerticalSplit
-import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.rounded.ChatBubble
+import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Email
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.Translate
+import androidx.compose.material.icons.rounded.VerticalSplit
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -73,19 +72,11 @@ private enum class SheetTarget {
     EditItem,
 }
 
-// -- Scrollable tour targets --
-
-private enum class ScrollTarget {
-    Top,
-    Middle,
-    Bottom,
-}
-
 @Composable
 fun ModalToursDemo(onBack: () -> Unit) {
     DemoScaffold(
         title = "Modal Tours",
-        description = "Tours inside dialogs, bottom sheets, and scrollable containers",
+        description = "Tours inside dialogs and bottom sheets — the overlay and tooltip stay within the modal bounds",
         onBack = onBack,
         onStartTour = {},
         fabVisible = false,
@@ -100,7 +91,6 @@ fun ModalToursDemo(onBack: () -> Unit) {
         ) {
             DialogTourSection()
             BottomSheetTourSection()
-            ScrollableTourSection()
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
@@ -115,7 +105,7 @@ private fun DialogTourSection() {
     var showDialog by remember { mutableStateOf(false) }
 
     SectionCard(
-        icon = Icons.Default.ChatBubble,
+        icon = Icons.Rounded.ChatBubble,
         title = "Dialog Tour",
         description = "A 2-step tour inside a Dialog targeting a notifications switch and a theme toggle.",
         buttonLabel = "Open Dialog",
@@ -173,7 +163,7 @@ private fun DialogTourContent(onDismiss: () -> Unit) {
                             .waypointTarget(state, DialogTarget.Notifications),
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Notifications,
+                            imageVector = Icons.Rounded.Notifications,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp),
@@ -201,7 +191,7 @@ private fun DialogTourContent(onDismiss: () -> Unit) {
                             .waypointTarget(state, DialogTarget.Theme),
                     ) {
                         Icon(
-                            imageVector = Icons.Default.DarkMode,
+                            imageVector = Icons.Rounded.DarkMode,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp),
@@ -226,7 +216,7 @@ private fun DialogTourContent(onDismiss: () -> Unit) {
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Translate,
+                            imageVector = Icons.Rounded.Translate,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp),
@@ -273,7 +263,7 @@ private fun BottomSheetTourSection() {
     var showSheet by remember { mutableStateOf(false) }
 
     SectionCard(
-        icon = Icons.Default.VerticalSplit,
+        icon = Icons.Rounded.VerticalSplit,
         title = "Bottom Sheet Tour",
         description = "A 2-step tour inside a ModalBottomSheet targeting share and edit actions.",
         buttonLabel = "Open Sheet",
@@ -318,25 +308,25 @@ private fun BottomSheetTourSection() {
                     HorizontalDivider()
 
                     SheetActionItem(
-                        icon = Icons.Default.Share,
+                        icon = Icons.Rounded.Share,
                         label = "Share",
                         modifier = Modifier.waypointTarget(tourState, SheetTarget.ShareItem),
                     )
                     SheetActionItem(
-                        icon = Icons.Default.Edit,
+                        icon = Icons.Rounded.Edit,
                         label = "Edit",
                         modifier = Modifier.waypointTarget(tourState, SheetTarget.EditItem),
                     )
                     SheetActionItem(
-                        icon = Icons.Default.Star,
+                        icon = Icons.Rounded.Star,
                         label = "Favorite",
                     )
                     SheetActionItem(
-                        icon = Icons.Default.Email,
+                        icon = Icons.Rounded.Email,
                         label = "Send via Email",
                     )
                     SheetActionItem(
-                        icon = Icons.Default.Delete,
+                        icon = Icons.Rounded.Delete,
                         label = "Delete",
                     )
 
@@ -373,110 +363,6 @@ private fun SheetActionItem(
         },
         modifier = modifier,
     )
-}
-
-// ---------------------------------------------------------------------------
-// Section 3: Scrollable Content Tour
-// ---------------------------------------------------------------------------
-
-@Composable
-private fun ScrollableTourSection() {
-    val scrollTourState = rememberWaypointState {
-        step(ScrollTarget.Top) {
-            title = "Top Section"
-            description = "This target is visible at the top of the scrollable area"
-            placement = TooltipPlacement.Bottom
-            highlightStyle = HighlightStyle.Spotlight(
-                shape = SpotlightShape.RoundedRect(12.dp),
-            )
-        }
-        step(ScrollTarget.Middle) {
-            title = "Middle Section"
-            description = "This target sits in the middle and may be partially visible"
-            placement = TooltipPlacement.Bottom
-            highlightStyle = HighlightStyle.Spotlight(
-                shape = SpotlightShape.RoundedRect(12.dp),
-            )
-        }
-        step(ScrollTarget.Bottom) {
-            title = "Bottom Section"
-            description = "This target is far below the fold and requires scrolling"
-            placement = TooltipPlacement.Top
-            highlightStyle = HighlightStyle.Spotlight(
-                shape = SpotlightShape.RoundedRect(12.dp),
-            )
-        }
-    }
-
-    SectionCard(
-        icon = Icons.AutoMirrored.Filled.ViewList,
-        title = "Scrollable Content Tour",
-        description = "A 3-step tour that auto-scrolls to targets placed at different scroll positions.",
-        buttonLabel = "Start Tour",
-        onClick = { scrollTourState.start() },
-    )
-
-    WaypointMaterial3Host(state = scrollTourState) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
-                .verticalScroll(rememberScrollState()),
-        ) {
-            ScrollableTargetCard(
-                title = "Target 1 - Top",
-                description = "This card is at the top of the scrollable area and should be visible immediately.",
-                modifier = Modifier.waypointTarget(scrollTourState, ScrollTarget.Top),
-            )
-
-            // Spacers to push middle and bottom targets further down
-            Spacer(modifier = Modifier.height(200.dp))
-
-            ScrollableTargetCard(
-                title = "Target 2 - Middle",
-                description = "This card is in the middle. You may need to scroll a bit to see it.",
-                modifier = Modifier.waypointTarget(scrollTourState, ScrollTarget.Middle),
-            )
-
-            Spacer(modifier = Modifier.height(300.dp))
-
-            ScrollableTargetCard(
-                title = "Target 3 - Bottom",
-                description = "This card is far below the fold. The tour auto-scrolls here.",
-                modifier = Modifier.waypointTarget(scrollTourState, ScrollTarget.Bottom),
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-        }
-    }
-}
-
-@Composable
-private fun ScrollableTargetCard(
-    title: String,
-    description: String,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
 }
 
 // ---------------------------------------------------------------------------

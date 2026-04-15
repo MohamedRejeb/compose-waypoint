@@ -51,7 +51,7 @@ fun DemoCard(
                 modifier = Modifier
                     .size(48.dp)
                     .background(
-                        color = item.iconTint.copy(alpha = 0.12f),
+                        color = item.iconTint.copy(alpha = 0.15f),
                         shape = CircleShape,
                     ),
             ) {

@@ -19,18 +19,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Circle
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.filled.Waves
+import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.Circle
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.LightMode
+import androidx.compose.material.icons.rounded.RadioButtonUnchecked
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.VisibilityOff
+import androidx.compose.material.icons.rounded.Waves
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -39,6 +39,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -77,7 +80,7 @@ private val highlightCards = listOf(
     HighlightCardData(
         title = "Spotlight (Circle)",
         description = "Classic circle cutout with dimmed overlay",
-        icon = Icons.Filled.Circle,
+        icon = Icons.Rounded.Circle,
         iconColor = Color(0xFF3B82F6),
         highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.Circle),
         tooltipTitle = "Circle Spotlight",
@@ -86,7 +89,7 @@ private val highlightCards = listOf(
     HighlightCardData(
         title = "Spotlight (RoundedRect)",
         description = "Rounded rectangle with custom padding",
-        icon = Icons.Filled.Star,
+        icon = Icons.Rounded.Star,
         iconColor = Color(0xFF8B5CF6),
         highlightStyle = HighlightStyle.Spotlight(
             shape = SpotlightShape.RoundedRect(12.dp),
@@ -98,7 +101,7 @@ private val highlightCards = listOf(
     HighlightCardData(
         title = "Spotlight (Pill)",
         description = "Capsule shape that hugs the target",
-        icon = Icons.Filled.FavoriteBorder,
+        icon = Icons.Rounded.FavoriteBorder,
         iconColor = Color(0xFFEC4899),
         highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.Pill),
         tooltipTitle = "Pill Spotlight",
@@ -107,7 +110,7 @@ private val highlightCards = listOf(
     HighlightCardData(
         title = "Pulse",
         description = "Animated breathing pulse around target",
-        icon = Icons.Filled.LightMode,
+        icon = Icons.Rounded.LightMode,
         iconColor = TealSecondary,
         highlightStyle = HighlightStyle.Pulse(
             color = TealSecondary,
@@ -120,7 +123,7 @@ private val highlightCards = listOf(
     HighlightCardData(
         title = "Border",
         description = "Static colored border outline",
-        icon = Icons.Filled.RadioButtonUnchecked,
+        icon = Icons.Rounded.RadioButtonUnchecked,
         iconColor = VioletPrimary,
         highlightStyle = HighlightStyle.Border(
             color = VioletPrimary,
@@ -133,7 +136,7 @@ private val highlightCards = listOf(
     HighlightCardData(
         title = "Ripple",
         description = "Expanding concentric rings",
-        icon = Icons.Filled.Waves,
+        icon = Icons.Rounded.Waves,
         iconColor = AmberTertiary,
         highlightStyle = HighlightStyle.Ripple(
             color = AmberTertiary,
@@ -145,7 +148,7 @@ private val highlightCards = listOf(
     HighlightCardData(
         title = "None",
         description = "Tooltip only, no visual highlight",
-        icon = Icons.Filled.VisibilityOff,
+        icon = Icons.Rounded.VisibilityOff,
         iconColor = Color(0xFF6B7280),
         highlightStyle = HighlightStyle.None,
         tooltipTitle = "No Highlight",
@@ -154,7 +157,7 @@ private val highlightCards = listOf(
     HighlightCardData(
         title = "Custom",
         description = "Fully custom composable",
-        icon = Icons.Filled.AutoAwesome,
+        icon = Icons.Rounded.AutoAwesome,
         iconColor = Color(0xFF7C3AED),
         highlightStyle = HighlightStyle.Custom { _, animatedBounds ->
             val infiniteTransition = rememberInfiniteTransition()
@@ -178,104 +181,128 @@ private val highlightCards = listOf(
     ),
 )
 
-private enum class GalleryTarget { Target }
+private enum class GalleryTarget {
+    SpotlightCircle, SpotlightRoundedRect, SpotlightPill,
+    Pulse, Border, Ripple, NoHighlight, Custom,
+}
 
 @Composable
 fun HighlightGalleryDemo(onBack: () -> Unit) {
+    // Track which card the user tapped "Try It" on — only that step is visible.
+    var activeHighlight by remember { mutableIntStateOf(-1) }
+    val targets = GalleryTarget.entries
+
+    val state = rememberWaypointState {
+        highlightCards.forEachIndexed { index, card ->
+            step(targets[index]) {
+                title = card.tooltipTitle
+                description = card.tooltipDescription
+                highlightStyle = card.highlightStyle
+                showIf { activeHighlight == index }
+            }
+        }
+    }
+
     DemoScaffold(
         title = "Highlight Styles",
-        description = "Visual showcase of every highlight style and shape",
+        description = "Tap \"Try It\" on any card to see the highlight in action",
         onBack = onBack,
         onStartTour = {},
         fabVisible = false,
     ) { padding ->
-        LazyVerticalStaggeredGrid(
-            columns = StaggeredGridCells.Adaptive(280.dp),
-            contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = 16.dp,
-                bottom = padding.calculateBottomPadding() + 16.dp,
-            ),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalItemSpacing = 12.dp,
-            modifier = Modifier.fillMaxSize(),
+        WaypointMaterial3Host(
+            state = state,
+            overlayClickBehavior = OverlayClickBehavior.Dismiss,
+            onTourComplete = { activeHighlight = -1 },
+            onTourCancel = { activeHighlight = -1 },
         ) {
-            items(highlightCards) { cardData ->
-                HighlightCard(cardData)
+            LazyVerticalStaggeredGrid(
+                columns = StaggeredGridCells.Adaptive(280.dp),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 16.dp,
+                    bottom = padding.calculateBottomPadding() + 16.dp,
+                ),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalItemSpacing = 12.dp,
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                itemsIndexed(highlightCards) { index, cardData ->
+                    HighlightCard(
+                        data = cardData,
+                        targetModifier = Modifier.waypointTarget(state, targets[index]),
+                        onTryIt = {
+                            activeHighlight = index
+                            state.resetCompletion()
+                            state.start()
+                        },
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun HighlightCard(data: HighlightCardData) {
-    val state = rememberWaypointState {
-        step(GalleryTarget.Target) {
-            title = data.tooltipTitle
-            description = data.tooltipDescription
-            highlightStyle = data.highlightStyle
-        }
-    }
-
-    WaypointMaterial3Host(
-        state = state,
-        overlayClickBehavior = OverlayClickBehavior.Dismiss,
+private fun HighlightCard(
+    data: HighlightCardData,
+    targetModifier: Modifier,
+    onTryIt: () -> Unit,
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            modifier = Modifier.fillMaxWidth(),
+        Column(
+            modifier = Modifier.padding(16.dp),
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
+            Text(
+                text = data.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = data.description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .then(targetModifier),
             ) {
-                Text(
-                    text = data.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = data.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .waypointTarget(state, GalleryTarget.Target),
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(data.iconColor.copy(alpha = 0.12f)),
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(CircleShape)
-                            .background(data.iconColor.copy(alpha = 0.12f)),
-                    ) {
-                        Icon(
-                            imageVector = data.icon,
-                            contentDescription = null,
-                            tint = data.iconColor,
-                            modifier = Modifier.size(28.dp),
-                        )
-                    }
+                    Icon(
+                        imageVector = data.icon,
+                        contentDescription = null,
+                        tint = data.iconColor,
+                        modifier = Modifier.size(28.dp),
+                    )
                 }
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                FilledTonalButton(
-                    onClick = { state.start() },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("Try It")
-                }
+            FilledTonalButton(
+                onClick = onTryIt,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Try It")
             }
         }
     }

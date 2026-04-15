@@ -17,6 +17,8 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.mohamedrejeb.waypoint.sample.catalog.CatalogScreen
+import com.mohamedrejeb.waypoint.sample.demos.discovery.FeatureDiscoveryDemo
+import com.mohamedrejeb.waypoint.sample.demos.onboarding.OnboardingDemo
 import com.mohamedrejeb.waypoint.sample.navigation.Route
 import com.mohamedrejeb.waypoint.sample.theme.SampleTheme
 
@@ -34,10 +36,10 @@ fun App() {
                     )
                 }
                 entry<Route.Onboarding> {
-                    DemoPlaceholder("Onboarding Tour") { backStack.removeLastOrNull() }
+                    OnboardingDemo(onBack = { backStack.removeLastOrNull() })
                 }
                 entry<Route.FeatureDiscovery> {
-                    DemoPlaceholder("Feature Discovery") { backStack.removeLastOrNull() }
+                    FeatureDiscoveryDemo(onBack = { backStack.removeLastOrNull() })
                 }
                 entry<Route.InteractiveTutorial> {
                     DemoPlaceholder("Interactive Tutorial") { backStack.removeLastOrNull() }

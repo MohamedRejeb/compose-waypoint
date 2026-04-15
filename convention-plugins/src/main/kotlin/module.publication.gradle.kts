@@ -11,7 +11,7 @@ mavenPublishing {
     pom {
         name.set("Waypoint")
         description.set("Compose Multiplatform product tour / showcase library")
-        url.set("https://github.com/MohamedRejeb/Waypoint")
+        url.set("https://github.com/MohamedRejeb/compose-waypoint")
 
         licenses {
             license {
@@ -30,12 +30,12 @@ mavenPublishing {
 
         issueManagement {
             system.set("Github")
-            url.set("https://github.com/MohamedRejeb/Waypoint/issues")
+            url.set("https://github.com/MohamedRejeb/compose-waypoint/issues")
         }
 
         scm {
-            connection.set("https://github.com/MohamedRejeb/Waypoint.git")
-            url.set("https://github.com/MohamedRejeb/Waypoint")
+            connection.set("https://github.com/MohamedRejeb/compose-waypoint.git")
+            url.set("https://github.com/MohamedRejeb/compose-waypoint")
         }
     }
 }

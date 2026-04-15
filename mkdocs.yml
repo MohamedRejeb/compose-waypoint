@@ -1,9 +1,9 @@
 site_name: Waypoint
 site_description: Compose Multiplatform product tour and showcase library
 site_author: Mohamed Ben Rejeb
-site_url: https://mohamedrejeb.github.io/Waypoint/
-repo_url: https://github.com/MohamedRejeb/Waypoint
-repo_name: MohamedRejeb/Waypoint
+site_url: https://mohamedrejeb.github.io/compose-waypoint/
+repo_url: https://github.com/MohamedRejeb/compose-waypoint
+repo_name: MohamedRejeb/compose-waypoint
 
 theme:
   name: material

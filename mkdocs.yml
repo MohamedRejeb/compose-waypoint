@@ -1,0 +1,68 @@
+site_name: Waypoint
+site_description: Compose Multiplatform product tour and showcase library
+site_author: Mohamed Ben Rejeb
+site_url: https://mohamedrejeb.github.io/Waypoint/
+repo_url: https://github.com/MohamedRejeb/Waypoint
+repo_name: MohamedRejeb/Waypoint
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+
+extra:
+  waypoint_version: '0.1.0'
+
+plugins:
+  - search
+  - macros
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - Quick Start: getting-started.md
+  - Guides:
+    - Highlight Styles: guides/highlight-styles.md
+    - Custom Tooltips: guides/custom-tooltips.md
+    - Theming: guides/theming.md
+    - Analytics: guides/analytics.md
+    - Persistence: guides/persistence.md
+  - API Reference:
+    - WaypointState: api/waypoint-state.md
+    - WaypointHost: api/waypoint-host.md
+    - Material3: api/material3.md

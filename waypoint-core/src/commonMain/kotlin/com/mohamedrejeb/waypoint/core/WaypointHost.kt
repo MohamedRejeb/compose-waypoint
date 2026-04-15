@@ -106,7 +106,14 @@ public fun <K> WaypointHost(
         }
     }
 
-    val shouldShowHighlight = state.isActive && !state.isPaused && targetBounds != null
+    // Double-check visibility: the modifier unregisters scrolled-out targets,
+    // but as a safety net also verify bounds are within the host's dimensions.
+    val hostSize = state.hostCoordinates?.size
+    val isTargetVisible = targetBounds != null && (hostSize == null ||
+        (targetBounds.bottom > 0f && targetBounds.top < hostSize.height.toFloat() &&
+         targetBounds.right > 0f && targetBounds.left < hostSize.width.toFloat()))
+
+    val shouldShowHighlight = state.isActive && !state.isPaused && isTargetVisible
     val currentStep = state.currentStep
 
     // Keyboard navigation: focusable host with onPreviewKeyEvent.
@@ -161,7 +168,7 @@ public fun <K> WaypointHost(
         // 1. Screen content
         content()
 
-        // 2. Highlight layer + Tooltip
+        // 2. Highlight layer (only when target is visible on screen)
         if (shouldShowHighlight && currentStep != null) {
             val step = currentStep
             val resolvedStyle = resolveHighlightStyle(step.highlightStyle, highlightStyle)
@@ -186,12 +193,10 @@ public fun <K> WaypointHost(
                 }
             }
 
-            // Resolve additional target bounds for multi-element highlight
             val additionalBounds = step.additionalTargets.mapNotNull { key ->
                 state.targetCoordinates[key]
             }
 
-            // Dispatch highlight rendering
             when (resolvedStyle) {
                 is HighlightStyle.Spotlight -> {
                     SpotlightOverlay(
@@ -232,9 +237,7 @@ public fun <K> WaypointHost(
                     )
                 }
 
-                is HighlightStyle.None -> {
-                    // No highlight layer
-                }
+                is HighlightStyle.None -> {}
 
                 is HighlightStyle.Custom -> {
                     resolvedStyle.content(
@@ -243,8 +246,14 @@ public fun <K> WaypointHost(
                     )
                 }
             }
+        }
 
-            // 3. Tooltip (always shown regardless of highlight style)
+        // 3. Tooltip + navigation (always shown while tour is active, even if
+        //    target is scrolled off-screen -- keeps Next/Skip buttons accessible)
+        val shouldShowTooltip = state.isActive && !state.isPaused
+        if (shouldShowTooltip && currentStep != null) {
+            val step = currentStep
+
             val stepScope = StepScopeImpl(
                 currentStepIndex = state.currentStepIndex,
                 totalSteps = state.steps.size,
@@ -268,20 +277,16 @@ public fun <K> WaypointHost(
                 },
             )
 
-            // Tooltip uses raw (snapped) bounds, not the animated bounds.
-            // The spotlight animates its cutout position smoothly, but the tooltip
-            // should snap to the new target immediately to avoid drifting through
-            // intermediate positions during the 400ms transition.
-            //
-            // The Popup system positions relative to the window, so we need
-            // window-relative bounds (not host-relative). Convert by adding
-            // the host's position in the window.
+            // Tooltip uses raw (snapped) bounds for positioning.
+            // When target is off-screen, use the last known animated bounds
+            // so the tooltip stays in a reasonable position.
+            val rawBounds = targetBounds ?: animatedBounds.value
             val hostCoords = state.hostCoordinates
             val tooltipTargetBounds = if (hostCoords != null && hostCoords.isAttached) {
                 val hostWindowPos = hostCoords.positionInWindow()
-                targetBounds.translate(hostWindowPos)
+                rawBounds.translate(hostWindowPos)
             } else {
-                targetBounds
+                rawBounds
             }
 
             TooltipPopup(
@@ -300,15 +305,10 @@ public fun <K> WaypointHost(
             }
 
             // 4. Event-driven progression trigger
-            // When a step uses a Custom trigger, launch a coroutine that
-            // awaits the trigger condition and auto-advances when it returns.
-            // The coroutine is cancelled when the step changes or tour stops
-            // (because this composable leaves composition).
             val trigger = step.advanceOn
             if (trigger is WaypointTrigger.Custom) {
                 LaunchedEffect(state.currentStepIndex) {
                     trigger.await()
-                    // Trigger completed -- advance to next step
                     val wasLastStep = state.currentStepIndex == state.steps.lastIndex
                     state.next()
                     if (wasLastStep && !state.isActive) {

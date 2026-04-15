@@ -44,17 +44,27 @@ public fun <K> Modifier.waypointTarget(
             if (!coordinates.isAttached) return@onGloballyPositioned
 
             val hostCoords = state.hostCoordinates
-            val bounds = if (hostCoords != null && hostCoords.isAttached) {
-                // Compute bounds relative to the WaypointHost Box.
-                // This works correctly inside Dialogs, Sheets, and nested layouts.
-                hostCoords.localBoundingBoxOf(coordinates)
-            } else {
-                // Fallback: no host coordinates yet (first frame).
-                coordinates.boundsInRoot()
-            }
+            if (hostCoords != null && hostCoords.isAttached) {
+                val bounds = hostCoords.localBoundingBoxOf(coordinates)
 
-            if (bounds != Rect.Zero) {
-                state.registerTarget(currentKey, bounds)
+                // Detect if the target is scrolled out of the host's visible area.
+                // Compare the target's boundsInRoot with the host's boundsInRoot.
+                // If they don't overlap, the target is clipped by a scroll container.
+                val targetInRoot = coordinates.boundsInRoot()
+                val hostInRoot = hostCoords.boundsInRoot()
+                val isVisible = targetInRoot.overlaps(hostInRoot) &&
+                    targetInRoot.width > 1f && targetInRoot.height > 1f
+
+                if (isVisible && bounds != Rect.Zero) {
+                    state.registerTarget(currentKey, bounds)
+                } else {
+                    state.targetCoordinates.remove(currentKey)
+                }
+            } else {
+                val bounds = coordinates.boundsInRoot()
+                if (bounds != Rect.Zero) {
+                    state.registerTarget(currentKey, bounds)
+                }
             }
         }
 }

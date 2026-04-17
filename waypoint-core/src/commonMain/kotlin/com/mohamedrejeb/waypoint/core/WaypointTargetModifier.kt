@@ -18,8 +18,11 @@ import androidx.compose.ui.layout.onGloballyPositioned
  * A [BringIntoViewRequester] is automatically attached so the tour can
  * scroll this target into view before showing the step.
  *
- * Coordinates are computed relative to the [WaypointHost] Box (not the window
- * root), so the spotlight renders correctly even inside Dialogs and Sheets.
+ * Bounds are recorded in the coordinate space of the nearest [WaypointHost]
+ * (or [WaypointOverlayHost]) in the composition. For targets that live in a
+ * different composition tree (e.g. inside a Dialog or Sheet), place a
+ * [WaypointOverlayHost] that shares the same [WaypointState] inside that tree
+ * so its targets register against the correct host.
  *
  * @param state the [WaypointState] managing the tour
  * @param key the target key identifying this composable in the step list
@@ -29,6 +32,7 @@ public fun <K> Modifier.waypointTarget(
     key: K,
 ): Modifier = composed {
     val currentKey = remember(key) { key }
+    val hostId = LocalWaypointHostId.current
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
 
     DisposableEffect(currentKey) {
@@ -42,29 +46,34 @@ public fun <K> Modifier.waypointTarget(
         .bringIntoViewRequester(bringIntoViewRequester)
         .onGloballyPositioned { coordinates ->
             if (!coordinates.isAttached) return@onGloballyPositioned
+            // No host in scope — target can't be registered anywhere useful.
+            if (hostId == null) return@onGloballyPositioned
 
-            val hostCoords = state.hostCoordinates
-            if (hostCoords != null && hostCoords.isAttached) {
-                val bounds = hostCoords.localBoundingBoxOf(coordinates)
+            val hostCoords = state.hostCoordinatesMap[hostId] ?: return@onGloballyPositioned
+            if (!hostCoords.isAttached) return@onGloballyPositioned
 
-                // Detect if the target is scrolled out of the host's visible area.
-                // Compare the target's boundsInRoot with the host's boundsInRoot.
-                // If they don't overlap, the target is clipped by a scroll container.
-                val targetInRoot = coordinates.boundsInRoot()
-                val hostInRoot = hostCoords.boundsInRoot()
-                val isVisible = targetInRoot.overlaps(hostInRoot) &&
-                    targetInRoot.width > 1f && targetInRoot.height > 1f
+            val bounds = try {
+                hostCoords.localBoundingBoxOf(coordinates)
+            } catch (_: IllegalArgumentException) {
+                // Target is in a different hierarchy than this host. Shouldn't
+                // happen with correct CompositionLocal wiring, but guard anyway.
+                return@onGloballyPositioned
+            }
 
-                if (isVisible && bounds != Rect.Zero) {
-                    state.registerTarget(currentKey, bounds)
-                } else {
-                    state.targetCoordinates.remove(currentKey)
-                }
+            // Scroll-out-of-view detection: use root-space bounds intersection
+            // so we can tell when a target has been scrolled off the host.
+            val targetInRoot = coordinates.boundsInRoot()
+            val hostInRoot = hostCoords.boundsInRoot()
+            val isVisible = targetInRoot.overlaps(hostInRoot) &&
+                bounds.width > 1f && bounds.height > 1f
+
+            if (isVisible && bounds != Rect.Zero) {
+                state.registerTarget(currentKey, hostId, bounds)
             } else {
-                val bounds = coordinates.boundsInRoot()
-                if (bounds != Rect.Zero) {
-                    state.registerTarget(currentKey, bounds)
-                }
+                // Scrolled out of view (or not yet laid out): clear bounds but
+                // keep the host association so the tour still knows which host
+                // owns this step until the composable is actually disposed.
+                state.clearTargetBounds(currentKey)
             }
         }
 }

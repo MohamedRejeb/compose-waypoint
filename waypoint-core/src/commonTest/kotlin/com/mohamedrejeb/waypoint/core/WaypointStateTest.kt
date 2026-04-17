@@ -502,27 +502,30 @@ class WaypointStateTest {
     fun `registerTarget stores bounds`() {
         val state = WaypointState(steps = threeSteps())
         val bounds = Rect(10f, 20f, 100f, 80f)
+        val host = Any()
 
-        state.registerTarget("a", bounds)
+        state.registerTarget("a", host, bounds)
 
         assertEquals(bounds, state.targetCoordinates["a"])
+        assertEquals(host, state.targetHostIds["a"])
     }
 
     @Test
     fun `unregisterTarget removes bounds`() {
         val state = WaypointState(steps = threeSteps())
-        state.registerTarget("a", Rect(10f, 20f, 100f, 80f))
+        state.registerTarget("a", Any(), Rect(10f, 20f, 100f, 80f))
 
         state.unregisterTarget("a")
 
         assertNull(state.targetCoordinates["a"])
+        assertNull(state.targetHostIds["a"])
     }
 
     @Test
     fun `currentTargetBounds returns bounds for active step`() {
         val state = WaypointState(steps = threeSteps())
         val bounds = Rect(10f, 20f, 100f, 80f)
-        state.registerTarget("a", bounds)
+        state.registerTarget("a", Any(), bounds)
         state.start()
 
         assertEquals(bounds, state.currentTargetBounds)
@@ -539,7 +542,7 @@ class WaypointStateTest {
     @Test
     fun `currentTargetBounds is null when inactive`() {
         val state = WaypointState(steps = threeSteps())
-        state.registerTarget("a", Rect(10f, 20f, 100f, 80f))
+        state.registerTarget("a", Any(), Rect(10f, 20f, 100f, 80f))
 
         assertNull(state.currentTargetBounds)
     }
@@ -549,8 +552,9 @@ class WaypointStateTest {
         val state = WaypointState(steps = threeSteps())
         val boundsA = Rect(10f, 20f, 100f, 80f)
         val boundsB = Rect(200f, 300f, 400f, 500f)
-        state.registerTarget("a", boundsA)
-        state.registerTarget("b", boundsB)
+        val host = Any()
+        state.registerTarget("a", host, boundsA)
+        state.registerTarget("b", host, boundsB)
         state.start()
 
         assertEquals(boundsA, state.currentTargetBounds)
@@ -575,7 +579,7 @@ class WaypointStateTest {
     @Test
     fun `unregisterTarget also removes BringIntoViewRequester`() {
         val state = WaypointState(steps = threeSteps())
-        state.registerTarget("a", Rect(10f, 20f, 100f, 80f))
+        state.registerTarget("a", Any(), Rect(10f, 20f, 100f, 80f))
         state.registerBringIntoViewRequester("a", BringIntoViewRequester())
 
         state.unregisterTarget("a")
@@ -587,7 +591,7 @@ class WaypointStateTest {
     @Test
     fun `unregisterTarget is safe when no requester registered`() {
         val state = WaypointState(steps = threeSteps())
-        state.registerTarget("a", Rect(10f, 20f, 100f, 80f))
+        state.registerTarget("a", Any(), Rect(10f, 20f, 100f, 80f))
 
         state.unregisterTarget("a") // should not crash
 

@@ -48,18 +48,28 @@ public class WaypointState<K>(
     public val currentStep: WaypointStep<K>?
         get() = if (currentStepIndex in steps.indices) steps[currentStepIndex] else null
 
-    /** Registered target coordinates, keyed by target key */
+    /**
+     * Registered target coordinates, keyed by target key. Bounds are expressed in the
+     * coordinate space of the host that owns the target (see [targetHostIds]).
+     */
     internal val targetCoordinates = mutableStateMapOf<K, Rect>()
 
     /** BringIntoViewRequesters for auto-scrolling targets into view */
     internal val bringIntoViewRequesters = mutableMapOf<K, BringIntoViewRequester>()
 
     /**
-     * LayoutCoordinates of the WaypointHost Box.
-     * Used to compute target bounds relative to the host rather than the window root,
-     * which fixes coordinate misalignment when the host is inside a Dialog or Sheet.
+     * LayoutCoordinates for each registered host, keyed by the host's unique id.
+     * A single tour can span multiple hosts (main screen + Dialog + Sheet); each
+     * host resolves its own targets against its own coordinates.
      */
-    internal var hostCoordinates: LayoutCoordinates? = null
+    internal val hostCoordinatesMap = mutableStateMapOf<Any, LayoutCoordinates>()
+
+    /** Which host each registered target belongs to. */
+    internal val targetHostIds = mutableStateMapOf<K, Any>()
+
+    /** The host id that owns the current step's target, or null if unregistered. */
+    internal val currentTargetHostId: Any?
+        get() = currentStep?.let { targetHostIds[it.targetKey] }
 
     internal fun setStepReady(ready: Boolean) {
         isStepReady = ready
@@ -175,18 +185,48 @@ public class WaypointState<K>(
         requester.bringIntoView()
     }
 
+    // -- Host registration (called by WaypointHost / WaypointOverlayHost) --
+
+    internal fun registerHost(hostId: Any, coords: LayoutCoordinates) {
+        hostCoordinatesMap[hostId] = coords
+    }
+
+    internal fun unregisterHost(hostId: Any) {
+        hostCoordinatesMap.remove(hostId)
+        // Clean up any targets still associated with this host in case the host
+        // was disposed before its children's DisposableEffect cleanup ran.
+        val orphaned = targetHostIds.entries
+            .filter { it.value == hostId }
+            .map { it.key }
+        orphaned.forEach { key ->
+            targetCoordinates.remove(key)
+            targetHostIds.remove(key)
+        }
+    }
+
     // -- Target registration (called by Modifier.waypointTarget) --
 
-    internal fun registerTarget(key: K, bounds: Rect) {
+    internal fun registerTarget(key: K, hostId: Any, bounds: Rect) {
         targetCoordinates[key] = bounds
+        targetHostIds[key] = hostId
     }
 
     internal fun registerBringIntoViewRequester(key: K, requester: BringIntoViewRequester) {
         bringIntoViewRequesters[key] = requester
     }
 
+    /**
+     * Clears the bounds for a target without dissociating it from its host.
+     * Use when a target scrolls out of view but its composable is still in the
+     * composition — the next onGloballyPositioned callback will re-register.
+     */
+    internal fun clearTargetBounds(key: K) {
+        targetCoordinates.remove(key)
+    }
+
     internal fun unregisterTarget(key: K) {
         targetCoordinates.remove(key)
+        targetHostIds.remove(key)
         bringIntoViewRequesters.remove(key)
     }
 
@@ -229,8 +269,13 @@ public class WaypointState<K>(
         val enteringStep = currentStep
         enteringStep?.onEnter?.invoke()
         analytics?.onStepViewed(tourId, newIndex, enteringStep?.targetKey)
-        // Gate highlight/tooltip if step has beforeShow
-        if (steps[newIndex].beforeShow != null) {
+        // Gate highlight/tooltip only if the step has a beforeShow AND the new
+        // target isn't already registered. When the target is already laid out
+        // (e.g., navigating between two steps inside the same open dialog) we
+        // keep isStepReady true so the highlight animates smoothly to the new
+        // position instead of flickering through a hidden frame.
+        val targetRegistered = targetCoordinates[steps[newIndex].targetKey] != null
+        if (steps[newIndex].beforeShow != null && !targetRegistered) {
             isStepReady = false
         }
     }

@@ -25,6 +25,7 @@ import com.mohamedrejeb.waypoint.sample.demos.onboarding.OnboardingDemo
 import com.mohamedrejeb.waypoint.sample.demos.theming.ThemingPlaygroundDemo
 import com.mohamedrejeb.waypoint.sample.demos.hints.HintsDemo
 import com.mohamedrejeb.waypoint.sample.demos.modals.ModalToursDemo
+import com.mohamedrejeb.waypoint.sample.demos.sequences.TourSequencesDemo
 import com.mohamedrejeb.waypoint.sample.demos.tutorial.InteractiveTutorialDemo
 import com.mohamedrejeb.waypoint.sample.navigation.Route
 import com.mohamedrejeb.waypoint.sample.theme.SampleTheme
@@ -68,6 +69,9 @@ fun App() {
                 }
                 entry<Route.Hints> {
                     HintsDemo(onBack = { backStack.removeLastOrNull() })
+                }
+                entry<Route.TourSequences> {
+                    TourSequencesDemo(onBack = { backStack.removeLastOrNull() })
                 }
             },
         )

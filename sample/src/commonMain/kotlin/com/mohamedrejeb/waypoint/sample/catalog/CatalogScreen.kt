@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Lightbulb
 import androidx.compose.material.icons.rounded.PlayArrow
@@ -95,6 +96,13 @@ private val demoItems = listOf(
         iconTint = Amber,
         tags = listOf("Hints", "Beacon", "Persistence"),
     ),
+    DemoItem(
+        title = "Tour Sequences",
+        description = "Chain multiple tours together with shared persistence and auto-advance.",
+        icon = Icons.AutoMirrored.Rounded.List,
+        iconTint = Violet,
+        tags = listOf("Sequence", "Chain", "Persistence"),
+    ),
 )
 
 private val demoRoutes: List<Route> = listOf(
@@ -107,6 +115,7 @@ private val demoRoutes: List<Route> = listOf(
     Route.AnalyticsDashboard,
     Route.ModalTours,
     Route.Hints,
+    Route.TourSequences,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

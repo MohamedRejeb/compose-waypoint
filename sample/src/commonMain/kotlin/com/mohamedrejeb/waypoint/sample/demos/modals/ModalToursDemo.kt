@@ -34,6 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -56,11 +57,13 @@ import com.mohamedrejeb.waypoint.core.TooltipPlacement
 import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
+import com.mohamedrejeb.waypoint.material3.WaypointMaterial3OverlayHost
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
 
 // -- Dialog tour targets --
 
 private enum class DialogTarget {
+    OpenButton,
     Notifications,
     Theme,
 }
@@ -68,6 +71,7 @@ private enum class DialogTarget {
 // -- Bottom sheet tour targets --
 
 private enum class SheetTarget {
+    OpenButton,
     ShareItem,
     EditItem,
 }
@@ -76,7 +80,7 @@ private enum class SheetTarget {
 fun ModalToursDemo(onBack: () -> Unit) {
     DemoScaffold(
         title = "Modal Tours",
-        description = "Tours inside dialogs and bottom sheets — the overlay and tooltip stay within the modal bounds",
+        description = "Cross-layer tours — the overlay renders fullscreen above dialogs and sheets",
         onBack = onBack,
         onStartTour = {},
         fabVisible = false,
@@ -104,22 +108,13 @@ fun ModalToursDemo(onBack: () -> Unit) {
 private fun DialogTourSection() {
     var showDialog by remember { mutableStateOf(false) }
 
-    SectionCard(
-        icon = Icons.Rounded.ChatBubble,
-        title = "Dialog Tour",
-        description = "A 2-step tour inside a Dialog targeting a notifications switch and a theme toggle.",
-        buttonLabel = "Open Dialog",
-        onClick = { showDialog = true },
-    )
-
-    if (showDialog) {
-        DialogTourContent(onDismiss = { showDialog = false })
-    }
-}
-
-@Composable
-private fun DialogTourContent(onDismiss: () -> Unit) {
     val state = rememberWaypointState {
+        step(DialogTarget.OpenButton) {
+            title = "Open Settings"
+            description = "Tap to open the settings dialog"
+            placement = TooltipPlacement.Bottom
+            onEnter { showDialog = false }
+        }
         step(DialogTarget.Notifications) {
             title = "Notifications"
             description = "Toggle push notifications on or off"
@@ -127,6 +122,7 @@ private fun DialogTourContent(onDismiss: () -> Unit) {
             highlightStyle = HighlightStyle.Spotlight(
                 shape = SpotlightShape.RoundedRect(8.dp),
             )
+            beforeShow { showDialog = true }
         }
         step(DialogTarget.Theme) {
             title = "Theme"
@@ -135,11 +131,38 @@ private fun DialogTourContent(onDismiss: () -> Unit) {
             highlightStyle = HighlightStyle.Spotlight(
                 shape = SpotlightShape.RoundedRect(8.dp),
             )
+            beforeShow { showDialog = true }
         }
     }
 
+    WaypointMaterial3Host(state = state) {
+        SectionCard(
+            icon = Icons.Rounded.ChatBubble,
+            title = "Dialog Tour",
+            description = "A cross-layer tour: step 1 highlights the button, steps 2-3 highlight elements inside a Dialog.",
+            primaryButtonLabel = "Open Dialog",
+            onPrimaryClick = { showDialog = true },
+            secondaryButtonLabel = "Start Tour",
+            onSecondaryClick = { state.start() },
+            primaryButtonModifier = Modifier.waypointTarget(state, DialogTarget.OpenButton),
+        )
+
+        if (showDialog) {
+            DialogContent(
+                state = state,
+                onDismiss = { showDialog = false },
+            )
+        }
+    }
+}
+
+@Composable
+private fun DialogContent(
+    state: com.mohamedrejeb.waypoint.core.WaypointState<DialogTarget>,
+    onDismiss: () -> Unit,
+) {
     Dialog(onDismissRequest = onDismiss) {
-        WaypointMaterial3Host(state = state) {
+        WaypointMaterial3OverlayHost(state = state) {
             Card(
                 shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -236,16 +259,11 @@ private fun DialogTourContent(onDismiss: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    TextButton(
+                        onClick = onDismiss,
                         modifier = Modifier.align(Alignment.End),
                     ) {
-                        TextButton(onClick = onDismiss) {
-                            Text("Close")
-                        }
-                        Button(onClick = { state.start() }) {
-                            Text("Start Tour")
-                        }
+                        Text("Close")
                     }
                 }
             }
@@ -262,83 +280,85 @@ private fun DialogTourContent(onDismiss: () -> Unit) {
 private fun BottomSheetTourSection() {
     var showSheet by remember { mutableStateOf(false) }
 
-    SectionCard(
-        icon = Icons.Rounded.VerticalSplit,
-        title = "Bottom Sheet Tour",
-        description = "A 2-step tour inside a ModalBottomSheet targeting share and edit actions.",
-        buttonLabel = "Open Sheet",
-        onClick = { showSheet = true },
-    )
-
-    if (showSheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-        val tourState = rememberWaypointState {
-            step(SheetTarget.ShareItem) {
-                title = "Share"
-                description = "Share this item with friends or colleagues"
-                placement = TooltipPlacement.Top
-                highlightStyle = HighlightStyle.Spotlight(
-                    shape = SpotlightShape.RoundedRect(8.dp),
-                )
-            }
-            step(SheetTarget.EditItem) {
-                title = "Edit"
-                description = "Modify item details or content"
-                placement = TooltipPlacement.Top
-                highlightStyle = HighlightStyle.Spotlight(
-                    shape = SpotlightShape.RoundedRect(8.dp),
-                )
-            }
+    val state = rememberWaypointState {
+        step(SheetTarget.OpenButton) {
+            title = "Open Actions"
+            description = "Tap to open the actions sheet"
+            placement = TooltipPlacement.Bottom
+            onEnter { showSheet = false }
         }
+        step(SheetTarget.ShareItem) {
+            title = "Share"
+            description = "Share this item with friends or colleagues"
+            placement = TooltipPlacement.Top
+            highlightStyle = HighlightStyle.Spotlight(
+                shape = SpotlightShape.RoundedRect(8.dp),
+            )
+            beforeShow { showSheet = true }
+        }
+        step(SheetTarget.EditItem) {
+            title = "Edit"
+            description = "Modify item details or content"
+            placement = TooltipPlacement.Top
+            highlightStyle = HighlightStyle.Spotlight(
+                shape = SpotlightShape.RoundedRect(8.dp),
+            )
+            beforeShow { showSheet = true }
+        }
+    }
 
-        ModalBottomSheet(
-            onDismissRequest = { showSheet = false },
-            sheetState = sheetState,
-        ) {
-            WaypointMaterial3Host(state = tourState) {
-                Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                    Text(
-                        text = "Actions",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    )
+    WaypointMaterial3Host(state = state) {
+        SectionCard(
+            icon = Icons.Rounded.VerticalSplit,
+            title = "Bottom Sheet Tour",
+            description = "A cross-layer tour: step 1 highlights the button, steps 2-3 highlight elements inside a ModalBottomSheet.",
+            primaryButtonLabel = "Open Sheet",
+            onPrimaryClick = { showSheet = true },
+            secondaryButtonLabel = "Start Tour",
+            onSecondaryClick = { state.start() },
+            primaryButtonModifier = Modifier.waypointTarget(state, SheetTarget.OpenButton),
+        )
 
-                    HorizontalDivider()
+        if (showSheet) {
+            val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-                    SheetActionItem(
-                        icon = Icons.Rounded.Share,
-                        label = "Share",
-                        modifier = Modifier.waypointTarget(tourState, SheetTarget.ShareItem),
-                    )
-                    SheetActionItem(
-                        icon = Icons.Rounded.Edit,
-                        label = "Edit",
-                        modifier = Modifier.waypointTarget(tourState, SheetTarget.EditItem),
-                    )
-                    SheetActionItem(
-                        icon = Icons.Rounded.Star,
-                        label = "Favorite",
-                    )
-                    SheetActionItem(
-                        icon = Icons.Rounded.Email,
-                        label = "Send via Email",
-                    )
-                    SheetActionItem(
-                        icon = Icons.Rounded.Delete,
-                        label = "Delete",
-                    )
+            ModalBottomSheet(
+                onDismissRequest = { showSheet = false },
+                sheetState = sheetState,
+            ) {
+                WaypointMaterial3OverlayHost(state = state) {
+                    Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                        Text(
+                            text = "Actions",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                        HorizontalDivider()
 
-                    Button(
-                        onClick = { tourState.start() },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                    ) {
-                        Text("Start Tour")
+                        SheetActionItem(
+                            icon = Icons.Rounded.Share,
+                            label = "Share",
+                            modifier = Modifier.waypointTarget(state, SheetTarget.ShareItem),
+                        )
+                        SheetActionItem(
+                            icon = Icons.Rounded.Edit,
+                            label = "Edit",
+                            modifier = Modifier.waypointTarget(state, SheetTarget.EditItem),
+                        )
+                        SheetActionItem(
+                            icon = Icons.Rounded.Star,
+                            label = "Favorite",
+                        )
+                        SheetActionItem(
+                            icon = Icons.Rounded.Email,
+                            label = "Send via Email",
+                        )
+                        SheetActionItem(
+                            icon = Icons.Rounded.Delete,
+                            label = "Delete",
+                        )
                     }
                 }
             }
@@ -374,8 +394,11 @@ private fun SectionCard(
     icon: ImageVector,
     title: String,
     description: String,
-    buttonLabel: String,
-    onClick: () -> Unit,
+    primaryButtonLabel: String,
+    onPrimaryClick: () -> Unit,
+    secondaryButtonLabel: String,
+    onSecondaryClick: () -> Unit,
+    primaryButtonModifier: Modifier = Modifier,
 ) {
     OutlinedCard(
         shape = RoundedCornerShape(16.dp),
@@ -412,11 +435,19 @@ private fun SectionCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Button(
-                onClick = onClick,
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.align(Alignment.End),
             ) {
-                Text(buttonLabel)
+                OutlinedButton(
+                    onClick = onPrimaryClick,
+                    modifier = primaryButtonModifier,
+                ) {
+                    Text(primaryButtonLabel)
+                }
+                Button(onClick = onSecondaryClick) {
+                    Text(secondaryButtonLabel)
+                }
             }
         }
     }

@@ -18,12 +18,17 @@ public sealed interface HighlightStyle {
     /**
      * Dimmed overlay with a transparent cutout around the target.
      * This is the classic product-tour look and the default.
+     *
+     * @param effect optional decoration applied around or instead of the
+     *   hard-edge cutout (glow, soft edge, or custom draw). Defaults to
+     *   [SpotlightEffect.None], preserving the classic hard cutout.
      */
     public data class Spotlight(
         val shape: SpotlightShape = SpotlightShape.Default,
         val padding: SpotlightPadding = SpotlightPadding.Default,
         val overlayColor: Color = Color.Black,
         val overlayAlpha: Float = 0.6f,
+        val effect: SpotlightEffect = SpotlightEffect.None,
     ) : HighlightStyle
 
     /**

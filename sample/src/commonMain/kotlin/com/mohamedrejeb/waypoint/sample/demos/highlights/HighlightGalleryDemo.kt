@@ -24,6 +24,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.AutoFixHigh
+import androidx.compose.material.icons.rounded.BlurOn
+import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.Circle
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.LightMode
@@ -55,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.waypoint.core.HighlightStyle
 import com.mohamedrejeb.waypoint.core.OverlayClickBehavior
+import com.mohamedrejeb.waypoint.core.SpotlightEffect
 import com.mohamedrejeb.waypoint.core.SpotlightPadding
 import com.mohamedrejeb.waypoint.core.SpotlightShape
 import com.mohamedrejeb.waypoint.core.rememberWaypointState
@@ -179,11 +183,63 @@ private val highlightCards = listOf(
         tooltipTitle = "Custom Highlight",
         tooltipDescription = "A fully custom animated glowing ring.",
     ),
+    HighlightCardData(
+        title = "Spotlight + Glow",
+        description = "Colored halo around the cutout edge",
+        icon = Icons.Rounded.Bolt,
+        iconColor = AmberTertiary,
+        highlightStyle = HighlightStyle.Spotlight(
+            shape = SpotlightShape.Circle,
+            padding = SpotlightPadding(12.dp),
+            effect = SpotlightEffect.Glow(
+                color = AmberTertiary,
+                radius = 32.dp,
+                alpha = 0.7f,
+            ),
+        ),
+        tooltipTitle = "Glow Effect",
+        tooltipDescription = "The cutout is surrounded by a soft colored halo.",
+    ),
+    HighlightCardData(
+        title = "Spotlight + SoftEdge",
+        description = "Gradient fade between cutout and scrim",
+        icon = Icons.Rounded.BlurOn,
+        iconColor = Color(0xFF38BDF8),
+        highlightStyle = HighlightStyle.Spotlight(
+            shape = SpotlightShape.RoundedRect(16.dp),
+            padding = SpotlightPadding(8.dp),
+            effect = SpotlightEffect.SoftEdge(fadeWidth = 24.dp),
+        ),
+        tooltipTitle = "Soft Edge",
+        tooltipDescription = "The cutout edge fades into the scrim instead of a hard line.",
+    ),
+    HighlightCardData(
+        title = "Spotlight + Custom FX",
+        description = "Animated dashed ring around cutout",
+        icon = Icons.Rounded.AutoFixHigh,
+        iconColor = VioletPrimary,
+        highlightStyle = HighlightStyle.Spotlight(
+            shape = SpotlightShape.RoundedRect(12.dp),
+            padding = SpotlightPadding(10.dp),
+            effect = SpotlightEffect.Custom { bounds ->
+                drawRoundRect(
+                    color = Color.White.copy(alpha = 0.9f),
+                    topLeft = bounds.topLeft - Offset(6f, 6f),
+                    size = Size(bounds.width + 12f, bounds.height + 12f),
+                    cornerRadius = CornerRadius(18f),
+                    style = Stroke(width = 3f),
+                )
+            },
+        ),
+        tooltipTitle = "Custom Spotlight FX",
+        tooltipDescription = "Draw anything around the cutout via SpotlightEffect.Custom.",
+    ),
 )
 
 private enum class GalleryTarget {
     SpotlightCircle, SpotlightRoundedRect, SpotlightPill,
     Pulse, Border, Ripple, NoHighlight, Custom,
+    Glow, SoftEdge, CustomFx,
 }
 
 @Composable

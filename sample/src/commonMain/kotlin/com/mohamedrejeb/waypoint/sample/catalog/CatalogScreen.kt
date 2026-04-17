@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Lightbulb
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Star
@@ -87,6 +88,13 @@ private val demoItems = listOf(
         iconTint = Teal,
         tags = listOf("Dialog", "Sheet", "Auto-Scroll"),
     ),
+    DemoItem(
+        title = "Persistent Hints",
+        description = "Ambient beacons on UI elements with dismiss-and-persist behavior.",
+        icon = Icons.Rounded.Lightbulb,
+        iconTint = Amber,
+        tags = listOf("Hints", "Beacon", "Persistence"),
+    ),
 )
 
 private val demoRoutes: List<Route> = listOf(
@@ -98,6 +106,7 @@ private val demoRoutes: List<Route> = listOf(
     Route.ThemingPlayground,
     Route.AnalyticsDashboard,
     Route.ModalTours,
+    Route.Hints,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

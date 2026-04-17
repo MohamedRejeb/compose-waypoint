@@ -14,4 +14,5 @@ sealed interface Route : NavKey {
     @Serializable data object ThemingPlayground : Route
     @Serializable data object AnalyticsDashboard : Route
     @Serializable data object ModalTours : Route
+    @Serializable data object Hints : Route
 }

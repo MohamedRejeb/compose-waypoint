@@ -115,6 +115,7 @@ fun DesignEditorDemo(onBack: () -> Unit) {
                         onRectangleToolClick = {
                             if (shape == null) shape = DefaultShapeRect
                         },
+                        onShapeChange = { shape = it },
                         onBack = { backStack.removeLastOrNull() },
                     )
                 }

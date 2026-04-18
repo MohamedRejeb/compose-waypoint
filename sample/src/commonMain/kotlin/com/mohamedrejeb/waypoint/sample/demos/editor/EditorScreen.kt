@@ -2,6 +2,7 @@ package com.mohamedrejeb.waypoint.sample.demos.editor
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,6 +41,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -58,6 +60,7 @@ internal fun EditorScreen(
     state: WaypointState<EditorTarget>,
     shape: Rect?,
     onRectangleToolClick: () -> Unit,
+    onShapeChange: (Rect) -> Unit,
     onBack: () -> Unit,
 ) {
     Scaffold(
@@ -87,6 +90,7 @@ internal fun EditorScreen(
             EditorCanvas(
                 state = state,
                 shape = shape,
+                onShapeChange = onShapeChange,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
@@ -148,6 +152,7 @@ private fun ToolPalette(
 private fun EditorCanvas(
     state: WaypointState<EditorTarget>,
     shape: Rect?,
+    onShapeChange: (Rect) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
@@ -174,6 +179,11 @@ private fun EditorCanvas(
     val hostId = LocalWaypointHostId.current
     var canvasCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
     val currentShape by rememberUpdatedState(shape)
+    val currentOnShapeChange by rememberUpdatedState(onShapeChange)
+    var isDraggingHandle by remember { mutableStateOf(false) }
+    val currentHandleHitBounds: () -> Rect? = {
+        currentShape?.let { handleRect(it).inflate(8f) }
+    }
 
     // Demonstrates the raw manual API: capture the Canvas's LayoutCoordinates
     // and the current host id, then translate the canvas-local handle rect to
@@ -215,7 +225,27 @@ private fun EditorCanvas(
                 .waypointCanvasTarget(state, EditorTarget.ShapeOnCanvas) {
                     shape ?: Rect.Zero
                 }
-                .onGloballyPositioned { canvasCoords = it },
+                .onGloballyPositioned { canvasCoords = it }
+                .pointerInput(Unit) {
+                    detectDragGestures(
+                        onDragStart = { offset ->
+                            isDraggingHandle =
+                                currentHandleHitBounds()?.contains(offset) == true
+                        },
+                        onDragEnd = { isDraggingHandle = false },
+                        onDragCancel = { isDraggingHandle = false },
+                        onDrag = { change, dragAmount ->
+                            if (!isDraggingHandle) return@detectDragGestures
+                            val s = currentShape ?: return@detectDragGestures
+                            val newRight =
+                                (s.right + dragAmount.x).coerceAtLeast(s.left + 40f)
+                            currentOnShapeChange(
+                                Rect(s.left, s.top, newRight, s.bottom),
+                            )
+                            change.consume()
+                        },
+                    )
+                },
         ) {
             // Light grid background
             val step = 32f

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -255,6 +256,44 @@ class WaypointCanvasTargetUiTest {
         assertEquals(60f, bounds.height, 0.5f) // 80 - 20
         assertTrue(bounds.left > 10f) // was offset by Box position
         assertTrue(bounds.top > 20f)
+    }
+
+    @Test
+    fun `boundsInCanvas captured as function parameter is updated on recomposition`() = runComposeUiTest {
+        val state = WaypointState(steps = listOf(WaypointStep(targetKey = "k")))
+        var shape by mutableStateOf<Rect?>(null)
+
+        @Composable
+        fun Target(rect: Rect?) {
+            Box(
+                modifier = Modifier
+                    .size(200.dp, 200.dp)
+                    .waypointCanvasTarget(state, "k") { rect ?: Rect.Zero },
+            )
+        }
+
+        setContent {
+            WaypointHost(
+                state = state,
+                tooltipContent = { _, _ -> },
+            ) {
+                Target(shape)
+            }
+        }
+
+        runOnIdle { state.start() }
+        waitForIdle()
+
+        // No shape yet — nothing registered.
+        assertNull(state.currentTargetBounds)
+
+        runOnIdle { shape = Rect(0f, 0f, 50f, 60f) }
+        waitUntil(timeoutMillis = 3000) { state.currentTargetBounds != null }
+
+        val bounds = state.currentTargetBounds
+        assertNotNull(bounds)
+        assertEquals(50f, bounds.width, 0.5f)
+        assertEquals(60f, bounds.height, 0.5f)
     }
 
     @Test

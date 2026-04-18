@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -46,6 +47,7 @@ public fun <K> Modifier.waypointCanvasTarget(
 ): Modifier = composed {
     val currentKey = remember(key) { key }
     val hostId = LocalWaypointHostId.current
+    val currentBoundsInCanvas by rememberUpdatedState(boundsInCanvas)
     var canvasCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
     // Tick bumped on every onGloballyPositioned callback. onGloballyPositioned
     // often re-delivers the same LayoutCoordinates instance across re-layouts
@@ -70,7 +72,7 @@ public fun <K> Modifier.waypointCanvasTarget(
                 val hostCoords = state.hostCoordinatesMap[hostId] ?: return@snapshotFlow null
                 if (!hostCoords.isAttached) return@snapshotFlow null
 
-                val canvasRect = boundsInCanvas()
+                val canvasRect = currentBoundsInCanvas()
                 val canvasOriginInHost = hostCoords.localPositionOf(coords, Offset.Zero)
                 val hostRect = canvasRect.translate(canvasOriginInHost)
 

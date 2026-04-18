@@ -144,6 +144,7 @@ public fun <K> WaypointHost(
  * reset of animatedBounds). Overlay hosts share the same [WaypointState] but stay
  * silent on lifecycle so they don't duplicate side effects.
  */
+@OptIn(ExperimentalWaypointApi::class)
 @Composable
 internal fun <K> WaypointHostScope(
     state: WaypointState<K>,

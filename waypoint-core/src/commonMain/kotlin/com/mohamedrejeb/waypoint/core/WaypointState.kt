@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.LayoutCoordinates
 
@@ -252,6 +253,61 @@ public class WaypointState<K>(
     public fun setTargetBounds(key: K, hostId: Any, bounds: Rect) {
         targetCoordinates[key] = bounds
         targetHostIds[key] = hostId
+    }
+
+    /**
+     * Registers bounds for a target when you have them in some source composable's
+     * local coordinate space rather than in the host's. Computes the host-local
+     * equivalent using the source's [LayoutCoordinates] and calls [setTargetBounds].
+     *
+     * Useful for targets drawn inside a Canvas or other composable where you know
+     * the target's position in the source's local space (for example, a shape's
+     * rect in canvas coordinates) and want to register without attaching a
+     * modifier. Capture the source composable's coordinates via
+     * `Modifier.onGloballyPositioned { sourceCoords = it }` and read
+     * `LocalWaypointHostId.current` to obtain the [hostId].
+     *
+     * Translates by converting the rect's top-left and bottom-right corners via
+     * `hostCoords.localPositionOf(sourceCoords, ...)`, which handles pure
+     * translation and uniform scaling. Rotation between source and host is not
+     * preserved, the resulting rect is axis-aligned in host space.
+     *
+     * Returns true if the registration happened, false if the host or source
+     * coordinates are detached, the host id is not registered, or the coordinates
+     * are in unrelated hierarchies.
+     *
+     * @param key the target key
+     * @param hostId the id of the host whose coordinate space you want to register against
+     * @param sourceCoords the [LayoutCoordinates] of the composable whose local space [localBounds] is in
+     * @param localBounds bounds in [sourceCoords]'s local coordinate space
+     */
+    @ExperimentalWaypointApi
+    public fun setTargetBoundsFromLocal(
+        key: K,
+        hostId: Any,
+        sourceCoords: LayoutCoordinates,
+        localBounds: Rect,
+    ): Boolean {
+        val hostCoords = hostCoordinatesMap[hostId] ?: return false
+        if (!hostCoords.isAttached || !sourceCoords.isAttached) return false
+        val topLeft = try {
+            hostCoords.localPositionOf(sourceCoords, Offset(localBounds.left, localBounds.top))
+        } catch (_: IllegalArgumentException) {
+            return false
+        }
+        val bottomRight = try {
+            hostCoords.localPositionOf(sourceCoords, Offset(localBounds.right, localBounds.bottom))
+        } catch (_: IllegalArgumentException) {
+            return false
+        }
+        val hostRect = Rect(
+            left = minOf(topLeft.x, bottomRight.x),
+            top = minOf(topLeft.y, bottomRight.y),
+            right = maxOf(topLeft.x, bottomRight.x),
+            bottom = maxOf(topLeft.y, bottomRight.y),
+        )
+        setTargetBounds(key, hostId, hostRect)
+        return true
     }
 
     /**

@@ -27,6 +27,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
  * @param state the [WaypointState] managing the tour
  * @param key the target key identifying this composable in the step list
  */
+@OptIn(ExperimentalWaypointApi::class)
 public fun <K> Modifier.waypointTarget(
     state: WaypointState<K>,
     key: K,

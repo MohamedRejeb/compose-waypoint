@@ -1,83 +1,154 @@
 # Waypoint
 
-**Product tours for Compose Multiplatform.**
+**Product tours and feature showcases for Compose Multiplatform.**
 
-Waypoint is a library for building guided product tours and feature showcases in Compose Multiplatform applications. It provides a spotlight overlay, tooltip positioning, step-by-step navigation, and multiple highlight modes -- all with a simple declarative API.
+[![Kotlin](https://img.shields.io/badge/kotlin-2.3.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Compose](https://img.shields.io/badge/compose-1.10.3-blue.svg?logo=jetpackcompose)](https://www.jetbrains.com/lp/compose-multiplatform)
+[![Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Maven Central](https://img.shields.io/maven-central/v/com.mohamedrejeb.waypoint/waypoint-core)](https://search.maven.org/search?q=g:%22com.mohamedrejeb.waypoint%22)
 
-## Platforms
+Waypoint is a Compose Multiplatform library for building guided product tours, feature discovery flows, and persistent contextual hints. It ships a spotlight overlay, tooltip positioning with auto-flip, pluggable highlight styles, and a state machine for step navigation, all from a simple declarative DSL.
 
-Android | iOS | Desktop (JVM) | Web (JS) | Web (Wasm)
+Targets **Android**, **iOS**, **Desktop (JVM)**, and **Web (JS, Wasm)**.
+
+## Artifacts
+
+| Artifact | Description | Platforms | Version |
+|----------|-------------|-----------|---------|
+| **waypoint-core** | State machine, overlay, tooltip positioning, target registration | Android, iOS, Desktop, Web (JS, Wasm) | [![Maven Central](https://img.shields.io/maven-central/v/com.mohamedrejeb.waypoint/waypoint-core)](https://search.maven.org/search?q=g:%22com.mohamedrejeb.waypoint%22%20AND%20a:%22waypoint-core%22) |
+| **waypoint-material3** | Material3-styled tooltip with navigation buttons and progress | Android, iOS, Desktop, Web (JS, Wasm) | [![Maven Central](https://img.shields.io/maven-central/v/com.mohamedrejeb.waypoint/waypoint-material3)](https://search.maven.org/search?q=g:%22com.mohamedrejeb.waypoint%22%20AND%20a:%22waypoint-material3%22) |
+
+Pick `waypoint-core` alone for full control over the tooltip UI, or `waypoint-material3` for a ready-made Material3 experience. `waypoint-material3` depends on `waypoint-core` transitively.
 
 ## Features
 
-- **Spotlight overlay** -- dimmed background with a transparent cutout around the target element
-- **Tooltip positioning** -- auto-placement with flip logic when space is constrained
-- **Step navigation** -- next, previous, skip, go-to, pause, and resume
-- **Multiple highlight modes** -- Spotlight, Pulse, Border, Ripple, None, or fully Custom
-- **Material3 support** -- optional module with ready-to-use styled tooltips
-- **Keyboard navigation** -- arrow keys and Escape support out of the box
-- **Analytics** -- hook into tour events (start, complete, cancel, step view)
-- **Persistence** -- remember which tours a user has completed
-- **Conditional steps** -- show or hide steps based on runtime conditions
-- **Auto-scroll** -- targets inside scroll containers are scrolled into view automatically
-- **Lifecycle callbacks** -- `onEnter` and `onExit` per step
+<div class="grid cards" markdown>
+
+-   :material-star-circle: __Highlight styles__
+
+    Spotlight, Pulse, Border, Ripple, None, or fully Custom — set per step or host-wide.
+
+-   :material-flare: __Spotlight effects__
+
+    Decorate the cutout with Glow, SoftEdge, or a custom draw lambda.
+
+-   :material-cursor-default-click: __Step navigation__
+
+    `next`, `previous`, `skip`, `goTo`, `pause`, `resume` — fully programmatic.
+
+-   :material-function: __Event-driven progression__
+
+    Advance steps when the user clicks a button, types in a field, or scrolls.
+
+-   :material-timer-sand: __Async gates__
+
+    Hold a step until a `suspend` block finishes — wait for API responses, animations, or navigation.
+
+-   :material-view-dashboard: __Cross-hierarchy tours__
+
+    Targets inside Dialog, BottomSheet, and Popup via `WaypointOverlayHost`.
+
+-   :material-link-variant: __Tour sequences__
+
+    Chain multiple tours together with shared persistence and auto-advance.
+
+-   :material-lightbulb-on: __Persistent hints__
+
+    Ambient beacons on UI elements, independent from tours, with dismiss-and-persist.
+
+-   :material-content-save: __Persistence__
+
+    Remember which tours a user has completed across sessions.
+
+-   :material-keyboard: __Keyboard navigation__
+
+    Arrow keys and Escape on Desktop and Web, configurable per key.
+
+-   :material-chart-line: __Analytics__
+
+    Track tour started, completed, cancelled, and per-step events.
+
+-   :material-theme-light-dark: __Theming__
+
+    Customize colors, typography, dimensions via `WaypointMaterial3Theme`.
+
+</div>
 
 ## Quick example
 
 ```kotlin
-// 1. Define your step keys
 enum class OnboardingTarget { SearchBar, AddButton, Profile }
 
-// 2. Create the tour state
-val state = rememberWaypointState {
-    step(OnboardingTarget.SearchBar) {
-        title = "Search"
-        description = "Find anything in your workspace."
+@Composable
+fun HomeScreen() {
+    val tourState = rememberWaypointState {
+        step(OnboardingTarget.SearchBar) {
+            title = "Search"
+            description = "Find anything in your workspace."
+        }
+        step(OnboardingTarget.AddButton) {
+            title = "Create"
+            description = "Add a new item with one tap."
+        }
+        step(OnboardingTarget.Profile) {
+            title = "Your profile"
+            description = "View and edit your account."
+        }
     }
-    step(OnboardingTarget.AddButton) {
-        title = "Create"
-        description = "Add a new item with one tap."
-    }
-    step(OnboardingTarget.Profile) {
-        title = "Profile"
-        description = "View and edit your account."
-    }
-}
 
-// 3. Wrap your screen and mark targets
-WaypointMaterial3Host(state = state) {
-    Column {
-        SearchBar(
-            modifier = Modifier.waypointTarget(state, OnboardingTarget.SearchBar)
-        )
-        FloatingActionButton(
-            onClick = { /* ... */ },
-            modifier = Modifier.waypointTarget(state, OnboardingTarget.AddButton)
-        ) { Icon(Icons.Default.Add, "Add") }
-        IconButton(
-            onClick = { /* ... */ },
-            modifier = Modifier.waypointTarget(state, OnboardingTarget.Profile)
-        ) { Icon(Icons.Default.Person, "Profile") }
+    WaypointMaterial3Host(state = tourState) {
+        Column {
+            SearchBar(Modifier.waypointTarget(tourState, OnboardingTarget.SearchBar))
+            FloatingActionButton(
+                onClick = {},
+                modifier = Modifier.waypointTarget(tourState, OnboardingTarget.AddButton),
+            ) { Icon(Icons.Default.Add, "Add") }
+            IconButton(
+                onClick = {},
+                modifier = Modifier.waypointTarget(tourState, OnboardingTarget.Profile),
+            ) { Icon(Icons.Default.Person, "Profile") }
+        }
     }
-}
 
-// 4. Start the tour
-LaunchedEffect(Unit) {
-    state.start()
+    LaunchedEffect(Unit) { tourState.start() }
 }
 ```
 
-## Modules
+## Four entry points
 
-| Module | Description | Dependency |
-|--------|-------------|------------|
-| `waypoint-core` | State machine, overlay, tooltip positioning, target registration | Compose Foundation only |
-| `waypoint-material3` | Material3-styled tooltip with navigation buttons and progress | Adds `compose-material3` |
+The public API is intentionally minimal — most use cases only need these:
 
-Use `waypoint-core` alone if you want full control over tooltip appearance. Use `waypoint-material3` for a ready-made Material3 experience.
+| API | Purpose |
+|-----|---------|
+| `rememberWaypointState { step(key) { … } }` | DSL builder that creates a [WaypointState](api/waypoint-state.md) with typed step definitions |
+| `Modifier.waypointTarget(state, key)` | Marks a composable as a tour target and registers its bounds |
+| `WaypointHost(state) { content }` | Host composable that renders the highlight + tooltip ([docs](api/waypoint-host.md)) |
+| `WaypointMaterial3Host(state) { content }` | Same, with Material3-styled tooltip ([docs](api/material3.md)) |
 
 ## Next steps
 
-- [Installation](installation.md) -- add Waypoint to your project
-- [Quick Start](getting-started.md) -- build your first tour step by step
-- [API Reference](api/waypoint-state.md) -- explore the full API
+- [Installation](installation.md) — add Waypoint to your project
+- [Quick Start](getting-started.md) — build your first tour step by step
+- [Highlight Styles](guides/highlight-styles.md) — customize how targets are highlighted
+- [Tour Sequences](guides/tour-sequences.md) — chain multiple tours together
+- [Persistent Hints](guides/hints.md) — ambient beacons outside of tours
+
+## Contribution
+
+Found a bug or want a new feature? [Open an issue](https://github.com/MohamedRejeb/compose-waypoint/issues). Pull requests welcome. :heart:
+
+## Find this library useful? :heart:
+
+Support it by joining [stargazers](https://github.com/MohamedRejeb/compose-waypoint/stargazers). :star: Also, [follow me](https://github.com/MohamedRejeb) on GitHub for more libraries.
+
+## License
+
+```
+Copyright 2026 Mohamed Rejeb
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+```

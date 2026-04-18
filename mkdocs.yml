@@ -1,68 +1,110 @@
-site_name: Waypoint
-site_description: Compose Multiplatform product tour and showcase library
-site_author: Mohamed Ben Rejeb
-site_url: https://mohamedrejeb.github.io/compose-waypoint/
-repo_url: https://github.com/MohamedRejeb/compose-waypoint
-repo_name: MohamedRejeb/compose-waypoint
+# Project information
+site_name: 'Waypoint'
+site_description: 'Product tours and feature showcases for Compose Multiplatform.'
+site_author: 'Mohamed Rejeb'
+site_url: 'https://mohamedrejeb.github.io/compose-waypoint/'
+remote_branch: gh-pages
+edit_uri: ""
 
+# Repository
+repo_name: 'compose-waypoint'
+repo_url: 'https://github.com/MohamedRejeb/compose-waypoint'
+
+# Configuration — side navigation (Calf-style titles on the side)
 theme:
-  name: material
+  name: 'material'
+  language: 'en'
   palette:
     - scheme: default
-      primary: deep purple
-      accent: deep purple
       toggle:
-        icon: material/brightness-7
+        icon: material/weather-night
         name: Switch to dark mode
-    - scheme: slate
       primary: deep purple
       accent: deep purple
+    - scheme: slate
       toggle:
-        icon: material/brightness-4
+        icon: material/weather-sunny
         name: Switch to light mode
+      primary: deep purple
+      accent: deep purple
+  font:
+    text: 'Roboto'
+    code: 'Roboto Mono'
   features:
-    - navigation.tabs
-    - navigation.sections
-    - navigation.expand
+    # No navigation.tabs — keep titles on the side, Calf-style
     - navigation.top
     - search.suggest
     - search.highlight
     - content.code.copy
     - content.tabs.link
 
+# Social
 extra:
   waypoint_version: '0.1.0'
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/MohamedRejeb
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/MohamadRejeb
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/mohamedrejeb/
 
+# Navigation (flat, side-loaded)
+nav:
+  - 'Overview': index.md
+  - 'Installation': installation.md
+  - 'Quick Start': getting-started.md
+  - 'Core concepts':
+    - 'Highlight Styles': guides/highlight-styles.md
+    - 'Spotlight Effects': guides/spotlight-effects.md
+    - 'Custom Tooltips': guides/custom-tooltips.md
+    - 'Theming': guides/theming.md
+  - 'Navigation & control':
+    - 'Keyboard Navigation': guides/keyboard.md
+    - 'Event-Driven Progression': guides/advance-on.md
+    - 'Async Gates': guides/async-gates.md
+    - 'Cross-Hierarchy Tours': guides/multi-host.md
+  - 'Ambient attention':
+    - 'Tour Sequences': guides/tour-sequences.md
+    - 'Persistent Hints': guides/hints.md
+    - 'Beacons': guides/beacons.md
+  - 'Integration':
+    - 'Analytics': guides/analytics.md
+    - 'Persistence': guides/persistence.md
+    - 'Accessibility & RTL': guides/accessibility.md
+  - 'API reference':
+    - 'WaypointState': api/waypoint-state.md
+    - 'WaypointHost': api/waypoint-host.md
+    - 'Material3': api/material3.md
+
+# Extensions
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - admonition
+  - footnotes
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.mark
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+# Plugins
 plugins:
   - search
   - macros
   - minify:
       minify_html: true
 
-markdown_extensions:
-  - admonition
-  - codehilite
-  - pymdownx.superfences
-  - pymdownx.tabbed:
-      alternate_style: true
-  - pymdownx.emoji:
-      emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:material.extensions.emoji.to_svg
-  - toc:
-      permalink: true
-
-nav:
-  - Home: index.md
-  - Getting Started:
-    - Installation: installation.md
-    - Quick Start: getting-started.md
-  - Guides:
-    - Highlight Styles: guides/highlight-styles.md
-    - Custom Tooltips: guides/custom-tooltips.md
-    - Theming: guides/theming.md
-    - Analytics: guides/analytics.md
-    - Persistence: guides/persistence.md
-  - API Reference:
-    - WaypointState: api/waypoint-state.md
-    - WaypointHost: api/waypoint-host.md
-    - Material3: api/material3.md
+# Copyright
+copyright: |
+  &copy; 2026 <a href="https://github.com/MohamedRejeb" target="_blank" rel="noopener">Mohamed Rejeb</a>

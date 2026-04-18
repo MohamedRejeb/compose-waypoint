@@ -29,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -172,12 +173,13 @@ private fun EditorCanvas(
 
     val hostId = LocalWaypointHostId.current
     var canvasCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val currentShape by rememberUpdatedState(shape)
 
     // Demonstrates the raw manual API: capture the Canvas's LayoutCoordinates
     // and the current host id, then translate the canvas-local handle rect to
     // host space via setTargetBoundsFromLocal on every shape change.
     LaunchedEffect(hostId, canvasCoords) {
-        snapshotFlow { shape }.collect { current ->
+        snapshotFlow { currentShape }.collect { current ->
             val id = hostId ?: return@collect
             val coords = canvasCoords ?: return@collect
             if (current == null) {

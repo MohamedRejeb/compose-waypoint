@@ -1,5 +1,11 @@
 package com.mohamedrejeb.waypoint.sample.demos.editor
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +49,7 @@ private val DefaultShapeRect = Rect(left = 120f, top = 100f, right = 280f, botto
 fun DesignEditorDemo(onBack: () -> Unit) {
     val backStack = remember { NavBackStack(InternalRoute.Projects as InternalRoute) }
     var shape by remember { mutableStateOf<Rect?>(null) }
+    var showSuccessDialog by remember { mutableStateOf(false) }
 
     val state = rememberWaypointState {
         step(EditorTarget.CreateFab) {
@@ -96,7 +103,10 @@ fun DesignEditorDemo(onBack: () -> Unit) {
         }
     }
 
-    WaypointMaterial3Host(state = state) {
+    WaypointMaterial3Host(
+        state = state,
+        onTourComplete = { showSuccessDialog = true },
+    ) {
         NavDisplay(
             backStack = backStack,
             entryProvider = entryProvider {
@@ -116,10 +126,44 @@ fun DesignEditorDemo(onBack: () -> Unit) {
                             if (shape == null) shape = DefaultShapeRect
                         },
                         onShapeChange = { shape = it },
+                        onShapeResizeEnd = {
+                            if (state.currentStep?.targetKey == EditorTarget.ResizeHandle) {
+                                state.next()
+                            }
+                        },
                         onBack = { backStack.removeLastOrNull() },
                     )
                 }
             },
         )
+
+        if (showSuccessDialog) {
+            AlertDialog(
+                onDismissRequest = { showSuccessDialog = false },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Rounded.CheckCircle,
+                        contentDescription = null,
+                    )
+                },
+                title = { Text("Tour complete") },
+                text = {
+                    Text(
+                        "You resized your first shape. Jump back to projects to start another design.",
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            shape = null
+                            while (backStack.size > 1) backStack.removeLastOrNull()
+                            showSuccessDialog = false
+                        },
+                    ) {
+                        Text("Back to projects")
+                    }
+                },
+            )
+        }
     }
 }

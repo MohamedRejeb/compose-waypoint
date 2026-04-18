@@ -61,6 +61,7 @@ internal fun EditorScreen(
     shape: Rect?,
     onRectangleToolClick: () -> Unit,
     onShapeChange: (Rect) -> Unit,
+    onShapeResizeEnd: () -> Unit,
     onBack: () -> Unit,
 ) {
     Scaffold(
@@ -91,6 +92,7 @@ internal fun EditorScreen(
                 state = state,
                 shape = shape,
                 onShapeChange = onShapeChange,
+                onShapeResizeEnd = onShapeResizeEnd,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
@@ -153,6 +155,7 @@ private fun EditorCanvas(
     state: WaypointState<EditorTarget>,
     shape: Rect?,
     onShapeChange: (Rect) -> Unit,
+    onShapeResizeEnd: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
@@ -180,6 +183,7 @@ private fun EditorCanvas(
     var canvasCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
     val currentShape by rememberUpdatedState(shape)
     val currentOnShapeChange by rememberUpdatedState(onShapeChange)
+    val currentOnShapeResizeEnd by rememberUpdatedState(onShapeResizeEnd)
     var isDraggingHandle by remember { mutableStateOf(false) }
     val currentHandleHitBounds: () -> Rect? = {
         currentShape?.let { handleRect(it).inflate(8f) }
@@ -232,7 +236,11 @@ private fun EditorCanvas(
                             isDraggingHandle =
                                 currentHandleHitBounds()?.contains(offset) == true
                         },
-                        onDragEnd = { isDraggingHandle = false },
+                        onDragEnd = {
+                            val wasDragging = isDraggingHandle
+                            isDraggingHandle = false
+                            if (wasDragging) currentOnShapeResizeEnd()
+                        },
                         onDragCancel = { isDraggingHandle = false },
                         onDrag = { change, dragAmount ->
                             if (!isDraggingHandle) return@detectDragGestures

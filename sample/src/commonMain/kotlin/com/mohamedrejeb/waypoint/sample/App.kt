@@ -18,6 +18,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.mohamedrejeb.waypoint.sample.catalog.CatalogScreen
 import com.mohamedrejeb.waypoint.sample.demos.discovery.FeatureDiscoveryDemo
+import com.mohamedrejeb.waypoint.sample.demos.editor.DesignEditorDemo
 import com.mohamedrejeb.waypoint.sample.demos.highlights.HighlightGalleryDemo
 import com.mohamedrejeb.waypoint.sample.demos.multitarget.MultiTargetDemo
 import com.mohamedrejeb.waypoint.sample.demos.analytics.AnalyticsDashboardDemo
@@ -72,6 +73,9 @@ fun App() {
                 }
                 entry<Route.TourSequences> {
                     TourSequencesDemo(onBack = { backStack.removeLastOrNull() })
+                }
+                entry<Route.DesignEditor> {
+                    DesignEditorDemo(onBack = { backStack.removeLastOrNull() })
                 }
             },
         )

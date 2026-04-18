@@ -103,6 +103,13 @@ private val demoItems = listOf(
         iconTint = Violet,
         tags = listOf("Sequence", "Chain", "Persistence"),
     ),
+    DemoItem(
+        title = "Design Editor",
+        description = "Canvas targets + cross-screen navigation with a drag-gesture highlight.",
+        icon = Icons.Rounded.Edit,
+        iconTint = Teal,
+        tags = listOf("Canvas", "Navigation", "Experimental"),
+    ),
 )
 
 private val demoRoutes: List<Route> = listOf(
@@ -116,6 +123,7 @@ private val demoRoutes: List<Route> = listOf(
     Route.ModalTours,
     Route.Hints,
     Route.TourSequences,
+    Route.DesignEditor,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

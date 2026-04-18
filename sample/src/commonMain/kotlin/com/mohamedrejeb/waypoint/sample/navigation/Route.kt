@@ -16,4 +16,5 @@ sealed interface Route : NavKey {
     @Serializable data object ModalTours : Route
     @Serializable data object Hints : Route
     @Serializable data object TourSequences : Route
+    @Serializable data object DesignEditor : Route
 }

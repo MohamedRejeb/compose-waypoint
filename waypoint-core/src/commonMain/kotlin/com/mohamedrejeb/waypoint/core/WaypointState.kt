@@ -216,11 +216,12 @@ public class WaypointState<K>(
     }
 
     /**
-     * Clears the bounds for a target without dissociating it from its host.
+     * Clears the bounds for a target while keeping its host association intact.
      * Use when a target scrolls out of view but its composable is still in the
-     * composition — the next onGloballyPositioned callback will re-register.
+     * composition, the next onGloballyPositioned callback will re-register the
+     * bounds against the same host.
      */
-    internal fun clearTargetBounds(key: K) {
+    internal fun clearTargetBoundsKeepingHost(key: K) {
         targetCoordinates.remove(key)
     }
 
@@ -228,6 +229,48 @@ public class WaypointState<K>(
         targetCoordinates.remove(key)
         targetHostIds.remove(key)
         bringIntoViewRequesters.remove(key)
+    }
+
+    /**
+     * Manually registers bounds for a target that has no wrappable composable,
+     * for example a shape drawn inside a Canvas or a region of an editor
+     * viewport. Bounds must be expressed in the coordinate space of the host
+     * identified by [hostId], typically obtained via
+     * `LocalWaypointHostId.current` inside the composable that owns the drawing.
+     *
+     * Call this from a [androidx.compose.runtime.SideEffect] or
+     * [androidx.compose.runtime.LaunchedEffect] driven by whatever changes the
+     * target's position (shape state, pan/zoom transforms, etc.). Pair every
+     * [setTargetBounds] call with [clearTargetBounds] when the target is
+     * removed so the tour doesn't point at stale coordinates.
+     *
+     * @param key the target key identifying this target in the step list
+     * @param hostId the id of the host whose coordinate space [bounds] is in
+     * @param bounds the bounds of the target in host-local coordinates
+     */
+    @ExperimentalWaypointApi
+    public fun setTargetBounds(key: K, hostId: Any, bounds: Rect) {
+        targetCoordinates[key] = bounds
+        targetHostIds[key] = hostId
+    }
+
+    /**
+     * Clears bounds and host association for a manually-registered target
+     * previously passed to [setTargetBounds]. Call when the target is removed
+     * or is no longer meaningful.
+     *
+     * Unlike [unregisterTarget], this does not touch any
+     * [androidx.compose.foundation.relocation.BringIntoViewRequester] for the
+     * key, that requester is tied to the `Modifier.waypointTarget` lifecycle
+     * only. Manual callers can safely re-register the same [key] via
+     * [setTargetBounds] at any time.
+     *
+     * @param key the target key to clear
+     */
+    @ExperimentalWaypointApi
+    public fun clearTargetBounds(key: K) {
+        targetCoordinates.remove(key)
+        targetHostIds.remove(key)
     }
 
     // -- Internal --

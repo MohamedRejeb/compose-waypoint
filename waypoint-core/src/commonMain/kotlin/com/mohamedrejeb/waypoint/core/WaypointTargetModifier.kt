@@ -73,7 +73,7 @@ public fun <K> Modifier.waypointTarget(
                 // Scrolled out of view (or not yet laid out): clear bounds but
                 // keep the host association so the tour still knows which host
                 // owns this step until the composable is actually disposed.
-                state.clearTargetBounds(currentKey)
+                state.clearTargetBoundsKeepingHost(currentKey)
             }
         }
 }

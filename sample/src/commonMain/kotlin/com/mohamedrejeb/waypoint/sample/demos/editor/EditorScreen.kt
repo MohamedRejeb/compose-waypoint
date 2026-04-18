@@ -58,7 +58,6 @@ import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.waypoint.core.ExperimentalWaypointApi
 import com.mohamedrejeb.waypoint.core.LocalWaypointHostId
 import com.mohamedrejeb.waypoint.core.WaypointState
-import com.mohamedrejeb.waypoint.core.waypointCanvasTarget
 import com.mohamedrejeb.waypoint.core.waypointTarget
 
 private val HandleSizeDp = 20.dp
@@ -120,7 +119,6 @@ internal fun EditorScreen(
 
 private val EditorScreenTargets = setOf(
     EditorTarget.RectangleTool,
-    EditorTarget.ShapeOnCanvas,
     EditorTarget.ResizeHandle,
 )
 
@@ -308,12 +306,6 @@ private fun EditorCanvas(
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
-                // Register the shape rect as a canvas target. The lambda reads
-                // the current shape state and waypointCanvasTarget re-registers
-                // reactively whenever it changes.
-                .waypointCanvasTarget(state, EditorTarget.ShapeOnCanvas) {
-                    shape ?: Rect.Zero
-                }
                 .onGloballyPositioned { canvasCoords = it }
                 .pointerInput(Unit) {
                     detectDragGestures(

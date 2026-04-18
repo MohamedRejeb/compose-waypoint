@@ -33,7 +33,6 @@ import kotlinx.serialization.Serializable
 internal enum class EditorTarget {
     CreateFab,
     RectangleTool,
-    ShapeOnCanvas,
     ResizeHandle,
 }
 
@@ -43,8 +42,7 @@ internal sealed interface InternalRoute : NavKey {
     @Serializable data object Editor : InternalRoute
 }
 
-// Canvas-local default shape rect, used both when the Rectangle tool is tapped
-// and when the tour advances into the shape step on its behalf.
+// Canvas-local default shape rect, dropped when the Rectangle tool is tapped.
 private val DefaultShapeRect = Rect(left = 120f, top = 100f, right = 280f, bottom = 220f)
 
 @OptIn(ExperimentalWaypointApi::class)
@@ -69,10 +67,7 @@ fun DesignEditorDemo(onBack: () -> Unit) {
             title = "Add a shape"
             description = "Tap the Rectangle tool to drop a shape on the canvas."
             placement = TooltipPlacement.End
-            interaction = TargetInteraction.ClickToAdvance
-            highlightStyle = HighlightStyle.Spotlight(
-                shape = SpotlightShape.RoundedRect(12.dp),
-            )
+            highlightStyle = HighlightStyle.None
             // Editor-screen steps use the top StepsHeader instead of a popup
             // tooltip. An empty content composable suppresses the default one.
             content { }
@@ -83,21 +78,6 @@ fun DesignEditorDemo(onBack: () -> Unit) {
                 if (backStack.lastOrNull() != InternalRoute.Editor) {
                     backStack.add(InternalRoute.Editor)
                 }
-            }
-        }
-        step(EditorTarget.ShapeOnCanvas) {
-            title = "Your shape is here"
-            description = "Nice, let's resize it next."
-            placement = TooltipPlacement.Bottom
-            advanceOn = WaypointTrigger.Default
-            highlightStyle = HighlightStyle.Spotlight(
-                shape = SpotlightShape.RoundedRect(4.dp),
-            )
-            content { }
-            // Same reasoning as step 2: the tool tap is intercepted, so the
-            // shape is created here on tour advance.
-            onEnter {
-                if (shape == null) shape = DefaultShapeRect
             }
         }
         step(EditorTarget.ResizeHandle) {
@@ -133,6 +113,9 @@ fun DesignEditorDemo(onBack: () -> Unit) {
                         shape = shape,
                         onRectangleToolClick = {
                             if (shape == null) shape = DefaultShapeRect
+                            if (state.currentStep?.targetKey == EditorTarget.RectangleTool) {
+                                state.next()
+                            }
                         },
                         onShapeChange = { shape = it },
                         onShapeResizeEnd = {

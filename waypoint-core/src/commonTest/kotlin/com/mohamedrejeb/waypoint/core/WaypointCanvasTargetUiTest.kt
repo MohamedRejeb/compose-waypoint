@@ -12,8 +12,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.runComposeUiTest
@@ -22,6 +25,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * UI tests for [Modifier.waypointCanvasTarget].
@@ -206,6 +210,51 @@ class WaypointCanvasTargetUiTest {
 
         assertNull(state.targetCoordinates["k"])
         assertNull(state.targetHostIds["k"])
+    }
+
+    @Test
+    fun `setTargetBoundsFromLocal registers translated host-local rect`() = runComposeUiTest {
+        val state = WaypointState(steps = listOf(WaypointStep(targetKey = "k")))
+        var sourceCoords: LayoutCoordinates? by mutableStateOf(null)
+
+        setContent {
+            WaypointHost(
+                state = state,
+                tooltipContent = { _, _ -> },
+            ) {
+                Box(
+                    modifier = Modifier
+                        .offset(40.dp, 50.dp)
+                        .size(100.dp, 100.dp)
+                        .onGloballyPositioned { sourceCoords = it },
+                )
+                val hid = LocalWaypointHostId.current
+                LaunchedEffect(hid, sourceCoords) {
+                    val coords = sourceCoords ?: return@LaunchedEffect
+                    val id = hid ?: return@LaunchedEffect
+                    state.setTargetBoundsFromLocal(
+                        key = "k",
+                        hostId = id,
+                        sourceCoords = coords,
+                        localBounds = Rect(10f, 20f, 60f, 80f),
+                    )
+                }
+            }
+        }
+
+        runOnIdle { state.start() }
+        waitForIdle()
+        waitUntil(timeoutMillis = 3000) { state.currentTargetBounds != null }
+
+        val bounds = state.currentTargetBounds
+        assertNotNull(bounds)
+        // Don't bind to density precisely, just verify translation happened.
+        // Source-local origin (10,20)..(60,80) translated through Box at
+        // (40.dp, 50.dp) must land in host space offset by the Box position.
+        assertEquals(50f, bounds.width, 0.5f) // 60 - 10
+        assertEquals(60f, bounds.height, 0.5f) // 80 - 20
+        assertTrue(bounds.left > 10f) // was offset by Box position
+        assertTrue(bounds.top > 20f)
     }
 
     @Test

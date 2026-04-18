@@ -41,7 +41,6 @@ internal fun DragGestureHighlight(
     val cornerRadiusPx = with(density) { 6.dp.toPx() }
     val dotRadiusPx = with(density) { 4.dp.toPx() }
     val dotTravelPx = with(density) { 36.dp.toPx() }
-    val dotStartOffsetPx = with(density) { 14.dp.toPx() }
 
     val ringColor = MaterialTheme.colorScheme.primary
     val dotColor = MaterialTheme.colorScheme.primary
@@ -107,7 +106,7 @@ internal fun DragGestureHighlight(
             )
 
             // Trailing dots, streaming rightward from the handle center.
-            val startX = animatedBounds.right + dotStartOffsetPx
+            val startX = animatedBounds.center.x
             val centerY = animatedBounds.center.y
             drawTrailDot(progressA, startX, centerY, dotTravelPx, dotRadiusPx, dotColor)
             drawTrailDot(progressB, startX, centerY, dotTravelPx, dotRadiusPx, dotColor)

@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.dp
@@ -25,6 +26,8 @@ import com.mohamedrejeb.waypoint.core.TooltipPlacement
 import com.mohamedrejeb.waypoint.core.WaypointTrigger
 import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 internal enum class EditorTarget {
@@ -50,6 +53,7 @@ fun DesignEditorDemo(onBack: () -> Unit) {
     val backStack = remember { NavBackStack(InternalRoute.Projects as InternalRoute) }
     var shape by remember { mutableStateOf<Rect?>(null) }
     var showSuccessDialog by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     val state = rememberWaypointState {
         step(EditorTarget.CreateFab) {
@@ -69,6 +73,9 @@ fun DesignEditorDemo(onBack: () -> Unit) {
             highlightStyle = HighlightStyle.Spotlight(
                 shape = SpotlightShape.RoundedRect(12.dp),
             )
+            // Editor-screen steps use the top StepsHeader instead of a popup
+            // tooltip. An empty content composable suppresses the default one.
+            content { }
             // The CreateFab click advances step 1 (ClickToAdvance), but the
             // overlay intercepts the tap so the FAB's own onClick never fires.
             // beforeShow performs the nav so the tour keeps flowing.
@@ -86,6 +93,7 @@ fun DesignEditorDemo(onBack: () -> Unit) {
             highlightStyle = HighlightStyle.Spotlight(
                 shape = SpotlightShape.RoundedRect(4.dp),
             )
+            content { }
             // Same reasoning as step 2: the tool tap is intercepted, so the
             // shape is created here on tour advance.
             onEnter {
@@ -100,6 +108,7 @@ fun DesignEditorDemo(onBack: () -> Unit) {
             highlightStyle = HighlightStyle.Custom { _, animatedBounds ->
                 DragGestureHighlight(animatedBounds = animatedBounds)
             }
+            content { }
         }
     }
 
@@ -128,7 +137,12 @@ fun DesignEditorDemo(onBack: () -> Unit) {
                         onShapeChange = { shape = it },
                         onShapeResizeEnd = {
                             if (state.currentStep?.targetKey == EditorTarget.ResizeHandle) {
-                                state.next()
+                                scope.launch {
+                                    delay(500)
+                                    if (state.currentStep?.targetKey == EditorTarget.ResizeHandle) {
+                                        state.next()
+                                    }
+                                }
                             }
                         },
                         onBack = { backStack.removeLastOrNull() },

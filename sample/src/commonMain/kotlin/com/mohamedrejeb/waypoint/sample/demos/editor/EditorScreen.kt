@@ -1,5 +1,10 @@
 package com.mohamedrejeb.waypoint.sample.demos.editor
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -9,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,9 +23,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.CropSquare
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -79,25 +88,101 @@ internal fun EditorScreen(
             )
         },
     ) { padding ->
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            ToolPalette(
-                state = state,
-                onRectangleToolClick = onRectangleToolClick,
-            )
-            EditorCanvas(
-                state = state,
-                shape = shape,
-                onShapeChange = onShapeChange,
-                onShapeResizeEnd = onShapeResizeEnd,
+            StepsHeader(state = state)
+            Row(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight()
-                    .padding(12.dp),
-            )
+                    .fillMaxWidth(),
+            ) {
+                ToolPalette(
+                    state = state,
+                    onRectangleToolClick = onRectangleToolClick,
+                )
+                EditorCanvas(
+                    state = state,
+                    shape = shape,
+                    onShapeChange = onShapeChange,
+                    onShapeResizeEnd = onShapeResizeEnd,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .padding(12.dp),
+                )
+            }
+        }
+    }
+}
+
+private val EditorScreenTargets = setOf(
+    EditorTarget.RectangleTool,
+    EditorTarget.ShapeOnCanvas,
+    EditorTarget.ResizeHandle,
+)
+
+@Composable
+private fun StepsHeader(
+    state: WaypointState<EditorTarget>,
+) {
+    val step = state.currentStep
+    val isEditorStep = step != null && step.targetKey in EditorScreenTargets
+    val visible = state.isActive && !state.isPaused && isEditorStep
+
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically(),
+    ) {
+        val currentIndex = state.currentStepIndex.coerceAtLeast(0)
+        val total = state.steps.size.coerceAtLeast(1)
+        val progress = (currentIndex + 1).toFloat() / total.toFloat()
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+            ) {
+                Text(
+                    text = "Step ${currentIndex + 1} of ${state.steps.size}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                val title = step?.title
+                if (!title.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+                val description = step?.description
+                if (!description.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
     }
 }

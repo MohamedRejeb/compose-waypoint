@@ -55,6 +55,7 @@ import com.mohamedrejeb.waypoint.core.WaypointHost
 import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
+import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
 
 private enum class DashTarget {
     Logo, DateRange, Export,
@@ -137,11 +138,14 @@ fun MultiTargetDemo(onBack: () -> Unit) {
         }
     }
 
+    ResetOnLeave { state.stop() }
+
     DemoScaffold(
         title = "Multi-Target Spotlight",
         description = "Highlights multiple elements per step with custom tooltip content",
         onBack = onBack,
         onStartTour = { state.start() },
+        fabVisible = !state.isActive,
     ) { padding ->
         WaypointHost(
             state = state,

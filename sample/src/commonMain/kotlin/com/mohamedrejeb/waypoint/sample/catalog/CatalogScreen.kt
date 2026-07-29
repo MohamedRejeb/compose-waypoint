@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Edit
@@ -155,11 +155,10 @@ fun CatalogScreen(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
         ) {
-            items(
+            itemsIndexed(
                 items = demoItems,
-                key = { it.title },
-            ) { item ->
-                val index = demoItems.indexOf(item)
+                key = { _, item -> item.title },
+            ) { index, item ->
                 DemoCard(
                     item = item,
                     onClick = { onDemoClick(demoRoutes[index]) },

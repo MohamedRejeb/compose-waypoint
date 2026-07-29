@@ -46,6 +46,7 @@ import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
+import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
 
 private enum class OnboardingTarget {
     Search,
@@ -107,11 +108,14 @@ fun OnboardingDemo(onBack: () -> Unit) {
         }
     }
 
+    ResetOnLeave { state.stop() }
+
     DemoScaffold(
         title = "Onboarding Tour",
         description = "A first-launch walkthrough showcasing spotlight, placements, and navigation",
         onBack = onBack,
         onStartTour = { state.start() },
+        fabVisible = !state.isActive,
     ) { padding ->
         WaypointMaterial3Host(
             state = state,

@@ -43,6 +43,7 @@ import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
+import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
 
 private val VioletPrimary = Color(0xFF7C3AED)
 private val TealSecondary = Color(0xFF14B8A6)
@@ -88,6 +89,16 @@ fun FeatureDiscoveryDemo(onBack: () -> Unit) {
             description = "Automatic dark mode with custom accent colors and OLED black option."
             highlightStyle = HighlightStyle.Spotlight()
         }
+    }
+
+    ResetOnLeave {
+        messagingState.stop()
+        filtersState.stop()
+        darkModeState.stop()
+        viewModel.onEvent(DiscoveryEvent.ResetAll)
+        messagingState.resetCompletion()
+        filtersState.resetCompletion()
+        darkModeState.resetCompletion()
     }
 
     DemoScaffold(

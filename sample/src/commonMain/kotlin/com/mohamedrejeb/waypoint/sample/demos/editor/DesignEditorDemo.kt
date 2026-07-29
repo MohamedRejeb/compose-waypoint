@@ -26,6 +26,7 @@ import com.mohamedrejeb.waypoint.core.TooltipPlacement
 import com.mohamedrejeb.waypoint.core.WaypointTrigger
 import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
+import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -90,6 +91,12 @@ fun DesignEditorDemo(onBack: () -> Unit) {
             }
             content { }
         }
+    }
+
+    ResetOnLeave {
+        state.stop()
+        shape = null
+        showSuccessDialog = false
     }
 
     WaypointMaterial3Host(

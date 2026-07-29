@@ -90,16 +90,18 @@ internal fun ProjectsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                TextButton(onClick = onStartTour) {
-                    Icon(
-                        imageVector = Icons.Rounded.PlayArrow,
-                        contentDescription = null,
-                    )
-                    Spacer(modifier = Modifier.size(4.dp))
-                    Text("Start Tour")
+            if (!state.isActive) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    TextButton(onClick = onStartTour) {
+                        Icon(
+                            imageVector = Icons.Rounded.PlayArrow,
+                            contentDescription = null,
+                        )
+                        Spacer(modifier = Modifier.size(4.dp))
+                        Text("Start Tour")
+                    }
                 }
             }
 

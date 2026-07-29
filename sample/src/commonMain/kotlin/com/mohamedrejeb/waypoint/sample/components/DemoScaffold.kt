@@ -16,8 +16,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +54,11 @@ fun DemoScaffold(
             )
         },
         floatingActionButton = {
-            if (fabVisible) {
+            AnimatedVisibility(
+                visible = fabVisible,
+                enter = fadeIn() + scaleIn(),
+                exit = fadeOut() + scaleOut(),
+            ) {
                 ExtendedFloatingActionButton(
                     onClick = onStartTour,
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -79,5 +91,18 @@ fun DemoScaffold(
                 PaddingValues(bottom = scaffoldPadding.calculateBottomPadding()),
             )
         }
+    }
+}
+
+/**
+ * Runs [block] once when the calling composable leaves composition, so demos
+ * can reset tour and view-model state when the user navigates away. Rotating
+ * the device keeps the composition alive, so it won't fire on config change.
+ */
+@Composable
+fun ResetOnLeave(block: () -> Unit) {
+    val latest by rememberUpdatedState(block)
+    DisposableEffect(Unit) {
+        onDispose { latest() }
     }
 }

@@ -59,6 +59,7 @@ import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3OverlayHost
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
+import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
 
 // -- Dialog tour targets --
 
@@ -135,6 +136,11 @@ private fun DialogTourSection() {
         }
     }
 
+    ResetOnLeave {
+        state.stop()
+        showDialog = false
+    }
+
     WaypointMaterial3Host(state = state) {
         SectionCard(
             icon = Icons.Rounded.ChatBubble,
@@ -144,6 +150,7 @@ private fun DialogTourSection() {
             onPrimaryClick = { showDialog = true },
             secondaryButtonLabel = "Start Tour",
             onSecondaryClick = { state.start() },
+            secondaryButtonVisible = !state.isActive,
             primaryButtonModifier = Modifier.waypointTarget(state, DialogTarget.OpenButton),
         )
 
@@ -307,6 +314,11 @@ private fun BottomSheetTourSection() {
         }
     }
 
+    ResetOnLeave {
+        state.stop()
+        showSheet = false
+    }
+
     WaypointMaterial3Host(state = state) {
         SectionCard(
             icon = Icons.Rounded.VerticalSplit,
@@ -316,6 +328,7 @@ private fun BottomSheetTourSection() {
             onPrimaryClick = { showSheet = true },
             secondaryButtonLabel = "Start Tour",
             onSecondaryClick = { state.start() },
+            secondaryButtonVisible = !state.isActive,
             primaryButtonModifier = Modifier.waypointTarget(state, SheetTarget.OpenButton),
         )
 
@@ -398,6 +411,7 @@ private fun SectionCard(
     onPrimaryClick: () -> Unit,
     secondaryButtonLabel: String,
     onSecondaryClick: () -> Unit,
+    secondaryButtonVisible: Boolean = true,
     primaryButtonModifier: Modifier = Modifier,
 ) {
     OutlinedCard(
@@ -445,8 +459,10 @@ private fun SectionCard(
                 ) {
                     Text(primaryButtonLabel)
                 }
-                Button(onClick = onSecondaryClick) {
-                    Text(secondaryButtonLabel)
+                if (secondaryButtonVisible) {
+                    Button(onClick = onSecondaryClick) {
+                        Text(secondaryButtonLabel)
+                    }
                 }
             }
         }

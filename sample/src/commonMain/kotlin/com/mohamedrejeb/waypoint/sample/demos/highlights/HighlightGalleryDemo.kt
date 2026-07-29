@@ -65,6 +65,7 @@ import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
+import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
 
 private val VioletPrimary = Color(0xFF7C3AED)
 private val TealSecondary = Color(0xFF14B8A6)
@@ -257,6 +258,11 @@ fun HighlightGalleryDemo(onBack: () -> Unit) {
                 showIf { activeHighlight == index }
             }
         }
+    }
+
+    ResetOnLeave {
+        state.stop()
+        activeHighlight = -1
     }
 
     DemoScaffold(

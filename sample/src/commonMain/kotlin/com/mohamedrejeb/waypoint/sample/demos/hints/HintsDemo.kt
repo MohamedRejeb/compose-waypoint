@@ -36,6 +36,7 @@ import com.mohamedrejeb.waypoint.core.WaypointPersistence
 import com.mohamedrejeb.waypoint.core.rememberWaypointHintState
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Hint
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
+import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
 
 private enum class HintKey { Search, Filters, Favorite, Share, Notifications }
 
@@ -98,6 +99,8 @@ fun HintsDemo(onBack: () -> Unit) {
             beaconAlignment = Alignment.TopEnd
         }
     }
+
+    ResetOnLeave { hintState.resetAll() }
 
     DemoScaffold(
         title = "Persistent Hints",

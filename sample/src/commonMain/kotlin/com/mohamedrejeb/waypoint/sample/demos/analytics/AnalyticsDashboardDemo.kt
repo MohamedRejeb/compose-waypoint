@@ -48,6 +48,7 @@ import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
+import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
 
 private enum class AnalyticsTarget { Search, Profile, Settings, Summary }
 
@@ -88,11 +89,17 @@ fun AnalyticsDashboardDemo(onBack: () -> Unit) {
         }
     }
 
+    ResetOnLeave {
+        waypointState.stop()
+        viewModel.onEvent(AnalyticsEvent.ClearLog)
+    }
+
     DemoScaffold(
         title = "Analytics Dashboard",
         description = "Real-time event log showing WaypointAnalytics callbacks",
         onBack = onBack,
         onStartTour = { waypointState.start() },
+        fabVisible = !waypointState.isActive,
     ) { padding ->
         WaypointMaterial3Host(
             state = waypointState,

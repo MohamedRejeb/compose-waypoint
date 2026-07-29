@@ -46,6 +46,7 @@ import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
+import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
@@ -119,11 +120,17 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
         }
     }
 
+    ResetOnLeave {
+        waypointState.stop()
+        viewModel.onEvent(TutorialEvent.Reset)
+    }
+
     DemoScaffold(
         title = "Interactive Tutorial",
         description = "A form walkthrough with event-driven progression and conditional steps.",
         onBack = onBack,
         onStartTour = { waypointState.start() },
+        fabVisible = !waypointState.isActive,
     ) { padding ->
         WaypointMaterial3Host(
             state = waypointState,

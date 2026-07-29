@@ -52,6 +52,7 @@ import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
+import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
 
 private enum class BasicsTarget { Profile, Bookmark }
 private enum class CustomizeTarget { Theme, Accent }
@@ -139,11 +140,19 @@ fun TourSequencesDemo(onBack: () -> Unit) {
     val sequence = rememberWaypointSequenceState(tourBasics, tourCustomize, tourAdvanced)
     WaypointSequenceEffect(sequence)
 
+    ResetOnLeave {
+        sequence.reset()
+        tourBasics.stop()
+        tourCustomize.stop()
+        tourAdvanced.stop()
+    }
+
     DemoScaffold(
         title = "Tour Sequences",
         description = "Three mini-tours chained together. Each persists independently and the sequence auto-advances when a tour completes.",
         onBack = onBack,
         onStartTour = { sequence.start() },
+        fabVisible = !sequence.isActive,
     ) { padding ->
         Column(
             modifier = Modifier

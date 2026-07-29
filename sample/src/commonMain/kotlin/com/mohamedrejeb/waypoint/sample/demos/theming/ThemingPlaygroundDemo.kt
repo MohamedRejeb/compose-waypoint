@@ -47,6 +47,7 @@ import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Theme
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
+import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
 
 private enum class ThemingTarget { SearchBar, NotificationBell, SettingsButton }
 
@@ -71,11 +72,17 @@ fun ThemingPlaygroundDemo(onBack: () -> Unit) {
         }
     }
 
+    ResetOnLeave {
+        tourState.stop()
+        viewModel.onEvent(ThemingEvent.ResetDefaults)
+    }
+
     DemoScaffold(
         title = "Theming Playground",
         description = "Customize tooltip appearance and preview the tour live.",
         onBack = onBack,
         onStartTour = { tourState.start() },
+        fabVisible = !tourState.isActive,
     ) { padding ->
         WaypointMaterial3Theme(
             colors = WaypointMaterial3Theme.colors(

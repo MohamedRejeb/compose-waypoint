@@ -273,6 +273,29 @@ class PositionProviderTest {
         assertEquals(expectedX, offset.x)
     }
 
+    // -- Anchor translation --
+
+    @Test
+    fun `anchor bounds translate anchor-relative target bounds into window space`() {
+        // Target is expressed relative to the anchor at (100, 50): the same
+        // centered target as [centeredTarget] once translated.
+        val provider = createProvider(
+            targetBounds = Rect(300f, 300f, 500f, 400f),
+            placement = TooltipPlacement.Bottom,
+        )
+
+        val offset = provider.calculatePosition(
+            anchorBounds = IntRect(100, 50, 100, 50),
+            windowSize = windowSize,
+            layoutDirection = LayoutDirection.Ltr,
+            popupContentSize = tooltipSize,
+        )
+
+        assertEquals(ResolvedPlacement.Bottom, provider.resolvedPlacement)
+        assertEquals((450f + spacing).toInt(), offset.y, "y below translated target bottom")
+        assertEquals(400, offset.x, "x centered on translated target")
+    }
+
     // -- Degenerate Windows --
 
     @Test

@@ -21,7 +21,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.Dp
@@ -389,19 +388,12 @@ internal fun <K> WaypointHostScope(
                         onClose = { state.stop() },
                     )
 
-                    // TooltipPopup positions via WaypointPositionProvider, which
-                    // expects window-space bounds. Translate host-relative bounds
-                    // by the host's window offset.
-                    val rawBounds = targetBounds ?: animatedBounds.value
-                    val hostCoords = state.hostCoordinatesMap[hostId]
-                    val tooltipTargetBounds = if (hostCoords != null && hostCoords.isAttached) {
-                        rawBounds.translate(hostCoords.positionInWindow())
-                    } else {
-                        rawBounds
-                    }
-
+                    // TooltipPopup expects bounds relative to its anchor, which
+                    // is this host's Box (the popup is composed inside it), so
+                    // host-local bounds can be passed straight through. The
+                    // popup's own anchorBounds supply the window offset.
                     TooltipPopup(
-                        targetBounds = tooltipTargetBounds,
+                        targetBounds = targetBounds ?: animatedBounds.value,
                         placement = step.placement,
                         tooltipSpacing = tooltipSpacingPx,
                         screenMargin = screenMarginPx,

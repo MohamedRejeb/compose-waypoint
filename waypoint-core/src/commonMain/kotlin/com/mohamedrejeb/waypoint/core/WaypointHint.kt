@@ -11,10 +11,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntSize
 
 /**
  * A single persistent hint attached to a UI element.
@@ -107,46 +107,47 @@ public fun <K> WaypointHint(
     val tooltipSpacingPx = with(density) { tooltipSpacing.toPx() }
     val screenMarginPx = with(density) { screenMargin.toPx() }
 
-    // Track content bounds in window space for popup positioning.
-    var targetBounds by remember { mutableStateOf(Rect.Zero) }
+    // The popup is anchored to this Box, so the target is simply the Box's
+    // own size; the popup's anchorBounds supply the window offset.
+    var targetSize by remember { mutableStateOf(IntSize.Zero) }
 
-    WaypointBeacon(
-        visible = true,
-        style = hint.beaconStyle,
-        alignment = hint.beaconAlignment,
-        offset = hint.beaconOffset,
-        onClick = { state.open(key) },
+    Box(
         modifier = modifier.onGloballyPositioned { coords ->
-            if (coords.isAttached) {
-                val origin = coords.positionInWindow()
-                targetBounds = Rect(
-                    left = origin.x,
-                    top = origin.y,
-                    right = origin.x + coords.size.width,
-                    bottom = origin.y + coords.size.height,
-                )
-            }
+            targetSize = coords.size
         },
     ) {
-        content()
-    }
-
-    if (isOpen && targetBounds != Rect.Zero) {
-        val hintScope = remember(state, key, hint.title, hint.description) {
-            HintScopeImpl(
-                title = hint.title,
-                description = hint.description,
-                onDismiss = { state.dismiss(key) },
-                onClose = { state.close() },
-            )
+        WaypointBeacon(
+            visible = true,
+            style = hint.beaconStyle,
+            alignment = hint.beaconAlignment,
+            offset = hint.beaconOffset,
+            onClick = { state.open(key) },
+        ) {
+            content()
         }
-        TooltipPopup(
-            targetBounds = targetBounds,
-            placement = hint.placement,
-            tooltipSpacing = tooltipSpacingPx,
-            screenMargin = screenMarginPx,
-        ) { resolvedPlacement ->
-            tooltipContent(hintScope, resolvedPlacement)
+
+        if (isOpen && targetSize != IntSize.Zero) {
+            val hintScope = remember(state, key, hint.title, hint.description) {
+                HintScopeImpl(
+                    title = hint.title,
+                    description = hint.description,
+                    onDismiss = { state.dismiss(key) },
+                    onClose = { state.close() },
+                )
+            }
+            TooltipPopup(
+                targetBounds = Rect(
+                    left = 0f,
+                    top = 0f,
+                    right = targetSize.width.toFloat(),
+                    bottom = targetSize.height.toFloat(),
+                ),
+                placement = hint.placement,
+                tooltipSpacing = tooltipSpacingPx,
+                screenMargin = screenMarginPx,
+            ) { resolvedPlacement ->
+                tooltipContent(hintScope, resolvedPlacement)
+            }
         }
     }
 }

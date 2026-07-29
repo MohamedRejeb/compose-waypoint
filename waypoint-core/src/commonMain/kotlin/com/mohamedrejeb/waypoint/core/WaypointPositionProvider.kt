@@ -14,6 +14,14 @@ import androidx.compose.ui.window.PopupPositionProvider
  * Custom [PopupPositionProvider] that positions the tooltip near the spotlight target.
  *
  * Handles auto-placement, flip logic, and screen edge clamping.
+ *
+ * [targetBounds] is expressed relative to the popup's anchor (the layout node
+ * where the popup is composed). It is translated by the anchor's window
+ * position inside [calculatePosition], using the `anchorBounds` the popup
+ * machinery itself computes. Deriving the window offset this way keeps the
+ * math consistent with the frame the popup is positioned in, which matters on
+ * Android where Dialog/BottomSheet windows have their own frames and
+ * `positionInWindow()` is not guaranteed to match them.
  */
 internal class WaypointPositionProvider(
     private val targetBounds: Rect,
@@ -44,6 +52,12 @@ internal class WaypointPositionProvider(
     ): IntOffset {
         val tooltipWidth = popupContentSize.width.toFloat()
         val tooltipHeight = popupContentSize.height.toFloat()
+
+        // Anchor-relative -> popup-window coordinates.
+        val targetBounds = targetBounds.translate(
+            anchorBounds.left.toFloat(),
+            anchorBounds.top.toFloat(),
+        )
 
         val spaceTop = targetBounds.top
         val spaceBottom = windowSize.height - targetBounds.bottom

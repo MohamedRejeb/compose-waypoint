@@ -41,8 +41,8 @@ class SpotlightEffectTest {
     }
 
     @Test
-    fun `HighlightStyle Default is Spotlight with None effect`() {
-        val default = HighlightStyle.Default
+    fun `default highlight style is Spotlight with None effect`() {
+        val default = WaypointDefaults.HighlightStyle
 
         assertTrue(default is HighlightStyle.Spotlight)
         assertEquals(SpotlightEffect.None, default.effect)

@@ -36,7 +36,7 @@ public class WaypointHintState<K> @PublishedApi internal constructor(
         private set
 
     init {
-        if (persistence != null && groupId != null) {
+        if (persistence != null) {
             hints.forEach { hint ->
                 if (persistence.isCompleted(persistenceId(hint.key))) {
                     dismissedKeys.add(hint.key)
@@ -70,17 +70,13 @@ public class WaypointHintState<K> @PublishedApi internal constructor(
         if (openHintKey == key) {
             openHintKey = null
         }
-        if (persistence != null && groupId != null) {
-            persistence.markCompleted(persistenceId(key))
-        }
+        persistence?.markCompleted(persistenceId(key))
     }
 
     /** Un-dismiss [key] so its beacon shows again */
     public fun reset(key: K) {
         dismissedKeys.remove(key)
-        if (persistence != null && groupId != null) {
-            persistence.reset(persistenceId(key))
-        }
+        persistence?.reset(persistenceId(key))
     }
 
     /** Un-dismiss every hint in this state */
@@ -88,7 +84,7 @@ public class WaypointHintState<K> @PublishedApi internal constructor(
         val keys = dismissedKeys.toList()
         dismissedKeys.clear()
         openHintKey = null
-        if (persistence != null && groupId != null) {
+        if (persistence != null) {
             keys.forEach { persistence.reset(persistenceId(it)) }
         }
     }
@@ -108,5 +104,11 @@ public class WaypointHintState<K> @PublishedApi internal constructor(
 
     internal fun dismissedSnapshot(): List<K> = dismissedKeys.toList()
 
-    private fun persistenceId(key: K): String = "$groupId:$key"
+    /**
+     * Persistence key for a hint. Namespaced by [groupId] when provided,
+     * otherwise by a "hint:" prefix so hint keys can't collide with tour ids
+     * stored in the same [WaypointPersistence].
+     */
+    private fun persistenceId(key: K): String =
+        if (groupId != null) "$groupId:$key" else "hint:$key"
 }

@@ -14,9 +14,21 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Draws a triangular arrow pointing toward the target element.
+ *
+ * The triangle is centered inside the composable's own bounds, so size the
+ * modifier to `2 * size` along the tooltip edge and `size` across it (e.g.
+ * `Modifier.size(width = 20.dp, height = 10.dp)` for [ResolvedPlacement.Top]/
+ * [ResolvedPlacement.Bottom]) and position it using
+ * [LocalTooltipArrowGeometry]. Layout direction is handled internally for
+ * [ResolvedPlacement.Start]/[ResolvedPlacement.End].
+ *
+ * @param placement the tooltip's resolved placement; the arrow points from the
+ *   tooltip toward the target (e.g. Bottom placement draws an upward arrow)
+ * @param color arrow fill color, typically the tooltip background color
+ * @param size distance the arrow protrudes from the tooltip edge
  */
 @Composable
-internal fun TooltipArrow(
+public fun TooltipArrow(
     placement: ResolvedPlacement,
     color: Color,
     size: Dp = 10.dp,

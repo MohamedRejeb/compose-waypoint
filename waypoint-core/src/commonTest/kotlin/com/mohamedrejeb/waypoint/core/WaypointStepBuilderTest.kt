@@ -188,7 +188,7 @@ class WaypointStepBuilderTest {
         assertNull(step.description)
         assertNull(step.content)
         assertEquals(TooltipPlacement.Auto, step.placement)
-        assertEquals(HighlightStyle.Default, step.highlightStyle)
+        assertNull(step.highlightStyle, "null highlightStyle inherits the host-level style")
         assertEquals(TargetInteraction.None, step.interaction)
         assertNull(step.showIf)
         assertNull(step.onEnter)

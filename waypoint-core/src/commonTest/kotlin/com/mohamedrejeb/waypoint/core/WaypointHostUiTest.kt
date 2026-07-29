@@ -470,8 +470,8 @@ class WaypointHostUiTest {
     }
 
     @Test
-    fun `HighlightStyle Default resolves to Spotlight`() {
-        assertTrue(HighlightStyle.Default is HighlightStyle.Spotlight)
+    fun `default highlight style is Spotlight`() {
+        assertTrue(WaypointDefaults.HighlightStyle is HighlightStyle.Spotlight)
     }
 
     @Test

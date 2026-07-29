@@ -12,8 +12,11 @@ import kotlinx.coroutines.flow.first
  *
  * Observes [WaypointState.isActive] on the sequence's current tour.
  * When the tour transitions to inactive:
- *  - if it [WaypointState.hasCompleted], [WaypointSequenceState.advance] is called
+ *  - if it ended with [WaypointEndReason.Completed], [WaypointSequenceState.advance] is called
  *  - otherwise the tour was cancelled and [WaypointSequenceState.stop] is called
+ *
+ * Tours do not need persistence for this to work; the decision is based on how
+ * the run ended, not on persisted completion state.
  *
  * Call this once in the composition that owns the sequence. Without it, you
  * need to call [WaypointSequenceState.advance] manually (e.g., from
@@ -30,7 +33,7 @@ public fun WaypointSequenceEffect(state: WaypointSequenceState) {
             .dropWhile { !it }   // wait until the tour becomes active
             .filter { !it }       // then wait for the next inactive transition
             .first()
-        if (tour.hasCompleted) {
+        if (tour.lastEndReason == WaypointEndReason.Completed) {
             state.advance()
         } else {
             state.stop()

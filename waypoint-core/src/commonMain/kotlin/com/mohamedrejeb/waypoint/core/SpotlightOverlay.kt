@@ -3,6 +3,8 @@ package com.mohamedrejeb.waypoint.core
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -51,14 +53,22 @@ internal fun SpotlightOverlay(
         additionalBounds.forEach { add(padBounds(it, style.padding, density, layoutDirection)) }
     }
 
+    // Keep the pointerInput alive across bounds animation frames and read the
+    // latest values through rememberUpdatedState; keying pointerInput on the
+    // animating bounds would restart the gesture detector every frame and drop
+    // taps that land mid-animation.
+    val currentPaddedBounds by rememberUpdatedState(allPaddedBounds)
+    val currentOnOverlayClick by rememberUpdatedState(onOverlayClick)
+    val currentOnTargetClick by rememberUpdatedState(onTargetClick)
+
     val touchModifier = if (!allowTargetInteraction) {
-        Modifier.pointerInput(targetBounds, additionalBounds) {
+        Modifier.pointerInput(Unit) {
             detectTapGestures { offset ->
-                val tappedInCutout = allPaddedBounds.any { it.contains(offset) }
+                val tappedInCutout = currentPaddedBounds.any { it.contains(offset) }
                 if (tappedInCutout) {
-                    onTargetClick()
+                    currentOnTargetClick()
                 } else {
-                    onOverlayClick()
+                    currentOnOverlayClick()
                 }
             }
         }
@@ -107,24 +117,6 @@ internal fun SpotlightOverlay(
             }
         }
     }
-}
-
-private fun padBounds(
-    bounds: Rect,
-    padding: SpotlightPadding,
-    density: Density,
-    layoutDirection: LayoutDirection,
-): Rect = with(density) {
-    val startPx = padding.start.toPx()
-    val endPx = padding.end.toPx()
-    val leftPad = if (layoutDirection == LayoutDirection.Ltr) startPx else endPx
-    val rightPad = if (layoutDirection == LayoutDirection.Ltr) endPx else startPx
-    Rect(
-        left = bounds.left - leftPad,
-        top = bounds.top - padding.top.toPx(),
-        right = bounds.right + rightPad,
-        bottom = bounds.bottom + padding.bottom.toPx(),
-    )
 }
 
 private fun DrawScope.drawCutout(

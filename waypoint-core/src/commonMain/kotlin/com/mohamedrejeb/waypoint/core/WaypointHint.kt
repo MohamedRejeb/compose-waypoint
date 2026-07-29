@@ -141,7 +141,6 @@ public fun <K> WaypointHint(
             )
         }
         TooltipPopup(
-            visible = true,
             targetBounds = targetBounds,
             placement = hint.placement,
             tooltipSpacing = tooltipSpacingPx,

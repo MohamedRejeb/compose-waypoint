@@ -20,10 +20,12 @@ internal class WaypointPositionProvider(
     private val requestedPlacement: TooltipPlacement,
     private val spacingPx: Float,
     private val screenMarginPx: Float,
+    initialPlacement: ResolvedPlacement = ResolvedPlacement.Bottom,
+    private val arrowEdgeInsetPx: Float = DEFAULT_ARROW_EDGE_INSET,
 ) : PopupPositionProvider {
 
     /** The resolved placement after layout, used to orient the arrow */
-    var resolvedPlacement: ResolvedPlacement by mutableStateOf(ResolvedPlacement.Bottom)
+    var resolvedPlacement: ResolvedPlacement by mutableStateOf(initialPlacement)
         private set
 
     /** Horizontal offset of the arrow center relative to the tooltip's left edge */
@@ -82,8 +84,8 @@ internal class WaypointPositionProvider(
         // Calculate arrow offset
         when (placement) {
             ResolvedPlacement.Top, ResolvedPlacement.Bottom -> {
-                val minOffset = ARROW_HALF_SIZE
-                val maxOffset = tooltipWidth - ARROW_HALF_SIZE
+                val minOffset = arrowEdgeInsetPx
+                val maxOffset = tooltipWidth - arrowEdgeInsetPx
                 arrowHorizontalOffset = if (maxOffset >= minOffset) {
                     (targetBounds.center.x - x).coerceIn(minOffset, maxOffset)
                 } else {
@@ -92,8 +94,8 @@ internal class WaypointPositionProvider(
             }
 
             ResolvedPlacement.Start, ResolvedPlacement.End -> {
-                val minOffset = ARROW_HALF_SIZE
-                val maxOffset = tooltipHeight - ARROW_HALF_SIZE
+                val minOffset = arrowEdgeInsetPx
+                val maxOffset = tooltipHeight - arrowEdgeInsetPx
                 arrowVerticalOffset = if (maxOffset >= minOffset) {
                     (targetBounds.center.y - y).coerceIn(minOffset, maxOffset)
                 } else {
@@ -182,14 +184,14 @@ internal class WaypointPositionProvider(
         return when (placement) {
             ResolvedPlacement.Bottom -> {
                 val x = (targetBounds.center.x - tooltipWidth / 2f)
-                    .coerceIn(margin, windowWidth - tooltipWidth - margin)
+                    .coerceInOrCenter(margin, windowWidth - tooltipWidth - margin)
                 val y = targetBounds.bottom + spacingPx
                 x to y
             }
 
             ResolvedPlacement.Top -> {
                 val x = (targetBounds.center.x - tooltipWidth / 2f)
-                    .coerceIn(margin, windowWidth - tooltipWidth - margin)
+                    .coerceInOrCenter(margin, windowWidth - tooltipWidth - margin)
                 val y = targetBounds.top - tooltipHeight - spacingPx
                 x to y
             }
@@ -201,7 +203,7 @@ internal class WaypointPositionProvider(
                     targetBounds.left - tooltipWidth - spacingPx
                 }
                 val y = (targetBounds.center.y - tooltipHeight / 2f)
-                    .coerceIn(margin, windowHeight - tooltipHeight - margin)
+                    .coerceInOrCenter(margin, windowHeight - tooltipHeight - margin)
                 x to y
             }
 
@@ -212,13 +214,26 @@ internal class WaypointPositionProvider(
                     targetBounds.right + spacingPx
                 }
                 val y = (targetBounds.center.y - tooltipHeight / 2f)
-                    .coerceIn(margin, windowHeight - tooltipHeight - margin)
+                    .coerceInOrCenter(margin, windowHeight - tooltipHeight - margin)
                 x to y
             }
         }
     }
 
-    private companion object {
-        const val ARROW_HALF_SIZE = 24f
+    internal companion object {
+        /**
+         * Minimum distance in px between the arrow center and the tooltip's
+         * corners, so the arrow doesn't land on a rounded corner. Callers with
+         * density access should pass a dp-scaled value instead.
+         */
+        const val DEFAULT_ARROW_EDGE_INSET = 24f
+
+        /**
+         * Like coerceIn, but when the tooltip is too large to satisfy both
+         * margins (max < min, e.g. a tiny window), centers the overflow
+         * instead of throwing.
+         */
+        fun Float.coerceInOrCenter(min: Float, max: Float): Float =
+            if (max < min) (min + max) / 2f else coerceIn(min, max)
     }
 }

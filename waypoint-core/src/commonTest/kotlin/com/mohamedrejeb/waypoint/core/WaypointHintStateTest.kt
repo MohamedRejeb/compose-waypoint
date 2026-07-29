@@ -107,7 +107,7 @@ class WaypointHintStateTest {
     }
 
     @Test
-    fun `dismiss without groupId does not persist`() {
+    fun `dismiss without groupId persists under the hint prefix`() {
         val persistence = RecordingPersistence()
         val state = WaypointHintState(
             hints = threeHints(),
@@ -119,8 +119,8 @@ class WaypointHintStateTest {
 
         assertTrue(state.isDismissed(HintKey.Search))
         assertTrue(
-            persistence.completed.isEmpty(),
-            "Persistence should not record anything when groupId is null",
+            "hint:${HintKey.Search}" in persistence.completed,
+            "Without a groupId, dismissal should persist under the hint: prefix",
         )
     }
 
@@ -242,10 +242,11 @@ class WaypointHintStateTest {
     }
 
     @Test
-    fun `init ignores persistence when groupId is null`() {
+    fun `init hydrates from persistence without groupId using the hint prefix`() {
         val persistence = RecordingPersistence()
-        // Even if some IDs were previously stored, with no groupId hydration is skipped.
+        // Grouped ids are not read when groupId is null, but hint-prefixed ones are.
         persistence.completed += "hints-group:${HintKey.Search}"
+        persistence.completed += "hint:${HintKey.Filter}"
 
         val state = WaypointHintState(
             hints = threeHints(),
@@ -254,7 +255,7 @@ class WaypointHintStateTest {
         )
 
         assertFalse(state.isDismissed(HintKey.Search))
-        assertFalse(state.isDismissed(HintKey.Filter))
+        assertTrue(state.isDismissed(HintKey.Filter))
         assertFalse(state.isDismissed(HintKey.Profile))
     }
 

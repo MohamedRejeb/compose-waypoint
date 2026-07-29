@@ -35,12 +35,13 @@ import com.mohamedrejeb.waypoint.core.ResolvedPlacement
  * [HintScope.close] to hide the tooltip without dismissing the hint.
  *
  * @param hintScope scope providing title/description and dismiss/close actions
- * @param resolvedPlacement placement resolved by the position provider, currently unused,
- * kept for signature symmetry with [WaypointMaterial3Tooltip]
+ * @param resolvedPlacement placement resolved by the position provider, kept for
+ * signature symmetry with [WaypointMaterial3Tooltip]
  * @param modifier modifier for the tooltip container
  * @param gotItText label for the primary dismiss button
  * @param showCloseButton whether to render a close-only button in the header row
  * @param closeContentDescription accessibility description for the close button
+ * @param showArrow whether to draw an arrow pointing at the hint target
  */
 @Suppress("UNUSED_PARAMETER")
 @Composable
@@ -51,6 +52,7 @@ public fun WaypointMaterial3HintTooltip(
     gotItText: String = "Got it",
     showCloseButton: Boolean = false,
     closeContentDescription: String = "Close",
+    showArrow: Boolean = true,
 ) {
     val colors = WaypointMaterial3Theme.colors
     val typography = WaypointMaterial3Theme.typography
@@ -59,6 +61,38 @@ public fun WaypointMaterial3HintTooltip(
     val title = hintScope.title
     val description = hintScope.description
 
+    Material3TooltipSurface(
+        arrowColor = colors.tooltipBackground,
+        showArrow = showArrow,
+    ) {
+        HintTooltipCard(
+            modifier = modifier,
+            colors = colors,
+            typography = typography,
+            dims = dims,
+            title = title,
+            description = description,
+            gotItText = gotItText,
+            showCloseButton = showCloseButton,
+            closeContentDescription = closeContentDescription,
+            hintScope = hintScope,
+        )
+    }
+}
+
+@Composable
+private fun HintTooltipCard(
+    modifier: Modifier,
+    colors: WaypointMaterial3Colors,
+    typography: WaypointMaterial3Typography,
+    dims: WaypointMaterial3Dimensions,
+    title: String?,
+    description: String?,
+    gotItText: String,
+    showCloseButton: Boolean,
+    closeContentDescription: String,
+    hintScope: HintScope,
+) {
     Column(
         modifier = modifier
             .widthIn(min = dims.tooltipMinWidth, max = dims.tooltipMaxWidth)

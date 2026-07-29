@@ -11,6 +11,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -24,6 +25,8 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.Dp
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 
 /**
@@ -92,11 +95,7 @@ public fun <K> WaypointHost(
 
                 when {
                     event.key in keyboardConfig.nextKeys -> {
-                        val wasLastStep = state.currentStepIndex == state.steps.lastIndex
                         state.next()
-                        if (wasLastStep && !state.isActive) {
-                            onTourComplete?.invoke()
-                        }
                         true
                     }
                     event.key in keyboardConfig.previousKeys -> {
@@ -105,7 +104,6 @@ public fun <K> WaypointHost(
                     }
                     event.key in keyboardConfig.dismissKeys -> {
                         state.stop()
-                        onTourCancel?.invoke()
                         true
                     }
                     else -> false
@@ -176,6 +174,22 @@ internal fun <K> WaypointHostScope(
     // target is laid out. This MUST run before the beforeShow gate so
     // animatedBounds is Zero by the time isStepReady becomes true.
     if (isPrimary) {
+        // Fire onTourComplete/onTourCancel from tour end events recorded on the
+        // state. This covers every way a tour can end: tooltip buttons in this
+        // host or in any overlay host (Dialog/Sheet), keyboard shortcuts,
+        // overlay clicks, custom triggers, and direct state.stop() calls.
+        LaunchedEffect(state) {
+            snapshotFlow { state.endEventCount }
+                .drop(1)
+                .collect {
+                    when (state.lastEndReason) {
+                        WaypointEndReason.Completed -> onTourComplete?.invoke()
+                        WaypointEndReason.Cancelled -> onTourCancel?.invoke()
+                        null -> Unit
+                    }
+                }
+        }
+
         LaunchedEffect(state.currentStepIndex) {
             val step = state.currentStep ?: return@LaunchedEffect
             val targetRegistered = state.targetCoordinates[step.targetKey] != null
@@ -277,7 +291,8 @@ internal fun <K> WaypointHostScope(
 
             if (currentStep != null && isOwnedByThisHost) {
                 val step = currentStep
-                val resolvedStyle = resolveHighlightStyle(step.highlightStyle, highlightStyle)
+                // Step-level style wins; null means inherit the host-level style.
+                val resolvedStyle = step.highlightStyle ?: highlightStyle
 
                 val overlayClickHandler: () -> Unit = {
                     when (overlayClickBehavior) {
@@ -299,10 +314,11 @@ internal fun <K> WaypointHostScope(
                     }
                 }
 
-                // Additional bounds are in the same host-relative space since
-                // they register through the same modifier against the same host.
+                // Only include additional targets registered against THIS host:
+                // bounds are host-relative, so a target living in another host
+                // (e.g. inside a Dialog) would draw at a meaningless position.
                 val additionalBounds = step.additionalTargets.mapNotNull { key ->
-                    state.targetCoordinates[key]
+                    if (state.targetHostIds[key] == hostId) state.targetCoordinates[key] else null
                 }
 
                 // 2. Highlight layer (host-relative bounds, matchParentSize inside host Box)
@@ -360,27 +376,19 @@ internal fun <K> WaypointHostScope(
 
                 // 3. Tooltip + navigation.
                 if (shouldShowTooltip) {
+                    // Step numbers/flags are computed over currently-visible
+                    // steps (showIf), so progress text and the Finish button
+                    // stay correct when steps are conditionally hidden.
                     val stepScope = StepScopeImpl(
                         currentStepIndex = state.currentStepIndex,
-                        totalSteps = state.steps.size,
-                        isFirstStep = state.currentStepIndex == 0,
-                        isLastStep = state.currentStepIndex == state.steps.lastIndex,
-                        onNext = {
-                            val wasLastStep = state.currentStepIndex == state.steps.lastIndex
-                            state.next()
-                            if (wasLastStep && !state.isActive) {
-                                onTourComplete?.invoke()
-                            }
-                        },
+                        currentStepNumber = state.visibleStepNumber(state.currentStepIndex),
+                        totalSteps = state.visibleStepCount(),
+                        isFirstStep = !state.hasVisibleStepBefore(state.currentStepIndex),
+                        isLastStep = !state.hasVisibleStepAfter(state.currentStepIndex),
+                        onNext = { state.next() },
                         onPrevious = { state.previous() },
-                        onSkip = {
-                            state.stop()
-                            onTourCancel?.invoke()
-                        },
-                        onClose = {
-                            state.stop()
-                            onTourCancel?.invoke()
-                        },
+                        onSkip = { state.stop() },
+                        onClose = { state.stop() },
                     )
 
                     // TooltipPopup positions via WaypointPositionProvider, which
@@ -395,7 +403,6 @@ internal fun <K> WaypointHostScope(
                     }
 
                     TooltipPopup(
-                        visible = true,
                         targetBounds = tooltipTargetBounds,
                         placement = step.placement,
                         tooltipSpacing = tooltipSpacingPx,
@@ -414,26 +421,16 @@ internal fun <K> WaypointHostScope(
                 val trigger = step.advanceOn
                 if (trigger is WaypointTrigger.Custom) {
                     LaunchedEffect(state.currentStepIndex) {
+                        // Wait for the beforeShow gate (and any pause) first so
+                        // a pre-satisfied trigger can't advance past a step
+                        // before it was ever shown.
+                        snapshotFlow { state.isStepReady && !state.isPaused }.first { it }
                         trigger.await()
-                        val wasLastStep = state.currentStepIndex == state.steps.lastIndex
+                        snapshotFlow { !state.isPaused }.first { it }
                         state.next()
-                        if (wasLastStep && !state.isActive) {
-                            onTourComplete?.invoke()
-                        }
                     }
                 }
             }
         }
     }
-}
-
-/**
- * Resolves the effective highlight style for a step.
- * If the step uses the default, fall back to the host-level style.
- */
-private fun resolveHighlightStyle(
-    stepStyle: HighlightStyle,
-    hostStyle: HighlightStyle,
-): HighlightStyle {
-    return if (stepStyle == HighlightStyle.Default) hostStyle else stepStyle
 }

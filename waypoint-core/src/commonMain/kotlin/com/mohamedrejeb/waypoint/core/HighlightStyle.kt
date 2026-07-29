@@ -64,6 +64,7 @@ public sealed interface HighlightStyle {
      * Expanding concentric rings radiating from the target center.
      *
      * @param filled when true, draws filled circles instead of stroke rings
+     * @param strokeWidth ring stroke width (ignored when [filled] is true)
      */
     public data class Ripple(
         val color: Color,
@@ -71,6 +72,7 @@ public sealed interface HighlightStyle {
         val durationMillis: Int = 2000,
         val maxRadius: Dp = 60.dp,
         val filled: Boolean = false,
+        val strokeWidth: Dp = 2.dp,
     ) : HighlightStyle
 
     /**
@@ -87,8 +89,4 @@ public sealed interface HighlightStyle {
     public data class Custom(
         val content: @Composable (targetBounds: Rect, animatedBounds: Rect) -> Unit,
     ) : HighlightStyle
-
-    public companion object {
-        public val Default: HighlightStyle = Spotlight()
-    }
 }

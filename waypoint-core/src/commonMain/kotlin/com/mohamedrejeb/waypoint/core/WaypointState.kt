@@ -45,6 +45,22 @@ public class WaypointState<K>(
     internal var isStepReady: Boolean by mutableStateOf(true)
         private set
 
+    /**
+     * How the most recent tour run ended, or null if this state instance has
+     * never ended a tour. Updated on every completion or cancellation,
+     * including ones triggered by direct [stop] calls from app code.
+     */
+    public var lastEndReason: WaypointEndReason? by mutableStateOf(null)
+        private set
+
+    /**
+     * Monotonic counter incremented every time a tour run ends. The primary
+     * host observes this to fire onTourComplete/onTourCancel exactly once per
+     * end event, no matter which host or code path triggered it.
+     */
+    internal var endEventCount: Int by mutableStateOf(0)
+        private set
+
     /** The current step, or null if the tour is not active */
     public val currentStep: WaypointStep<K>?
         get() = if (currentStepIndex in steps.indices) steps[currentStepIndex] else null
@@ -79,8 +95,13 @@ public class WaypointState<K>(
     /**
      * Restores state after process death or configuration change.
      * Called by the [Saver] in [rememberWaypointState].
+     *
+     * If the saved step index no longer exists (the step list changed across
+     * an app update or process death), the stale session is dropped and the
+     * state stays inactive instead of restoring a tour with no current step.
      */
     internal fun restoreState(savedStepIndex: Int, savedIsActive: Boolean, savedIsPaused: Boolean) {
+        if (savedIsActive && savedStepIndex !in steps.indices) return
         currentStepIndex = savedStepIndex
         isActive = savedIsActive
         isPaused = savedIsPaused
@@ -158,6 +179,8 @@ public class WaypointState<K>(
         isStepReady = true
         exitingStep?.onExit?.invoke()
         analytics?.onTourCancelled(tourId, cancelledAtIndex, steps.size)
+        lastEndReason = WaypointEndReason.Cancelled
+        endEventCount++
     }
 
     /** Pause the tour (hide overlay, preserve state) */
@@ -343,6 +366,8 @@ public class WaypointState<K>(
         analytics?.onTourCompleted(tourId, steps.size)
         val id = tourId
         if (id != null) persistence?.markCompleted(id)
+        lastEndReason = WaypointEndReason.Completed
+        endEventCount++
     }
 
     /** Force-marks this tour as completed in persistence */
@@ -391,4 +416,24 @@ public class WaypointState<K>(
         }
         return null
     }
+
+    // -- Visible-step queries (used to build StepScope) --
+
+    /** Number of steps whose showIf currently passes. */
+    internal fun visibleStepCount(): Int = steps.count { it.showIf?.invoke() != false }
+
+    /**
+     * 1-based position of the step at [index] among currently-visible steps.
+     * The step at [index] itself always counts as visible (it is being shown).
+     */
+    internal fun visibleStepNumber(index: Int): Int =
+        steps.take(index).count { it.showIf?.invoke() != false } + 1
+
+    /** True when a visible step exists after [index]. */
+    internal fun hasVisibleStepAfter(index: Int): Boolean =
+        resolveNextVisibleStep(index, direction = 1) != null
+
+    /** True when a visible step exists before [index]. */
+    internal fun hasVisibleStepBefore(index: Int): Boolean =
+        resolveNextVisibleStep(index, direction = -1) != null
 }

@@ -96,6 +96,56 @@ class WaypointSequenceEffectTest {
     }
 
     @Test
+    fun `effect auto-advances between tours that have no persistence`() = runComposeUiTest {
+        // Tours without tourId/persistence must still advance on completion:
+        // the effect distinguishes complete vs cancel by how the tour ended,
+        // not by persisted completion state.
+        val tourA = WaypointState(steps = listOf(WaypointStep(targetKey = "a")))
+        val tourB = WaypointState(steps = listOf(WaypointStep(targetKey = "b")))
+        val sequence = WaypointSequenceState(listOf(tourA, tourB))
+
+        setContent {
+            WaypointSequenceEffect(sequence)
+        }
+
+        runOnIdle { sequence.start() }
+        waitForIdle()
+        assertTrue(tourA.isActive)
+
+        // Complete tour A normally (single step, next() completes it).
+        runOnIdle { tourA.next() }
+        waitForIdle()
+
+        waitUntil(timeoutMillis = 3000) { sequence.activeIndex == 1 }
+
+        assertEquals(1, sequence.activeIndex)
+        assertTrue(tourB.isActive, "tour B should become active even without persistence")
+    }
+
+    @Test
+    fun `effect halts when a tour without persistence is cancelled`() = runComposeUiTest {
+        val tourA = WaypointState(steps = listOf(WaypointStep(targetKey = "a")))
+        val tourB = WaypointState(steps = listOf(WaypointStep(targetKey = "b")))
+        val sequence = WaypointSequenceState(listOf(tourA, tourB))
+
+        setContent {
+            WaypointSequenceEffect(sequence)
+        }
+
+        runOnIdle { sequence.start() }
+        waitForIdle()
+        assertTrue(tourA.isActive)
+
+        runOnIdle { tourA.stop() }
+        waitForIdle()
+
+        waitUntil(timeoutMillis = 3000) { sequence.activeIndex == -1 }
+
+        assertFalse(sequence.isActive)
+        assertFalse(tourB.isActive, "cancelling tour A should halt the sequence")
+    }
+
+    @Test
     fun `effect advances past an already-completed intermediate tour`() = runComposeUiTest {
         val persistence = RecordingPersistence()
         // Mark B as completed before the sequence runs.

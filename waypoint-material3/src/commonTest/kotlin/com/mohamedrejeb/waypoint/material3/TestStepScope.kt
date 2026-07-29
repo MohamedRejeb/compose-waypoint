@@ -13,6 +13,7 @@ internal data class TestStepScope(
     override val totalSteps: Int,
     override val isFirstStep: Boolean,
     override val isLastStep: Boolean,
+    override val currentStepNumber: Int = currentStepIndex + 1,
     override val onNext: () -> Unit = {},
     override val onPrevious: () -> Unit = {},
     override val onSkip: () -> Unit = {},

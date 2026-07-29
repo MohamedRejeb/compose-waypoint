@@ -273,6 +273,61 @@ class PositionProviderTest {
         assertEquals(expectedX, offset.x)
     }
 
+    // -- Degenerate Windows --
+
+    @Test
+    fun `tooltip wider than window does not crash and centers the overflow`() {
+        // Window 300 wide, tooltip 280 wide, margin 16 each side: the tooltip
+        // cannot satisfy both margins. It must not crash and should center.
+        val smallWindow = IntSize(300, 800)
+        val provider = createProvider(
+            targetBounds = Rect(100f, 350f, 200f, 450f),
+            placement = TooltipPlacement.Bottom,
+        )
+
+        val offset = provider.calculatePosition(
+            anchorBounds = IntRect.Zero,
+            windowSize = smallWindow,
+            layoutDirection = LayoutDirection.Ltr,
+            popupContentSize = IntSize(280, 100),
+        )
+
+        // Midpoint of [margin, windowWidth - tooltipWidth - margin] = (16 + 4) / 2
+        assertEquals(10, offset.x)
+    }
+
+    @Test
+    fun `tooltip taller than window does not crash for side placement`() {
+        val smallWindow = IntSize(1000, 200)
+        val provider = createProvider(
+            targetBounds = Rect(400f, 50f, 600f, 150f),
+            placement = TooltipPlacement.End,
+        )
+
+        val offset = provider.calculatePosition(
+            anchorBounds = IntRect.Zero,
+            windowSize = smallWindow,
+            layoutDirection = LayoutDirection.Ltr,
+            popupContentSize = IntSize(200, 190),
+        )
+
+        // Midpoint of [16, 200 - 190 - 16] = (16 + -6) / 2 = 5
+        assertEquals(5, offset.y)
+    }
+
+    @Test
+    fun `zero size window does not crash`() {
+        val provider = createProvider(centeredTarget, TooltipPlacement.Auto)
+
+        provider.calculatePosition(
+            anchorBounds = IntRect.Zero,
+            windowSize = IntSize(0, 0),
+            layoutDirection = LayoutDirection.Ltr,
+            popupContentSize = tooltipSize,
+        )
+        // No assertion needed - just must not throw.
+    }
+
     // -- Arrow Offsets --
 
     @Test

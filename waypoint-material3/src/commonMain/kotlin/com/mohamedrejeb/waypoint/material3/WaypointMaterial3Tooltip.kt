@@ -23,6 +23,9 @@ import com.mohamedrejeb.waypoint.core.StepScope
  *
  * Reads colors, typography, and dimensions from [WaypointMaterial3Theme].
  * If no theme is provided, falls back to Material3 defaults.
+ *
+ * When composed inside a Waypoint tooltip popup, an arrow pointing at the
+ * target is drawn automatically (disable via [showArrow]).
  */
 @Composable
 public fun WaypointMaterial3Tooltip(
@@ -36,80 +39,86 @@ public fun WaypointMaterial3Tooltip(
     backText: String = "Back",
     finishText: String = "Finish",
     showProgress: Boolean = true,
+    showArrow: Boolean = true,
 ) {
     val colors = WaypointMaterial3Theme.colors
     val typography = WaypointMaterial3Theme.typography
     val dims = WaypointMaterial3Theme.dimensions
 
-    Column(
-        modifier = modifier
-            .widthIn(min = dims.tooltipMinWidth, max = dims.tooltipMaxWidth)
-            .shadow(elevation = dims.tooltipElevation, shape = dims.tooltipShape)
-            .clip(dims.tooltipShape)
-            .background(colors.tooltipBackground)
-            .padding(dims.tooltipPadding),
-        verticalArrangement = Arrangement.spacedBy(dims.contentSpacing),
+    Material3TooltipSurface(
+        arrowColor = colors.tooltipBackground,
+        showArrow = showArrow,
     ) {
-        // Progress indicator
-        if (showProgress) {
-            Text(
-                text = "${stepScope.currentStepIndex + 1} of ${stepScope.totalSteps}",
-                style = typography.progress,
-                color = colors.progress,
-            )
-        }
-
-        // Title
-        if (title != null) {
-            Text(
-                text = title,
-                style = typography.title,
-                color = colors.title,
-            )
-        }
-
-        // Description
-        if (description != null) {
-            Text(
-                text = description,
-                style = typography.description,
-                color = colors.description,
-            )
-        }
-
-        // Navigation buttons
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = modifier
+                .widthIn(min = dims.tooltipMinWidth, max = dims.tooltipMaxWidth)
+                .shadow(elevation = dims.tooltipElevation, shape = dims.tooltipShape)
+                .clip(dims.tooltipShape)
+                .background(colors.tooltipBackground)
+                .padding(dims.tooltipPadding),
+            verticalArrangement = Arrangement.spacedBy(dims.contentSpacing),
         ) {
-            // Left side: Skip button
-            TextButton(onClick = stepScope.onSkip) {
+            // Progress indicator
+            if (showProgress) {
                 Text(
-                    text = skipText,
-                    style = typography.button,
-                    color = colors.skipButton,
+                    text = "${stepScope.currentStepNumber} of ${stepScope.totalSteps}",
+                    style = typography.progress,
+                    color = colors.progress,
                 )
             }
 
-            // Right side: Back + Next/Finish
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                if (!stepScope.isFirstStep) {
-                    TextButton(onClick = stepScope.onPrevious) {
-                        Text(
-                            text = backText,
-                            style = typography.button,
-                            color = colors.secondaryButton,
-                        )
-                    }
+            // Title
+            if (title != null) {
+                Text(
+                    text = title,
+                    style = typography.title,
+                    color = colors.title,
+                )
+            }
+
+            // Description
+            if (description != null) {
+                Text(
+                    text = description,
+                    style = typography.description,
+                    color = colors.description,
+                )
+            }
+
+            // Navigation buttons
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // Left side: Skip button
+                TextButton(onClick = stepScope.onSkip) {
+                    Text(
+                        text = skipText,
+                        style = typography.button,
+                        color = colors.skipButton,
+                    )
                 }
 
-                TextButton(onClick = stepScope.onNext) {
-                    Text(
-                        text = if (stepScope.isLastStep) finishText else nextText,
-                        style = typography.button,
-                        color = colors.primaryButton,
-                    )
+                // Right side: Back + Next/Finish
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (!stepScope.isFirstStep) {
+                        TextButton(onClick = stepScope.onPrevious) {
+                            Text(
+                                text = backText,
+                                style = typography.button,
+                                color = colors.secondaryButton,
+                            )
+                        }
+                    }
+
+                    TextButton(onClick = stepScope.onNext) {
+                        Text(
+                            text = if (stepScope.isLastStep) finishText else nextText,
+                            style = typography.button,
+                            color = colors.primaryButton,
+                        )
+                    }
                 }
             }
         }

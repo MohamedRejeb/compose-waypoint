@@ -73,8 +73,25 @@ public fun <K> Modifier.waypointCanvasTarget(
                 if (!hostCoords.isAttached) return@snapshotFlow null
 
                 val canvasRect = currentBoundsInCanvas()
-                val canvasOriginInHost = hostCoords.localPositionOf(coords, Offset.Zero)
-                val hostRect = canvasRect.translate(canvasOriginInHost)
+                // Map both corners through the coordinate systems so uniform
+                // scale (pan/zoom via graphicsLayer) is captured, not just
+                // translation. Mirrors WaypointState.setTargetBoundsFromLocal.
+                val topLeft = try {
+                    hostCoords.localPositionOf(coords, Offset(canvasRect.left, canvasRect.top))
+                } catch (_: IllegalArgumentException) {
+                    return@snapshotFlow null
+                }
+                val bottomRight = try {
+                    hostCoords.localPositionOf(coords, Offset(canvasRect.right, canvasRect.bottom))
+                } catch (_: IllegalArgumentException) {
+                    return@snapshotFlow null
+                }
+                val hostRect = Rect(
+                    left = minOf(topLeft.x, bottomRight.x),
+                    top = minOf(topLeft.y, bottomRight.y),
+                    right = maxOf(topLeft.x, bottomRight.x),
+                    bottom = maxOf(topLeft.y, bottomRight.y),
+                )
 
                 val canvasInRoot = coords.boundsInRoot()
                 val hostInRoot = hostCoords.boundsInRoot()

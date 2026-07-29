@@ -26,6 +26,7 @@ internal fun RippleHighlight(
 ) {
     val density = LocalDensity.current
     val maxRadiusPx = with(density) { style.maxRadius.toPx() }
+    val strokeWidthPx = with(density) { style.strokeWidth.toPx() }
 
     val allCenters = buildList {
         add(targetBounds.center)
@@ -54,7 +55,7 @@ internal fun RippleHighlight(
                         color = style.color.copy(alpha = alpha),
                         center = center,
                         radius = radius,
-                        style = if (style.filled) Fill else Stroke(width = 2f),
+                        style = if (style.filled) Fill else Stroke(width = strokeWidthPx),
                     )
                 }
             }

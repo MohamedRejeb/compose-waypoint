@@ -36,8 +36,8 @@ public class StepBuilder<K> internal constructor(private val targetKey: K) {
     /** Tooltip placement relative to target */
     public var placement: TooltipPlacement = TooltipPlacement.Auto
 
-    /** How the target is visually highlighted */
-    public var highlightStyle: HighlightStyle = HighlightStyle.Default
+    /** How the target is visually highlighted; null inherits the host-level style */
+    public var highlightStyle: HighlightStyle? = null
 
     /** How the target responds to interaction */
     public var interaction: TargetInteraction = TargetInteraction.None
@@ -68,7 +68,12 @@ public class StepBuilder<K> internal constructor(private val targetKey: K) {
         onExit = action
     }
 
-    /** Set a suspend function that must complete before this step's tooltip/highlight are shown */
+    /**
+     * Set a suspend function launched when this step becomes active, typically to
+     * open a Dialog/Sheet or scroll so the target can register. The highlight and
+     * tooltip are held back until it completes when the target is not yet laid
+     * out; an already-visible target shows immediately while the action runs.
+     */
     public fun beforeShow(action: suspend () -> Unit) {
         beforeShow = action
     }

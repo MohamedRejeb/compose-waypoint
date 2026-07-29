@@ -5,10 +5,13 @@ package com.mohamedrejeb.waypoint.core
  * Exposes tour state and navigation controls.
  */
 public interface StepScope {
-    /** Index of the current step (0-based) */
+    /** Index of the current step in [WaypointState.steps] (0-based, includes hidden steps) */
     public val currentStepIndex: Int
 
-    /** Total number of visible steps in the tour */
+    /** 1-based position of the current step among currently-visible steps, for "X of Y" progress */
+    public val currentStepNumber: Int
+
+    /** Total number of currently-visible steps in the tour (steps whose showIf passes) */
     public val totalSteps: Int
 
     /** Whether this is the first visible step */
@@ -32,6 +35,7 @@ public interface StepScope {
 
 internal data class StepScopeImpl(
     override val currentStepIndex: Int,
+    override val currentStepNumber: Int,
     override val totalSteps: Int,
     override val isFirstStep: Boolean,
     override val isLastStep: Boolean,

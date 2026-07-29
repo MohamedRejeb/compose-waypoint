@@ -388,7 +388,7 @@ class WaypointHostUiTest {
     // -- Pause/Resume in UI --
 
     @Test
-    fun `pause hides tooltip, resume shows it again`() = runComposeUiTest {
+    fun `pause hides tooltip and resume shows it again`() = runComposeUiTest {
         val state = WaypointState(
             steps = listOf(WaypointStep(targetKey = "target")),
         )

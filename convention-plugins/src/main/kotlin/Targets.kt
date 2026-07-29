@@ -9,7 +9,15 @@ fun KotlinMultiplatformExtension.applyTargets() {
     jvm()
 
     js {
-        browser()
+        browser {
+            // Compose UI tests can't bootstrap Skiko on the legacy k/js Karma
+            // runner (org_jetbrains_skia_* symbols unresolved). The same suite
+            // runs on jvm, wasmJs (ChromeHeadless), and iOS simulator, so js
+            // execution adds no coverage. Compilation still runs.
+            testTask {
+                enabled = false
+            }
+        }
     }
 
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)

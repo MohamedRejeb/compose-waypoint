@@ -20,5 +20,14 @@ fun Project.androidLibrarySetup() {
             sourceCompatibility = JavaVersion.VERSION_11
             targetCompatibility = JavaVersion.VERSION_11
         }
+
+        // commonTest contains Compose UI tests (runComposeUiTest), which cannot
+        // run on the local Android unit-test JVM (stubbed android.jar, no
+        // Robolectric): every UI test dies on Build.FINGERPRINT == null. The
+        // exact same suite runs on the jvm target (jvmTest), so Android-local
+        // execution only duplicates the pure tests and breaks on the UI ones.
+        testOptions {
+            unitTests.all { it.isEnabled = false }
+        }
     }
 }

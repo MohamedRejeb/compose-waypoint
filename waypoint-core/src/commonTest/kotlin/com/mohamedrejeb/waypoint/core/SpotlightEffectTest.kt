@@ -84,7 +84,7 @@ class SpotlightEffectTest {
     }
 
     @Test
-    fun `Glow has default color White, radius 24dp, alpha 0_6`() {
+    fun `Glow has default color White with radius 24dp and alpha 0_6`() {
         val glow = SpotlightEffect.Glow()
 
         assertEquals(Color.White, glow.color)

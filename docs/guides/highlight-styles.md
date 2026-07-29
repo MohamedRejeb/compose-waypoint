@@ -35,7 +35,7 @@ WaypointMaterial3Host(
 ```
 
 !!! note
-    A step whose `highlightStyle` equals `HighlightStyle.Default` falls back to the host-level style. This is the default behavior when you omit the property.
+    A step whose `highlightStyle` is `null` falls back to the host-level style. This is the default behavior when you omit the property. The host-level default is `WaypointDefaults.HighlightStyle`, a `Spotlight()`.
 
 ## Variants
 
@@ -126,6 +126,7 @@ highlightStyle = HighlightStyle.Ripple(
     durationMillis = 2000,
     maxRadius = 60.dp,
     filled = false,
+    strokeWidth = 2.dp,
 )
 ```
 
@@ -136,6 +137,7 @@ highlightStyle = HighlightStyle.Ripple(
 | `durationMillis` | `Int` | `2000` | Time for a ring to travel from center to `maxRadius`. |
 | `maxRadius` | `Dp` | `60.dp` | Outer extent of each ring. |
 | `filled` | `Boolean` | `false` | If true, rings render as filled circles. |
+| `strokeWidth` | `Dp` | `2.dp` | Ring stroke width, ignored when `filled` is true. |
 
 Use Ripple to draw attention to small, discrete targets (icons, dots, FABs) where a shape-matched highlight would look cramped.
 

@@ -1,6 +1,6 @@
 # Tour Sequences
 
-A `WaypointSequenceState` chains multiple independent tours into one linear flow, auto-advancing from one to the next and reusing each tour's own persistence to skip tours the user has already completed.
+A `WaypointSequenceState` chains multiple independent tours into one linear flow, auto-advancing from one to the next. Tours don't need persistence for this to work; when a tour has one, the sequence also skips tours the user completed in an earlier session.
 
 Use sequences when a single "onboarding" conceptually spans multiple screens or feature areas and you want each area to remain individually resumable, replayable, and analytics-tagged.
 
@@ -42,7 +42,7 @@ Returns a state that keeps a reference to each tour. Tours pass through `vararg`
 public fun WaypointSequenceEffect(state: WaypointSequenceState)
 ```
 
-Observes the current tour's `isActive`. When a tour transitions to inactive, the effect calls `sequence.advance()` if the tour reports `hasCompleted`, otherwise it calls `sequence.stop()`. Without this effect you must call `advance()` manually (for example, from each host's `onTourComplete`).
+Observes the current tour's `isActive`. When a tour transitions to inactive, the effect calls `sequence.advance()` if the tour's `lastEndReason` is `WaypointEndReason.Completed`, otherwise it calls `sequence.stop()`. The decision is based on how the run ended, not on persisted completion, so tours don't need persistence. Without this effect you must call `advance()` manually (for example, from each host's `onTourComplete`).
 
 ## State API
 
@@ -65,7 +65,7 @@ A sequence does not own the tours. Each `WaypointState` keeps its own:
 
 - Steps and target keys, typed independently (`WelcomeKeys`, `SearchKeys`, and so on).
 - Host rendering, place a `WaypointHost` next to each `rememberWaypointState` call.
-- `tourId` and `persistence`, which drive `hasCompleted` and auto-skip logic.
+- `tourId` and `persistence` (optional), which drive `hasCompleted` and cross-session auto-skip.
 - `analytics` callbacks, which fire per tour.
 
 The sequence just tracks which tour is active at any moment and coordinates start/advance transitions.
@@ -81,10 +81,10 @@ To replay the full sequence, call `reset()`. It clears completion for every tour
 
 ## Completion vs cancellation
 
-`WaypointSequenceEffect` distinguishes the two:
+`WaypointSequenceEffect` distinguishes the two via `lastEndReason`:
 
-- **Completed**, the tour called `complete()` internally, `hasCompleted` is true, the effect calls `advance()`.
-- **Cancelled**, the user dismissed the tour before the last step, `hasCompleted` is false, the effect calls `stop()` so the sequence halts rather than skipping to the next tour.
+- **Completed**, the user advanced past the last step, `lastEndReason` is `WaypointEndReason.Completed`, the effect calls `advance()`.
+- **Cancelled**, the user dismissed the tour before the last step, `lastEndReason` is `WaypointEndReason.Cancelled`, the effect calls `stop()` so the sequence halts rather than skipping to the next tour.
 
 This matches user intent: if a user explicitly dismissed the welcome tour, they probably don't want the search tour to fire right after.
 

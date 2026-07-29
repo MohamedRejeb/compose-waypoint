@@ -31,7 +31,7 @@ step(Targets.SearchField) {
 }
 ```
 
-When the step becomes active, the host launches a `LaunchedEffect(currentStepIndex)` that calls `trigger.await()`. When the suspend function returns, the host calls `state.next()`. If the step was last, `onTourComplete` fires.
+When the step becomes active, the host launches a `LaunchedEffect(currentStepIndex)` that waits for the step's `beforeShow` gate to complete (and the tour to be un-paused), then calls `trigger.await()`. A trigger whose condition is already satisfied therefore cannot skip a step that was never shown. When the suspend function returns, the host calls `state.next()`. If the step was last, `onTourComplete` fires.
 
 ## How it interacts with NextButton
 
@@ -166,7 +166,7 @@ step(Targets.LoadedPanel) {
 }
 ```
 
-`beforeShow` runs first, gating the step visibility. Once the step shows, `advanceOn` starts listening for the next condition.
+`beforeShow` runs first, gating the step visibility. `advanceOn` starts listening only after the gate completes, even if its condition is already met.
 
 ## FAQ
 

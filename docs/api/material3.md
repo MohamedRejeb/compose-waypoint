@@ -126,7 +126,7 @@ public fun <K> WaypointMaterial3OverlayHost(
 )
 ```
 
-Notice there's no `keyboardConfig`, `onTourComplete`, or `onTourCancel`, those responsibilities belong to the primary host.
+Notice there's no `keyboardConfig`, `onTourComplete`, or `onTourCancel`, those responsibilities belong to the primary host. The primary host's callbacks still fire when the tour completes or is cancelled from a tooltip inside the overlay host.
 
 ```kotlin
 WaypointMaterial3Host(state = state) {
@@ -159,10 +159,11 @@ public fun WaypointMaterial3Tooltip(
     backText: String = "Back",
     finishText: String = "Finish",
     showProgress: Boolean = true,
+    showArrow: Boolean = true,
 )
 ```
 
-Reads colors, typography, and dimensions from [`WaypointMaterial3Theme`](#waypointmaterial3theme).
+Reads colors, typography, and dimensions from [`WaypointMaterial3Theme`](#waypointmaterial3theme). When composed inside a Waypoint tooltip popup, an arrow pointing at the target is drawn automatically; pass `showArrow = false` to disable it. The progress label shows `currentStepNumber of totalSteps`, counting only visible steps.
 
 ```kotlin
 step(Targets.Special) {
@@ -249,10 +250,11 @@ public fun WaypointMaterial3HintTooltip(
     gotItText: String = "Got it",
     showCloseButton: Boolean = false,
     closeContentDescription: String = "Close",
+    showArrow: Boolean = true,
 )
 ```
 
-Reads from `WaypointMaterial3Theme` the same way `WaypointMaterial3Tooltip` does, so theming applies to hints automatically.
+Reads from `WaypointMaterial3Theme` the same way `WaypointMaterial3Tooltip` does, so theming applies to hints automatically. Like the tour tooltip, it draws an arrow pointing at the hint target unless `showArrow` is false.
 
 ## See also
 

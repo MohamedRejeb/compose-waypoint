@@ -50,7 +50,7 @@ Pick `waypoint-core` alone for full control over the tooltip UI, or `waypoint-ma
 
 -   :material-link-variant: __Tour sequences__
 
-    Chain multiple tours together with shared persistence and auto-advance.
+    Chain multiple tours together with auto-advance and optional shared persistence.
 
 -   :material-lightbulb-on: __Persistent hints__
 

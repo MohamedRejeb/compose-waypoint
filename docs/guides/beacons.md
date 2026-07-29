@@ -129,7 +129,7 @@ A `WaypointHint` is a beacon plus a tooltip popup plus persistence. Use a standa
 |------|-----|
 | Just a flashing dot, no tooltip | `WaypointBeacon` |
 | Beacon with tap-to-show tooltip | `WaypointHint` |
-| Dismissal should persist across sessions | `WaypointHint` with `persistence` and `groupId` |
+| Dismissal should persist across sessions | `WaypointHint` with `persistence` (plus an optional `groupId` namespace) |
 | Multiple hints, centrally managed | `rememberWaypointHintState` |
 
 Beacons are also useful inside tooltip content or other components where you only need the visual without any state machine.

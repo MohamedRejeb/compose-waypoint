@@ -53,7 +53,7 @@ public fun <K> rememberWaypointHintState(
 ): WaypointHintState<K>
 ```
 
-`persistence` and `groupId` both need to be non-null for dismissal to survive across sessions. Dismissed keys and the open hint are restored on configuration change via `rememberSaveable`.
+`persistence` needs to be non-null for dismissal to survive across sessions; `groupId` is an optional namespace. Dismissed keys and the open hint are restored on configuration change via `rememberSaveable`.
 
 ### Hint properties
 
@@ -127,7 +127,7 @@ public interface HintScope {
 
 ## Persistence
 
-When `persistence` and `groupId` are both provided, the state writes dismissals to `"<groupId>:<key>"`. On init, each hint's persistence key is checked, hints whose key reports completed are marked dismissed.
+When `persistence` is provided, the state writes dismissals to `"<groupId>:<key>"`, or to `"hint:<key>"` when `groupId` is null (the prefix keeps hint keys from colliding with tour ids). On init, each hint's persistence key is checked, hints whose key reports completed are marked dismissed.
 
 ```kotlin
 val hints = rememberWaypointHintState<HomeHints>(

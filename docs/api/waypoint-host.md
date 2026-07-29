@@ -34,8 +34,8 @@ public fun <K> WaypointHost(
 | `keyboardConfig` | `KeyboardConfig` | `KeyboardConfig.Default` | Keyboard navigation config (arrow keys, Enter, Escape). |
 | `tooltipSpacing` | `Dp` | `12.dp` | Gap between the tooltip and the target. |
 | `screenMargin` | `Dp` | `16.dp` | Minimum margin from screen edges before the tooltip flips or shifts. |
-| `onTourComplete` | `(() -> Unit)?` | `null` | Called when the user advances past the last step. |
-| `onTourCancel` | `(() -> Unit)?` | `null` | Called when the user skips or the tour is stopped mid-flight. |
+| `onTourComplete` | `(() -> Unit)?` | `null` | Called when a tour run ends with `WaypointEndReason.Completed`, no matter which host or code path finished it. |
+| `onTourCancel` | `(() -> Unit)?` | `null` | Called when a tour run ends with `WaypointEndReason.Cancelled`: skip, Escape, overlay dismiss, or a direct `state.stop()` call. |
 | `tooltipContent` | `@Composable (StepScope, ResolvedPlacement) -> Unit` | required | Slot for your tooltip composable. See [Custom Tooltips](../guides/custom-tooltips.md). |
 | `content` | `@Composable () -> Unit` | required | Your screen content. |
 
@@ -146,7 +146,7 @@ public fun <K> WaypointOverlayHost(
 )
 ```
 
-Both hosts share the same `WaypointState`. Targets register against whichever host is their nearest ancestor, and Waypoint renders the overlay + tooltip in the host that owns the current step's target. Tour-lifecycle callbacks (`onTourComplete`, `onTourCancel`, keyboard) stay on the primary host.
+Both hosts share the same `WaypointState`. Targets register against whichever host is their nearest ancestor, and Waypoint renders the overlay + tooltip in the host that owns the current step's target. Tour-lifecycle callbacks (`onTourComplete`, `onTourCancel`, keyboard) stay on the primary host, and they fire for every way the tour ends, including tooltip buttons inside a `WaypointOverlayHost`.
 
 ```kotlin
 WaypointHost(state = state, tooltipContent = { s, p -> MyTooltip(s, p) }) {

@@ -34,9 +34,10 @@ The slot signature is `@Composable (StepScope, ResolvedPlacement) -> Unit`.
 
 | Property | Type | Description |
 |---|---|---|
-| `currentStepIndex` | `Int` | 0-based index of the visible step. |
-| `totalSteps` | `Int` | Total number of steps in the tour. |
-| `isFirstStep` | `Boolean` | True if `currentStepIndex == 0`. |
+| `currentStepIndex` | `Int` | Raw 0-based index in the full steps list, including hidden steps. |
+| `currentStepNumber` | `Int` | 1-based position among currently-visible steps, for "X of Y" progress. |
+| `totalSteps` | `Int` | Number of currently-visible steps (steps whose `showIf` passes). |
+| `isFirstStep` | `Boolean` | True if the step is the first visible step. |
 | `isLastStep` | `Boolean` | True if the step is the last visible step. |
 | `onNext` | `() -> Unit` | Advance to the next step, or complete the tour. |
 | `onPrevious` | `() -> Unit` | Go back one step. |
@@ -82,7 +83,7 @@ fun CustomOnboardingScreen() {
             MyTooltip(
                 title = step?.title.orEmpty(),
                 description = step?.description.orEmpty(),
-                currentIndex = stepScope.currentStepIndex,
+                currentIndex = stepScope.currentStepNumber - 1,
                 total = stepScope.totalSteps,
                 placement = placement,
                 onBack = if (stepScope.isFirstStep) null else stepScope.onPrevious,
@@ -155,7 +156,7 @@ fun MyTooltip(
 
 ## Per-step overrides
 
-A single step can provide its own tooltip composable via `content { ... }` in the step builder. It receives only `StepScope` (placement is not passed because per-step content typically doesn't need auto-flip hints).
+A single step can provide its own tooltip composable via `content { ... }` in the step builder. It receives only `StepScope` (placement is not passed because per-step content typically doesn't need auto-flip hints). If per-step content does need the resolved placement, for example to draw an arrow, read `LocalTooltipArrowGeometry`.
 
 ```kotlin
 rememberWaypointState<Targets> {
@@ -201,7 +202,7 @@ WaypointHost(
 
 ## Arrows
 
-Waypoint ships an internal `TooltipArrow` composable that draws a triangle pointing at the target, but it's not wired into the core tooltip by default, each custom tooltip can decide whether to show one. `ResolvedPlacement` tells you which direction the arrow should point:
+Waypoint ships a public `TooltipArrow(placement, color, size, modifier)` composable that draws a triangle pointing at the target. The Material3 tooltip renders it automatically; for custom tooltips you decide whether to show one. The direction follows the resolved placement:
 
 | `ResolvedPlacement` | Arrow points |
 |---|---|
@@ -210,7 +211,27 @@ Waypoint ships an internal `TooltipArrow` composable that draws a triangle point
 | `Start` (tooltip left of target in LTR) | Right |
 | `End` (tooltip right of target in LTR) | Left |
 
-If you build your own arrow, mirror the direction for RTL layouts.
+`TooltipArrow` mirrors `Start`/`End` for RTL layouts internally, so you don't have to.
+
+To position the arrow so it keeps pointing at the target even when the tooltip is clamped by a screen edge, read `LocalTooltipArrowGeometry`. It provides a `TooltipArrowGeometry(placement, arrowOffset)` while tooltip content is composed inside the popup (null outside of one). `arrowOffset` is the px distance of the arrow's center from the tooltip's left edge for `Top`/`Bottom` placements, and from the top edge for `Start`/`End`.
+
+```kotlin
+tooltipContent = { stepScope, placement ->
+    val geometry = LocalTooltipArrowGeometry.current
+    Column {
+        if (geometry != null && geometry.placement == ResolvedPlacement.Bottom) {
+            TooltipArrow(
+                placement = geometry.placement,
+                color = Color(0xFF1B1B2F),
+                modifier = Modifier
+                    .size(width = 20.dp, height = 10.dp)
+                    .offset { IntOffset((geometry.arrowOffset - 10.dp.toPx()).roundToInt(), 0) },
+            )
+        }
+        MyTooltipBody(stepScope)
+    }
+}
+```
 
 ## Accessibility
 

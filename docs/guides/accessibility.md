@@ -123,11 +123,11 @@ fun AccessibleTooltip(
             .padding(16.dp)
             .semantics {
                 // Explicit description helps screen readers read the full context.
-                contentDescription = "Tour tooltip, step ${stepScope.currentStepIndex + 1} of ${stepScope.totalSteps}"
+                contentDescription = "Tour tooltip, step ${stepScope.currentStepNumber} of ${stepScope.totalSteps}"
             },
     ) {
         Text(
-            text = "Step ${stepScope.currentStepIndex + 1}",
+            text = "Step ${stepScope.currentStepNumber}",
             style = MaterialTheme.typography.labelSmall,
         )
         Text(

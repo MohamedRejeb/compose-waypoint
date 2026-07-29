@@ -63,6 +63,8 @@ Each host gets a unique `hostId` (`remember { Any() }`) and registers its `Layou
 
 When the current step's target key resolves to host A, only host A renders the overlay and tooltip. Host B stays passive, its own animated bounds are snapped to `Rect.Zero` so ownership hand-offs don't flash stale positions.
 
+A step's `additionalTargets` must live in the same host as its primary target. Additional keys registered against a different host are ignored for that step's highlight.
+
 Only the primary host (`WaypointHost`) runs these lifecycle effects:
 
 - `beforeShow` gating.
@@ -70,7 +72,7 @@ Only the primary host (`WaypointHost`) runs these lifecycle effects:
 - Keyboard handling.
 - `onTourComplete` / `onTourCancel` callbacks.
 
-Overlay hosts (`WaypointOverlayHost`) stay silent on lifecycle to avoid duplicating side effects.
+Overlay hosts (`WaypointOverlayHost`) stay silent on lifecycle to avoid duplicating side effects. The primary host's `onTourComplete` / `onTourCancel` still fire for every way the tour ends, including tooltip buttons inside an overlay host, keyboard shortcuts, overlay clicks, custom triggers, and direct `state.stop()` calls.
 
 ## Full example: tour that spans a dialog
 

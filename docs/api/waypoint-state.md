@@ -33,11 +33,12 @@ You usually don't construct `WaypointState` directly, use `rememberWaypointState
 | `tourId` | `String?` | Identifier passed at construction. |
 | `analytics` | `WaypointAnalytics?` | Analytics listener passed at construction. |
 | `persistence` | `WaypointPersistence?` | Persistence listener passed at construction. |
-| `currentStepIndex` | `Int` | Index of the current step, or `-1` when inactive. Backed by `mutableStateOf`. |
+| `currentStepIndex` | `Int` | Raw index of the current step in the full `steps` list (hidden steps included), or `-1` when inactive. Backed by `mutableStateOf`. |
 | `isActive` | `Boolean` | True while the tour is showing steps. |
 | `isPaused` | `Boolean` | True if the tour is paused. |
 | `currentStep` | `WaypointStep<K>?` | The current step, or null when inactive. |
 | `currentTargetBounds` | `Rect?` | Bounds of the current step's target, or null if the target hasn't registered. |
+| `lastEndReason` | `WaypointEndReason?` | How the most recent run ended (`Completed` or `Cancelled`), or null until a run ends. Updated on every completion or cancellation, including direct `stop()` calls. |
 | `hasCompleted` | `Boolean` | True if `tourId` and `persistence` are set and `persistence.isCompleted(tourId)` returns true. |
 
 All reactive properties are backed by Compose state, so reading them in a composable triggers recomposition.
@@ -80,7 +81,7 @@ Jumps to a step by its target key. Looks up the first step whose `targetKey == k
 
 ### `stop()`
 
-Cancels the tour, fires the current step's `onExit`, and emits `WaypointAnalytics.onTourCancelled`. No-op if already inactive and not paused.
+Cancels the tour, fires the current step's `onExit`, sets `lastEndReason` to `Cancelled`, and emits `WaypointAnalytics.onTourCancelled`. The host's `onTourCancel` callback fires too, even for direct `stop()` calls from app code. No-op if already inactive and not paused.
 
 ### `pause()`
 
@@ -183,10 +184,10 @@ step(Targets.Search) {
 | `description` | `String?` | `null` | Tooltip description. |
 | `content` | `(@Composable (StepScope) -> Unit)?` | `null` | Per-step custom tooltip. Bypasses the host-level `tooltipContent`. See [Custom Tooltips](../guides/custom-tooltips.md). |
 | `placement` | `TooltipPlacement` | `Auto` | Desired side. Waypoint auto-flips if space is tight. |
-| `highlightStyle` | `HighlightStyle` | `Default` (falls back to host) | Per-step highlight. See [Highlight Styles](../guides/highlight-styles.md). |
+| `highlightStyle` | `HighlightStyle?` | `null` (inherits host) | Per-step highlight. See [Highlight Styles](../guides/highlight-styles.md). |
 | `interaction` | `TargetInteraction` | `None` | Whether the user can tap the highlighted target. |
 | `advanceOn` | `WaypointTrigger` | `NextButton` | How the step progresses. Use `WaypointTrigger.Custom` for async gates. |
-| `additionalTargets` | `List<K>` | `emptyList()` | Extra keys to highlight alongside the primary target. |
+| `additionalTargets` | `List<K>` | `emptyList()` | Extra keys to highlight alongside the primary target. Must live in the same host as the primary target; keys registered against a different host are ignored for that step. |
 
 ### StepBuilder methods
 
@@ -195,12 +196,12 @@ step(Targets.Search) {
 | `showIf { condition() }` | Skip this step when the predicate returns `false`. Called when navigating through the tour. |
 | `onEnter { }` | Callback when the step becomes active. |
 | `onExit { }` | Callback when the step is exited (advance, back, stop). |
-| `beforeShow { suspendWork() }` | Suspend block that must complete before the tooltip / highlight appear. Use for opening modals, waiting for navigation, async prefetching. |
+| `beforeShow { suspendWork() }` | Suspend block that runs on every step entry. Use for opening modals, waiting for navigation, async prefetching. |
 | `content { stepScope -> ... }` | Alternative to the property form, sets `content` via a method call. |
 
-`beforeShow` is useful when the target mounts inside a `Dialog` or a scroll list, open the dialog, wait for composition, then let Waypoint render. The tour highlight is hidden while `beforeShow` runs.
+`beforeShow` is useful when the target mounts inside a `Dialog` or a scroll list, open the dialog, wait for composition, then let Waypoint render. The highlight and tooltip are held back until the gate completes only when the step's target isn't laid out yet (the dialog/sheet case); if the target is already visible, the step shows immediately while `beforeShow` runs.
 
-`advanceOn = WaypointTrigger.Custom { ... }` runs the suspend lambda in parallel with the tooltip. When it returns, the step advances automatically. The Next button and keyboard shortcuts still work alongside it.
+`advanceOn = WaypointTrigger.Custom { ... }` starts the suspend lambda once the `beforeShow` gate completes and the tour is un-paused, so a pre-satisfied trigger cannot skip a step that was never shown. When it returns, the step advances automatically. The Next button and keyboard shortcuts still work alongside it.
 
 ## Minimal end-to-end example
 

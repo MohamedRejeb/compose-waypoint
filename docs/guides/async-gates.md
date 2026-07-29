@@ -1,6 +1,6 @@
 # Async Gates with `beforeShow`
 
-`beforeShow` is a suspend block attached to a step that must complete before that step's highlight and tooltip are rendered. Use it to wait for data, open a modal, run an animation, or perform any asynchronous setup that needs to land before the user sees the spotlight.
+`beforeShow` is a suspend block attached to a step that runs on every entry to that step. When the step's target isn't laid out yet (for example, it lives in a dialog the gate is about to open), the highlight and tooltip are held back until the block completes. Use it to wait for data, open a modal, run an animation, or perform any asynchronous setup that needs to land before the user sees the spotlight.
 
 ## Core API
 
@@ -28,10 +28,10 @@ When the step becomes active, `WaypointHost` launches an effect that:
 2. Awaits `beforeShow`.
 3. Marks the step as ready, which unblocks the highlight and tooltip.
 
-While `beforeShow` is running, the tooltip and highlight stay hidden. The scrim stays visible since the underlying `SpotlightOverlay` only renders when `shouldShowHighlight` is true, which requires `isStepReady`.
+While `beforeShow` is running, the tooltip and highlight stay hidden only if the target wasn't laid out when the step was entered. A step whose target is already visible shows immediately while the gate runs in the background.
 
 !!! note
-    The gate runs only when the current step actually has a `beforeShow` lambda **and** the target isn't already registered. When navigating between two steps inside an already-open modal, `isStepReady` stays true so the highlight animates smoothly to the new position instead of flickering through a hidden frame.
+    The gate lambda itself runs on every step entry. The hold-back applies only when the step has a `beforeShow` **and** the target isn't already registered. When navigating between two steps inside an already-open modal, `isStepReady` stays true so the highlight animates smoothly to the new position instead of flickering through a hidden frame.
 
 ## Common use cases
 
@@ -188,7 +188,7 @@ fun CheckoutScreen() {
 The exception propagates out of the `LaunchedEffect` block. The step never marks ready, so the tooltip stays hidden. Handle errors explicitly inside the lambda, especially if you call into potentially failing network or IO code.
 
 **Can I chain `beforeShow` with `advanceOn`?**
-Yes, `beforeShow` runs before the step appears, `advanceOn` runs after. A step can use both. See [Advance Triggers](advance-on.md).
+Yes, a step can use both. A `Custom` trigger doesn't start awaiting until the gate completes and the tour is un-paused, so a pre-satisfied trigger can't skip a step that was never shown. See [Advance Triggers](advance-on.md).
 
 **Does `beforeShow` block navigation?**
 No. The user can still hit Next, Previous, or Escape on the host. When they do, the running `beforeShow` is cancelled, and the next step takes over.

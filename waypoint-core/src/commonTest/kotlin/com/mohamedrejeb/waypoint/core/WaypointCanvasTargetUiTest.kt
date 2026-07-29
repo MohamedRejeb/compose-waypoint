@@ -16,6 +16,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -76,6 +78,42 @@ class WaypointCanvasTargetUiTest {
         assertEquals(expectedTop, bounds.top, 0.5f)
         assertEquals(expectedLeft + 50f, bounds.right, 0.5f) // width 60-10 = 50
         assertEquals(expectedTop + 60f, bounds.bottom, 0.5f) // height 80-20 = 60
+    }
+
+    @Test
+    fun `graphicsLayer scale on the canvas is captured in registered bounds`() = runComposeUiTest {
+        val state = WaypointState(steps = listOf(WaypointStep(targetKey = "k")))
+
+        setContent {
+            WaypointHost(
+                state = state,
+                tooltipContent = { _, _ -> },
+            ) {
+                Box(
+                    modifier = Modifier
+                        .graphicsLayer(
+                            scaleX = 2f,
+                            scaleY = 2f,
+                            transformOrigin = TransformOrigin(0f, 0f),
+                        )
+                        .size(100.dp, 100.dp)
+                        .waypointCanvasTarget(state, "k") {
+                            Rect(10f, 20f, 60f, 80f)
+                        },
+                )
+            }
+        }
+
+        runOnIdle { state.start() }
+        waitUntil(timeoutMillis = 3000) { state.currentTargetBounds != null }
+
+        val bounds = state.currentTargetBounds
+        assertNotNull(bounds)
+        // Zoomed 2x from origin: position and size both scale.
+        assertEquals(20f, bounds.left, 0.5f)
+        assertEquals(40f, bounds.top, 0.5f)
+        assertEquals(100f, bounds.width, 0.5f)
+        assertEquals(120f, bounds.height, 0.5f)
     }
 
     @Test

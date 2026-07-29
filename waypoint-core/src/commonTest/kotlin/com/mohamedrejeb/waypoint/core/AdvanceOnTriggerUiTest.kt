@@ -384,4 +384,66 @@ class AdvanceOnTriggerUiTest {
         }
         assertEquals(1, state.currentStepIndex)
     }
+
+    // -- beforeShow gating --
+
+    @Test
+    fun `pre-satisfied trigger waits for the beforeShow gate`() = runComposeUiTest {
+        val gate = CompletableDeferred<Unit>()
+        val showSecondTarget = mutableStateOf(false)
+
+        val state = WaypointState(
+            steps = listOf(
+                WaypointStep(targetKey = "a"),
+                WaypointStep(
+                    targetKey = "b",
+                    beforeShow = { gate.await() },
+                    // Already satisfied when the step is entered - without the
+                    // gate this would advance instantly and skip the step.
+                    advanceOn = WaypointTrigger.Custom { },
+                ),
+            ),
+        )
+
+        setContent {
+            WaypointHost(
+                state = state,
+                tooltipContent = { _, _ ->
+                    BasicText(
+                        text = state.currentStep?.targetKey ?: "",
+                        modifier = Modifier.testTag("tooltip"),
+                    )
+                },
+            ) {
+                Box(Modifier.fillMaxSize()) {
+                    Column {
+                        Box(Modifier.size(60.dp).waypointTarget(state, "a"))
+                        if (showSecondTarget.value) {
+                            Box(Modifier.size(60.dp).waypointTarget(state, "b"))
+                        }
+                    }
+                }
+            }
+        }
+
+        runOnIdle { state.start() }
+        waitUntil(timeoutMillis = 3000) {
+            onAllNodesWithText("a").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Enter the gated step. The trigger must NOT fire while the gate holds.
+        runOnIdle { state.next() }
+        waitForIdle()
+        assertTrue(state.isActive, "trigger must not complete the tour while beforeShow is pending")
+        assertEquals(1, state.currentStepIndex)
+
+        // Release the gate and mount the target; the trigger then advances,
+        // which completes the (two-step) tour.
+        runOnIdle {
+            showSecondTarget.value = true
+            gate.complete(Unit)
+        }
+        waitUntil(timeoutMillis = 3000) { !state.isActive }
+        assertEquals(WaypointEndReason.Completed, state.lastEndReason)
+    }
 }

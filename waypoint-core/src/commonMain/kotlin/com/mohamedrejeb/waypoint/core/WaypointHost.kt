@@ -297,10 +297,8 @@ internal fun <K> WaypointHostScope(
                 val overlayClickHandler: () -> Unit = {
                     when (overlayClickBehavior) {
                         is OverlayClickBehavior.Nothing -> {}
-                        is OverlayClickBehavior.Dismiss -> {
-                            state.stop()
-                            onTourCancel?.invoke()
-                        }
+                        // onTourCancel fires via the end-event observer.
+                        is OverlayClickBehavior.Dismiss -> state.stop()
                         is OverlayClickBehavior.NextStep -> state.next()
                         is OverlayClickBehavior.Custom -> overlayClickBehavior.action()
                     }

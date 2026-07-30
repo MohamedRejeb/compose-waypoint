@@ -1,32 +1,20 @@
 package com.mohamedrejeb.waypoint.sample.demos.highlights
 
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
-import androidx.compose.material.icons.rounded.AutoFixHigh
 import androidx.compose.material.icons.rounded.BlurOn
-import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.Circle
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.LightMode
@@ -34,338 +22,262 @@ import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material.icons.rounded.Waves
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.waypoint.core.HighlightStyle
-import com.mohamedrejeb.waypoint.core.OverlayClickBehavior
 import com.mohamedrejeb.waypoint.core.SpotlightEffect
-import com.mohamedrejeb.waypoint.core.SpotlightPadding
 import com.mohamedrejeb.waypoint.core.SpotlightShape
+import com.mohamedrejeb.waypoint.core.WaypointState
 import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
+import com.mohamedrejeb.waypoint.sample.components.FlatCard
+import com.mohamedrejeb.waypoint.sample.components.IconBadge
 import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
+import com.mohamedrejeb.waypoint.sample.components.ScreenPadding
+import com.mohamedrejeb.waypoint.sample.components.SectionLabel
 
-private val VioletPrimary = Color(0xFF7C3AED)
-private val TealSecondary = Color(0xFF14B8A6)
-private val AmberTertiary = Color(0xFFF59E0B)
+// The multi-target entry uses its own keys, kept apart from the entry indices.
+private const val MultiTargetEntry = 9
+private const val ChipA = 100
+private const val ChipB = 101
+private const val ChipC = 102
 
-private data class HighlightCardData(
-    val title: String,
-    val description: String,
+private data class GalleryEntry(
+    val label: String,
+    val note: String,
     val icon: ImageVector,
-    val iconColor: Color,
-    val highlightStyle: HighlightStyle,
-    val tooltipTitle: String,
-    val tooltipDescription: String,
+    val style: HighlightStyle,
 )
 
-private val highlightCards = listOf(
-    HighlightCardData(
-        title = "Spotlight (Circle)",
-        description = "Classic circle cutout with dimmed overlay",
-        icon = Icons.Rounded.Circle,
-        iconColor = Color(0xFF3B82F6),
-        highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.Circle),
-        tooltipTitle = "Circle Spotlight",
-        tooltipDescription = "A circular cutout reveals the target element.",
-    ),
-    HighlightCardData(
-        title = "Spotlight (RoundedRect)",
-        description = "Rounded rectangle with custom padding",
-        icon = Icons.Rounded.Star,
-        iconColor = Color(0xFF8B5CF6),
-        highlightStyle = HighlightStyle.Spotlight(
-            shape = SpotlightShape.RoundedRect(12.dp),
-            padding = SpotlightPadding(8.dp),
-        ),
-        tooltipTitle = "Rounded Rectangle",
-        tooltipDescription = "A rounded rectangle cutout with extra padding.",
-    ),
-    HighlightCardData(
-        title = "Spotlight (Pill)",
-        description = "Capsule shape that hugs the target",
-        icon = Icons.Rounded.FavoriteBorder,
-        iconColor = Color(0xFFEC4899),
-        highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.Pill),
-        tooltipTitle = "Pill Spotlight",
-        tooltipDescription = "A capsule-shaped cutout hugging the target.",
-    ),
-    HighlightCardData(
-        title = "Pulse",
-        description = "Animated breathing pulse around target",
-        icon = Icons.Rounded.LightMode,
-        iconColor = TealSecondary,
-        highlightStyle = HighlightStyle.Pulse(
-            color = TealSecondary,
-            shape = SpotlightShape.Circle,
-            filled = true,
-        ),
-        tooltipTitle = "Pulse Highlight",
-        tooltipDescription = "An animated breathing pulse draws attention.",
-    ),
-    HighlightCardData(
-        title = "Border",
-        description = "Static colored border outline",
-        icon = Icons.Rounded.RadioButtonUnchecked,
-        iconColor = VioletPrimary,
-        highlightStyle = HighlightStyle.Border(
-            color = VioletPrimary,
-            borderWidth = 3.dp,
-            shape = SpotlightShape.RoundedRect(8.dp),
-        ),
-        tooltipTitle = "Border Highlight",
-        tooltipDescription = "A static colored border outlines the target.",
-    ),
-    HighlightCardData(
-        title = "Ripple",
-        description = "Expanding concentric rings",
-        icon = Icons.Rounded.Waves,
-        iconColor = AmberTertiary,
-        highlightStyle = HighlightStyle.Ripple(
-            color = AmberTertiary,
-            ringCount = 3,
-        ),
-        tooltipTitle = "Ripple Highlight",
-        tooltipDescription = "Concentric rings expand outward from the target.",
-    ),
-    HighlightCardData(
-        title = "None",
-        description = "Tooltip only, no visual highlight",
-        icon = Icons.Rounded.VisibilityOff,
-        iconColor = Color(0xFF6B7280),
-        highlightStyle = HighlightStyle.None,
-        tooltipTitle = "No Highlight",
-        tooltipDescription = "Only the tooltip is shown, with no visual highlight.",
-    ),
-    HighlightCardData(
-        title = "Custom",
-        description = "Fully custom composable",
-        icon = Icons.Rounded.AutoAwesome,
-        iconColor = Color(0xFF7C3AED),
-        highlightStyle = HighlightStyle.Custom { _, animatedBounds ->
-            val infiniteTransition = rememberInfiniteTransition()
-            val alpha by infiniteTransition.animateFloat(
-                initialValue = 0.3f,
-                targetValue = 1f,
-                animationSpec = infiniteRepeatable(tween(800), RepeatMode.Reverse),
-            )
-            Canvas(Modifier.fillMaxSize()) {
-                drawRoundRect(
-                    color = Color(0xFF7C3AED).copy(alpha = alpha),
-                    topLeft = animatedBounds.topLeft - Offset(8f, 8f),
-                    size = Size(animatedBounds.width + 16f, animatedBounds.height + 16f),
-                    cornerRadius = CornerRadius(16f),
-                    style = Stroke(width = 4f),
-                )
-            }
-        },
-        tooltipTitle = "Custom Highlight",
-        tooltipDescription = "A fully custom animated glowing ring.",
-    ),
-    HighlightCardData(
-        title = "Spotlight + Glow",
-        description = "Colored halo around the cutout edge",
-        icon = Icons.Rounded.Bolt,
-        iconColor = AmberTertiary,
-        highlightStyle = HighlightStyle.Spotlight(
-            shape = SpotlightShape.Circle,
-            padding = SpotlightPadding(12.dp),
-            effect = SpotlightEffect.Glow(
-                color = AmberTertiary,
-                radius = 32.dp,
-                alpha = 0.7f,
-            ),
-        ),
-        tooltipTitle = "Glow Effect",
-        tooltipDescription = "The cutout is surrounded by a soft colored halo.",
-    ),
-    HighlightCardData(
-        title = "Spotlight + SoftEdge",
-        description = "Gradient fade between cutout and scrim",
-        icon = Icons.Rounded.BlurOn,
-        iconColor = Color(0xFF38BDF8),
-        highlightStyle = HighlightStyle.Spotlight(
-            shape = SpotlightShape.RoundedRect(16.dp),
-            padding = SpotlightPadding(8.dp),
-            effect = SpotlightEffect.SoftEdge(fadeWidth = 24.dp),
-        ),
-        tooltipTitle = "Soft Edge",
-        tooltipDescription = "The cutout edge fades into the scrim instead of a hard line.",
-    ),
-    HighlightCardData(
-        title = "Spotlight + Custom FX",
-        description = "Animated dashed ring around cutout",
-        icon = Icons.Rounded.AutoFixHigh,
-        iconColor = VioletPrimary,
-        highlightStyle = HighlightStyle.Spotlight(
-            shape = SpotlightShape.RoundedRect(12.dp),
-            padding = SpotlightPadding(10.dp),
-            effect = SpotlightEffect.Custom { bounds ->
-                drawRoundRect(
-                    color = Color.White.copy(alpha = 0.9f),
-                    topLeft = bounds.topLeft - Offset(6f, 6f),
-                    size = Size(bounds.width + 12f, bounds.height + 12f),
-                    cornerRadius = CornerRadius(18f),
-                    style = Stroke(width = 3f),
-                )
-            },
-        ),
-        tooltipTitle = "Custom Spotlight FX",
-        tooltipDescription = "Draw anything around the cutout via SpotlightEffect.Custom.",
-    ),
-)
-
-private enum class GalleryTarget {
-    SpotlightCircle, SpotlightRoundedRect, SpotlightPill,
-    Pulse, Border, Ripple, NoHighlight, Custom,
-    Glow, SoftEdge, CustomFx,
-}
-
+/**
+ * One card per highlight style, each previewing the highlight on itself.
+ * A single tour holds every step; showIf makes only the tapped entry visible,
+ * so each Try button runs a one-step tour.
+ */
 @Composable
 fun HighlightGalleryDemo(onBack: () -> Unit) {
-    // Track which card the user tapped "Try It" on — only that step is visible.
-    var activeHighlight by remember { mutableIntStateOf(-1) }
-    val targets = GalleryTarget.entries
+    var activeEntry by remember { mutableStateOf(-1) }
 
-    val state = rememberWaypointState {
-        highlightCards.forEachIndexed { index, card ->
-            step(targets[index]) {
-                title = card.tooltipTitle
-                description = card.tooltipDescription
-                highlightStyle = card.highlightStyle
-                showIf { activeHighlight == index }
+    val scheme = MaterialTheme.colorScheme
+    val entries = remember {
+        listOf(
+            GalleryEntry(
+                label = "Spotlight - rounded",
+                note = "Dimmed overlay with a rounded cutout.",
+                icon = Icons.Rounded.Star,
+                style = HighlightStyle.Spotlight(shape = SpotlightShape.RoundedRect(16.dp)),
+            ),
+            GalleryEntry(
+                label = "Spotlight - circle",
+                note = "Circular cutout around the target.",
+                icon = Icons.Rounded.Circle,
+                style = HighlightStyle.Spotlight(shape = SpotlightShape.Circle),
+            ),
+            GalleryEntry(
+                label = "Spotlight - pill",
+                note = "Capsule cutout that hugs the target.",
+                icon = Icons.Rounded.FavoriteBorder,
+                style = HighlightStyle.Spotlight(shape = SpotlightShape.Pill),
+            ),
+            GalleryEntry(
+                label = "Glow effect",
+                note = "Colored halo around the cutout edge.",
+                icon = Icons.Rounded.LightMode,
+                style = HighlightStyle.Spotlight(
+                    effect = SpotlightEffect.Glow(color = scheme.primary, radius = 28.dp),
+                ),
+            ),
+            GalleryEntry(
+                label = "Soft edge",
+                note = "The cutout fades into the scrim.",
+                icon = Icons.Rounded.BlurOn,
+                style = HighlightStyle.Spotlight(
+                    effect = SpotlightEffect.SoftEdge(fadeWidth = 20.dp),
+                ),
+            ),
+            GalleryEntry(
+                label = "Pulse",
+                note = "Breathing shape, no dimmed overlay.",
+                icon = Icons.Rounded.AutoAwesome,
+                style = HighlightStyle.Pulse(color = scheme.primary),
+            ),
+            GalleryEntry(
+                label = "Border",
+                note = "Static outline, no dimmed overlay.",
+                icon = Icons.Rounded.RadioButtonUnchecked,
+                style = HighlightStyle.Border(color = scheme.tertiary, borderWidth = 3.dp),
+            ),
+            GalleryEntry(
+                label = "Ripple",
+                note = "Expanding rings from the center.",
+                icon = Icons.Rounded.Waves,
+                style = HighlightStyle.Ripple(color = scheme.secondary),
+            ),
+            GalleryEntry(
+                label = "None (tooltip only)",
+                note = "No highlight, just the tooltip.",
+                icon = Icons.Rounded.VisibilityOff,
+                style = HighlightStyle.None,
+            ),
+        )
+    }
+
+    val state = rememberWaypointState<Int> {
+        entries.forEachIndexed { index, entry ->
+            step(index) {
+                title = entry.label
+                description = entry.note
+                highlightStyle = entry.style
+                showIf { activeEntry == index }
             }
+        }
+        step(ChipA) {
+            title = "Multi-target"
+            description = "One step can highlight several elements at once."
+            additionalTargets = listOf(ChipB, ChipC)
+            showIf { activeEntry == MultiTargetEntry }
         }
     }
 
     ResetOnLeave {
         state.stop()
-        activeHighlight = -1
+        activeEntry = -1
     }
 
     DemoScaffold(
-        title = "Highlight Styles",
-        description = "Tap \"Try It\" on any card to see the highlight in action",
+        title = "Highlight gallery",
+        description = "Every highlight style in the library. Tap Try on a card to preview it on that card.",
         onBack = onBack,
-        onStartTour = {},
-        fabVisible = false,
+        onStartTour = null,
     ) { padding ->
-        WaypointMaterial3Host(
-            state = state,
-            overlayClickBehavior = OverlayClickBehavior.Dismiss,
-            onTourComplete = { activeHighlight = -1 },
-            onTourCancel = { activeHighlight = -1 },
-        ) {
-            LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Adaptive(280.dp),
-                contentPadding = PaddingValues(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = 16.dp,
-                    bottom = padding.calculateBottomPadding() + 16.dp,
-                ),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalItemSpacing = 12.dp,
-                modifier = Modifier.fillMaxSize(),
+        WaypointMaterial3Host(state = state) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(padding)
+                    .padding(horizontal = ScreenPadding),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                itemsIndexed(highlightCards) { index, cardData ->
-                    HighlightCard(
-                        data = cardData,
-                        targetModifier = Modifier.waypointTarget(state, targets[index]),
-                        onTryIt = {
-                            activeHighlight = index
-                            state.resetCompletion()
+                SectionLabel("Styles")
+                entries.forEachIndexed { index, entry ->
+                    GalleryCard(
+                        entry = entry,
+                        targetModifier = Modifier.waypointTarget(state, index),
+                        onTry = {
+                            state.stop()
+                            activeEntry = index
                             state.start()
                         },
                     )
                 }
+                SectionLabel("Multi-target")
+                MultiTargetCard(
+                    state = state,
+                    onTry = {
+                        state.stop()
+                        activeEntry = MultiTargetEntry
+                        state.start()
+                    },
+                )
+                Spacer(Modifier.height(80.dp))
             }
         }
     }
 }
 
 @Composable
-private fun HighlightCard(
-    data: HighlightCardData,
+private fun GalleryCard(
+    entry: GalleryEntry,
     targetModifier: Modifier,
-    onTryIt: () -> Unit,
+    onTry: () -> Unit,
 ) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-        ) {
-            Text(
-                text = data.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+    FlatCard {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconBadge(
+                icon = entry.icon,
+                size = 44.dp,
+                modifier = targetModifier,
             )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = data.description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Box(
-                contentAlignment = Alignment.Center,
+            Column(
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .then(targetModifier),
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(data.iconColor.copy(alpha = 0.12f)),
-                ) {
-                    Icon(
-                        imageVector = data.icon,
-                        contentDescription = null,
-                        tint = data.iconColor,
-                        modifier = Modifier.size(28.dp),
-                    )
-                }
+                Text(
+                    text = entry.label,
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Text(
+                    text = entry.note,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            FilledTonalButton(
-                onClick = onTryIt,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("Try It")
+            TextButton(onClick = onTry) {
+                Text("Try")
             }
+        }
+    }
+}
+
+@Composable
+private fun MultiTargetCard(
+    state: WaypointState<Int>,
+    onTry: () -> Unit,
+) {
+    FlatCard {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Multi-target",
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Text(
+                    text = "Chip A leads, B and C are extra targets.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            TextButton(onClick = onTry) {
+                Text("Try")
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            MultiTargetChip(label = "A", modifier = Modifier.waypointTarget(state, ChipA))
+            MultiTargetChip(label = "B", modifier = Modifier.waypointTarget(state, ChipB))
+            MultiTargetChip(label = "C", modifier = Modifier.waypointTarget(state, ChipC))
+        }
+    }
+}
+
+@Composable
+private fun MultiTargetChip(label: String, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.size(40.dp),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer,
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
         }
     }
 }

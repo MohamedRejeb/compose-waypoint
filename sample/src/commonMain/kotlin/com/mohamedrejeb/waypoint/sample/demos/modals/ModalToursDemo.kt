@@ -1,7 +1,6 @@
 package com.mohamedrejeb.waypoint.sample.demos.modals
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,33 +8,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ChatBubble
 import androidx.compose.material.icons.rounded.DarkMode
-import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Email
+import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.Translate
-import androidx.compose.material.icons.rounded.VerticalSplit
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -48,90 +35,79 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.mohamedrejeb.waypoint.core.HighlightStyle
 import com.mohamedrejeb.waypoint.core.SpotlightShape
 import com.mohamedrejeb.waypoint.core.TooltipPlacement
+import com.mohamedrejeb.waypoint.core.WaypointState
 import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3OverlayHost
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
+import com.mohamedrejeb.waypoint.sample.components.FlatCard
+import com.mohamedrejeb.waypoint.sample.components.MockRow
 import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
+import com.mohamedrejeb.waypoint.sample.components.ScreenPadding
+import com.mohamedrejeb.waypoint.sample.components.SectionLabel
 
-// -- Dialog tour targets --
+private enum class DialogTarget { OpenButton, Notifications, DarkMode }
 
-private enum class DialogTarget {
-    OpenButton,
-    Notifications,
-    Theme,
-}
+private enum class SheetTarget { OpenButton, Share, Rename }
 
-// -- Bottom sheet tour targets --
+private enum class ScrollTarget { NearTop, FarDown }
 
-private enum class SheetTarget {
-    OpenButton,
-    ShareItem,
-    EditItem,
-}
-
+/**
+ * Tours that cross into dialogs and sheets via beforeShow, plus automatic
+ * scrolling to targets that start off screen.
+ */
 @Composable
 fun ModalToursDemo(onBack: () -> Unit) {
     DemoScaffold(
-        title = "Modal Tours",
-        description = "Cross-layer tours — the overlay renders fullscreen above dialogs and sheets",
+        title = "Dialogs & sheets",
+        description = "Tours that reach into dialogs and bottom sheets, plus automatic scrolling to off-screen targets.",
         onBack = onBack,
-        onStartTour = {},
-        fabVisible = false,
     ) { padding ->
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+                .padding(padding)
+                .padding(horizontal = ScreenPadding),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            DialogTourSection()
-            BottomSheetTourSection()
-            Spacer(modifier = Modifier.height(16.dp))
+            DialogSection()
+            SheetSection()
+            AutoScrollSection()
+            Spacer(Modifier.height(80.dp))
         }
     }
 }
 
-// ---------------------------------------------------------------------------
-// Section 1: Dialog Tour
-// ---------------------------------------------------------------------------
-
 @Composable
-private fun DialogTourSection() {
+private fun DialogSection() {
     var showDialog by remember { mutableStateOf(false) }
 
-    val state = rememberWaypointState {
+    val state = rememberWaypointState<DialogTarget> {
         step(DialogTarget.OpenButton) {
-            title = "Open Settings"
-            description = "Tap to open the settings dialog"
+            title = "Open settings"
+            description = "The tour starts on the button that opens the dialog."
             placement = TooltipPlacement.Bottom
             onEnter { showDialog = false }
         }
         step(DialogTarget.Notifications) {
             title = "Notifications"
-            description = "Toggle push notifications on or off"
+            description = "beforeShow opened the dialog so this row could be highlighted."
             placement = TooltipPlacement.Bottom
-            highlightStyle = HighlightStyle.Spotlight(
-                shape = SpotlightShape.RoundedRect(8.dp),
-            )
+            highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.RoundedRect(12.dp))
             beforeShow { showDialog = true }
         }
-        step(DialogTarget.Theme) {
-            title = "Theme"
-            description = "Switch between light and dark mode"
-            placement = TooltipPlacement.Top
-            highlightStyle = HighlightStyle.Spotlight(
-                shape = SpotlightShape.RoundedRect(8.dp),
-            )
+        step(DialogTarget.DarkMode) {
+            title = "Dark mode"
+            description = "The overlay keeps tracking targets across dialog steps."
+            placement = TooltipPlacement.Bottom
+            highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.RoundedRect(12.dp))
             beforeShow { showDialog = true }
         }
     }
@@ -141,21 +117,38 @@ private fun DialogTourSection() {
         showDialog = false
     }
 
-    WaypointMaterial3Host(state = state) {
-        SectionCard(
-            icon = Icons.Rounded.ChatBubble,
-            title = "Dialog Tour",
-            description = "A cross-layer tour: step 1 highlights the button, steps 2-3 highlight elements inside a Dialog.",
-            primaryButtonLabel = "Open Dialog",
-            onPrimaryClick = { showDialog = true },
-            secondaryButtonLabel = "Start Tour",
-            onSecondaryClick = { state.start() },
-            secondaryButtonVisible = !state.isActive,
-            primaryButtonModifier = Modifier.waypointTarget(state, DialogTarget.OpenButton),
-        )
+    WaypointMaterial3Host(
+        state = state,
+        onTourComplete = { showDialog = false },
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionLabel("Dialog")
+            FlatCard {
+                Text(
+                    text = "Steps 2 and 3 live inside a dialog that opens on demand.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(12.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedButton(
+                        onClick = { showDialog = true },
+                        modifier = Modifier.waypointTarget(state, DialogTarget.OpenButton),
+                    ) {
+                        Text("Open settings")
+                    }
+                    Spacer(Modifier.weight(1f))
+                    if (!state.isActive) {
+                        TextButton(onClick = { state.start() }) {
+                            Text("Start tour")
+                        }
+                    }
+                }
+            }
+        }
 
         if (showDialog) {
-            DialogContent(
+            SettingsDialog(
                 state = state,
                 onDismiss = { showDialog = false },
             )
@@ -164,108 +157,44 @@ private fun DialogTourSection() {
 }
 
 @Composable
-private fun DialogContent(
-    state: com.mohamedrejeb.waypoint.core.WaypointState<DialogTarget>,
+private fun SettingsDialog(
+    state: WaypointState<DialogTarget>,
     onDismiss: () -> Unit,
 ) {
+    var notifications by remember { mutableStateOf(true) }
+    var darkMode by remember { mutableStateOf(false) }
+
     Dialog(onDismissRequest = onDismiss) {
-        WaypointMaterial3OverlayHost(state = state) {
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Column(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
+        // The overlay host lives inside the rounded Surface so the scrim is
+        // clipped to the dialog shape instead of poking past its corners.
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            WaypointMaterial3OverlayHost(state = state) {
+                Column(modifier = Modifier.padding(20.dp)) {
                     Text(
                         text = "Settings",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium,
                     )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Notifications row
-                    var notificationsOn by remember { mutableStateOf(true) }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .waypointTarget(state, DialogTarget.Notifications),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Notifications,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp),
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = "Notifications",
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.weight(1f),
-                        )
-                        Switch(
-                            checked = notificationsOn,
-                            onCheckedChange = { notificationsOn = it },
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Theme row
-                    var darkMode by remember { mutableStateOf(false) }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .waypointTarget(state, DialogTarget.Theme),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.DarkMode,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp),
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = "Dark Mode",
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.weight(1f),
-                        )
-                        Switch(
-                            checked = darkMode,
-                            onCheckedChange = { darkMode = it },
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Language row (not a tour target, just decoration)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Translate,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp),
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = "Language",
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.weight(1f),
-                        )
-                        Text(
-                            text = "English",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
+                    Spacer(Modifier.height(12.dp))
+                    SwitchRow(
+                        icon = Icons.Rounded.Notifications,
+                        label = "Notifications",
+                        checked = notifications,
+                        onCheckedChange = { notifications = it },
+                        modifier = Modifier.waypointTarget(state, DialogTarget.Notifications),
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    SwitchRow(
+                        icon = Icons.Rounded.DarkMode,
+                        label = "Dark mode",
+                        checked = darkMode,
+                        onCheckedChange = { darkMode = it },
+                        modifier = Modifier.waypointTarget(state, DialogTarget.DarkMode),
+                    )
+                    Spacer(Modifier.height(8.dp))
                     TextButton(
                         onClick = onDismiss,
                         modifier = Modifier.align(Alignment.End),
@@ -278,38 +207,60 @@ private fun DialogContent(
     }
 }
 
-// ---------------------------------------------------------------------------
-// Section 2: Bottom Sheet Tour
-// ---------------------------------------------------------------------------
+@Composable
+private fun SwitchRow(
+    icon: ImageVector,
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 12.dp),
+        )
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BottomSheetTourSection() {
+private fun SheetSection() {
     var showSheet by remember { mutableStateOf(false) }
 
-    val state = rememberWaypointState {
+    val state = rememberWaypointState<SheetTarget> {
         step(SheetTarget.OpenButton) {
-            title = "Open Actions"
-            description = "Tap to open the actions sheet"
+            title = "Open actions"
+            description = "This button opens the bottom sheet."
             placement = TooltipPlacement.Bottom
             onEnter { showSheet = false }
         }
-        step(SheetTarget.ShareItem) {
+        step(SheetTarget.Share) {
             title = "Share"
-            description = "Share this item with friends or colleagues"
+            description = "Steps can highlight rows inside an open sheet."
             placement = TooltipPlacement.Top
-            highlightStyle = HighlightStyle.Spotlight(
-                shape = SpotlightShape.RoundedRect(8.dp),
-            )
+            highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.RoundedRect(12.dp))
             beforeShow { showSheet = true }
         }
-        step(SheetTarget.EditItem) {
-            title = "Edit"
-            description = "Modify item details or content"
+        step(SheetTarget.Rename) {
+            title = "Rename"
+            description = "The overlay renders above the sheet the whole time."
             placement = TooltipPlacement.Top
-            highlightStyle = HighlightStyle.Spotlight(
-                shape = SpotlightShape.RoundedRect(8.dp),
-            )
+            highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.RoundedRect(12.dp))
             beforeShow { showSheet = true }
         }
     }
@@ -319,149 +270,140 @@ private fun BottomSheetTourSection() {
         showSheet = false
     }
 
-    WaypointMaterial3Host(state = state) {
-        SectionCard(
-            icon = Icons.Rounded.VerticalSplit,
-            title = "Bottom Sheet Tour",
-            description = "A cross-layer tour: step 1 highlights the button, steps 2-3 highlight elements inside a ModalBottomSheet.",
-            primaryButtonLabel = "Open Sheet",
-            onPrimaryClick = { showSheet = true },
-            secondaryButtonLabel = "Start Tour",
-            onSecondaryClick = { state.start() },
-            secondaryButtonVisible = !state.isActive,
-            primaryButtonModifier = Modifier.waypointTarget(state, SheetTarget.OpenButton),
-        )
-
-        if (showSheet) {
-            val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-            ModalBottomSheet(
-                onDismissRequest = { showSheet = false },
-                sheetState = sheetState,
-            ) {
-                WaypointMaterial3OverlayHost(state = state) {
-                    Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                        Text(
-                            text = "Actions",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        )
-
-                        HorizontalDivider()
-
-                        SheetActionItem(
-                            icon = Icons.Rounded.Share,
-                            label = "Share",
-                            modifier = Modifier.waypointTarget(state, SheetTarget.ShareItem),
-                        )
-                        SheetActionItem(
-                            icon = Icons.Rounded.Edit,
-                            label = "Edit",
-                            modifier = Modifier.waypointTarget(state, SheetTarget.EditItem),
-                        )
-                        SheetActionItem(
-                            icon = Icons.Rounded.Star,
-                            label = "Favorite",
-                        )
-                        SheetActionItem(
-                            icon = Icons.Rounded.Email,
-                            label = "Send via Email",
-                        )
-                        SheetActionItem(
-                            icon = Icons.Rounded.Delete,
-                            label = "Delete",
-                        )
+    WaypointMaterial3Host(
+        state = state,
+        onTourComplete = { showSheet = false },
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionLabel("Bottom sheet")
+            FlatCard {
+                Text(
+                    text = "The same pattern works for sheets, beforeShow opens it before each step.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(12.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedButton(
+                        onClick = { showSheet = true },
+                        modifier = Modifier.waypointTarget(state, SheetTarget.OpenButton),
+                    ) {
+                        Text("Open actions")
+                    }
+                    Spacer(Modifier.weight(1f))
+                    if (!state.isActive) {
+                        TextButton(onClick = { state.start() }) {
+                            Text("Start tour")
+                        }
                     }
                 }
+            }
+        }
+
+        if (showSheet) {
+            ActionsSheet(
+                state = state,
+                onDismiss = { showSheet = false },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ActionsSheet(
+    state: WaypointState<SheetTarget>,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+    ) {
+        WaypointMaterial3OverlayHost(state = state) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 24.dp),
+            ) {
+                Text(
+                    text = "Actions",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Spacer(Modifier.height(12.dp))
+                MockRow(
+                    icon = Icons.Rounded.Share,
+                    title = "Share",
+                    subtitle = "Send a copy to teammates",
+                    modifier = Modifier.waypointTarget(state, SheetTarget.Share),
+                )
+                Spacer(Modifier.height(12.dp))
+                MockRow(
+                    icon = Icons.Rounded.Edit,
+                    title = "Rename",
+                    subtitle = "Give the file a clearer name",
+                    modifier = Modifier.waypointTarget(state, SheetTarget.Rename),
+                )
             }
         }
     }
 }
 
 @Composable
-private fun SheetActionItem(
-    icon: ImageVector,
-    label: String,
-    modifier: Modifier = Modifier,
-) {
-    ListItem(
-        headlineContent = { Text(label) },
-        leadingContent = {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        },
-        modifier = modifier,
-    )
-}
+private fun AutoScrollSection() {
+    val state = rememberWaypointState<ScrollTarget> {
+        step(ScrollTarget.NearTop) {
+            title = "Already visible"
+            description = "This item is on screen, so the tour shows it right away."
+            placement = TooltipPlacement.Bottom
+            highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.RoundedRect(12.dp))
+        }
+        step(ScrollTarget.FarDown) {
+            title = "Scrolled into view"
+            description = "This item started off screen and Waypoint scrolled to it."
+            placement = TooltipPlacement.Top
+            highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.RoundedRect(12.dp))
+        }
+    }
 
-// ---------------------------------------------------------------------------
-// Shared section card
-// ---------------------------------------------------------------------------
+    ResetOnLeave { state.stop() }
 
-@Composable
-private fun SectionCard(
-    icon: ImageVector,
-    title: String,
-    description: String,
-    primaryButtonLabel: String,
-    onPrimaryClick: () -> Unit,
-    secondaryButtonLabel: String,
-    onSecondaryClick: () -> Unit,
-    secondaryButtonVisible: Boolean = true,
-    primaryButtonModifier: Modifier = Modifier,
-) {
-    OutlinedCard(
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(40.dp),
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp),
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
+    WaypointMaterial3Host(state = state) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionLabel("Auto-scroll")
+            FlatCard {
                 Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    text = "Waypoint scrolls off-screen targets into view automatically.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.align(Alignment.End),
-            ) {
-                OutlinedButton(
-                    onClick = onPrimaryClick,
-                    modifier = primaryButtonModifier,
+                Spacer(Modifier.height(12.dp))
+                Column(
+                    modifier = Modifier
+                        .height(240.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Text(primaryButtonLabel)
+                    repeat(12) { index ->
+                        MockRow(
+                            icon = Icons.Rounded.Folder,
+                            title = "Folder ${index + 1}",
+                            subtitle = "${index + 2} items",
+                            modifier = when (index) {
+                                1 -> Modifier.waypointTarget(state, ScrollTarget.NearTop)
+                                9 -> Modifier.waypointTarget(state, ScrollTarget.FarDown)
+                                else -> Modifier
+                            },
+                        )
+                    }
                 }
-                if (secondaryButtonVisible) {
-                    Button(onClick = onSecondaryClick) {
-                        Text(secondaryButtonLabel)
+                Spacer(Modifier.height(4.dp))
+                if (!state.isActive) {
+                    TextButton(
+                        onClick = { state.start() },
+                        modifier = Modifier.align(Alignment.End),
+                    ) {
+                        Text("Start tour")
                     }
                 }
             }

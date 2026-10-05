@@ -52,7 +52,7 @@ Two preset instances are available on the companion:
 
 ## How it works
 
-When `enabled` is true, `WaypointHost` applies a modifier chain equivalent to:
+When `enabled` is true and the tour is active, `WaypointHost` applies a modifier chain equivalent to:
 
 ```kotlin
 Modifier
@@ -61,15 +61,15 @@ Modifier
     .focusable()
 ```
 
-The host requests focus when the tour starts and on every step change, so the keys reach it even if nothing on the screen was focused. Steps where the user works inside the target are the exception, see [Text input during a tour](#text-input-during-a-tour).
+An idle host is not focusable, so it never takes part in your app's focus traversal. Once a step is on screen the host requests focus, so the keys reach it even if nothing on the screen was focused. Steps where the user works inside the target are the exception, see [Text input during a tour](#text-input-during-a-tour).
 
-On `KeyDown` events, while a step is current and the tour is not paused:
+On `KeyDown` events, while the tour is active and not paused:
 
-- Keys in `nextKeys` call `state.next()`. If that was the last step, the tour completes and `onTourComplete` fires.
-- Keys in `previousKeys` call `state.previous()`.
-- Keys in `dismissKeys` call `state.stop()`, and `onTourCancel` fires.
+- Keys in `nextKeys` call `state.next()`, but only while the step is on screen (`isStepVisible`). If that was the last step, the tour completes and `onTourComplete` fires.
+- Keys in `previousKeys` call `state.previous()`, under the same condition.
+- Keys in `dismissKeys` call `state.stop()`, and `onTourCancel` fires. These work during any step, including one held by its `beforeShow` gate.
 
-All other keys fall through, including your app's own shortcuts, so Waypoint doesn't swallow unrelated input. While the tour is paused or inactive no key is handled.
+All other keys fall through, including your app's own shortcuts, so Waypoint doesn't swallow unrelated input. While a `beforeShow` gate holds a step, Enter and the arrows go to the app too (the user may be typing in a field), and while the tour is paused or inactive no key is handled.
 
 !!! note
     Because `onPreviewKeyEvent` runs before descendant focus owners see the event, the host handles its keys even when a `TextField` inside it has focus. With the default config that includes Enter and the arrow keys, see [Text input during a tour](#text-input-during-a-tour).

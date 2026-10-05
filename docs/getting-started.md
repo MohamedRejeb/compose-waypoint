@@ -232,7 +232,7 @@ See [Interactive Tutorials](guides/interactive-tutorials.md) for the full patter
 | `rememberWaypointState { }` | DSL builder that creates a `WaypointState` with typed step definitions |
 | `Modifier.waypointTarget(state, key)` | Marks a composable as a tour target and registers its bounds |
 | `WaypointHost(state) { content() }` | Host composable that renders spotlight overlay and tooltip popup |
-| `WaypointState` | State holder with navigation: `start()`, `next()`, `previous()`, `goTo()`, `stop()`, `pause()`, `resume()` |
+| `WaypointState` | State holder with navigation: `start()`, `next()`, `previous()`, `goToStep()`, `goTo(key)`, `stop()`, `pause()`, `resume()` |
 
 ## Next steps
 

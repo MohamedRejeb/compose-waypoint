@@ -98,7 +98,7 @@ step(Targets.SaveButton) {
 
 ## Cancellation
 
-The gate runs in a coroutine tied to the current step. When the step changes (the user presses a navigation key, `goTo()` fires, or the tour is stopped), the coroutine is cancelled and the next step starts with its own gate.
+The gate runs in a coroutine tied to the current step. When the step changes (the user presses a navigation key, `goToStep()` fires, or the tour is stopped), the coroutine is cancelled and the next step starts with its own gate.
 
 ```kotlin
 beforeShow {
@@ -187,7 +187,7 @@ The exception propagates out of the host's effect, like any exception thrown ins
 Yes, a step can use both. `advanceOn` does not start until the gate has completed and the step is on screen, so a condition that is already satisfied can't skip a step that was never shown. See [Event-Driven Progression](advance-on.md).
 
 **Does `beforeShow` block navigation?**
-No. The tooltip is hidden while the gate runs, but keyboard navigation and calls to `state.next()`, `previous()`, `goTo()` or `stop()` still work. When the step changes, the running `beforeShow` is cancelled and the next step takes over.
+No. The tooltip is hidden while the gate runs, but keyboard navigation and calls to `state.next()`, `previous()`, `goToStep()` or `stop()` still work. When the step changes, the running `beforeShow` is cancelled and the next step takes over.
 
 ## See also
 

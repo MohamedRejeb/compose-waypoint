@@ -23,9 +23,23 @@ val advanceOn: (suspend () -> Unit)?
 
 When the step becomes current, the host waits until the step is actually on screen (its `beforeShow` gate has completed, its target is laid out, and the tour is not paused), then runs the block. A condition that is already satisfied therefore cannot skip a step the user never saw. When the block returns, the host calls `state.next()`. If the step was the last one, the tour completes and `onTourComplete` fires.
 
+## Forward only
+
+The trigger is armed only when the step is entered moving forward: `start()`, `next()`, or `goToStep()` to a higher index. When the user goes **back** into a step whose condition already holds (the name is already typed), re-arming it would bounce them forward again, so an entry via `previous()` or `goToStep()` to a lower index shows the step with manual navigation instead. Moving forward out of it and back in re-arms the trigger.
+
+`StepScope.advancesAutomatically` tells tooltip content which case it is in: `true` when the trigger is armed for this visit, `false` for a step without `advanceOn` or one entered backward.
+
 ## How it interacts with the Next button
 
-`advanceOn` does not remove the Next button or keyboard navigation. The user can still click Next or press a next key to advance manually, whichever happens first wins. If the step should only advance from the user's action, use a [tooltip without a Next button](interactive-tutorials.md#a-tooltip-without-a-next-button).
+`advanceOn` does not remove keyboard navigation, and a custom tooltip decides what to show. The user can still press a next key or click a Next button to advance manually, whichever happens first wins. `WaypointMaterial3Tooltip` hides its Next/Finish button while `advancesAutomatically` is true (Skip and Back stay), so the user has to perform the action, and shows it again when the step was entered backward. A custom tooltip can do the same:
+
+```kotlin
+if (!scope.advancesAutomatically) {
+    Button(onClick = { scope.next() }) { Text("Next") }
+}
+```
+
+See also the [tooltip without a Next button](interactive-tutorials.md#a-tooltip-without-a-next-button) in the tutorials guide.
 
 ## Letting the user reach the target
 
@@ -176,7 +190,13 @@ step(Targets.LoadedPanel) {
 Use `showIf` on the intermediate steps so they are skipped. `advanceOn` always ends with `next()`.
 
 **Does `advanceOn` run on every recomposition?**
-No. It is started once per step entry and restarts only when the step changes.
+No. It is started once per forward entry into the step and restarts only when the step is entered again. Stopping and starting the tour counts as a new entry.
+
+**Does it run when the user comes back to the step?**
+No. See [Forward only](#forward-only): entered backward, the step waits for manual navigation.
+
+**What if the block throws?**
+The exception propagates to the composition of the primary host, nothing is swallowed. Catch and handle inside the block if a failure should not crash the screen.
 
 **What if my block never returns?**
 The step stays until the user navigates manually. Use `withTimeoutOrNull` inside the block if the step should move on by itself after a deadline.

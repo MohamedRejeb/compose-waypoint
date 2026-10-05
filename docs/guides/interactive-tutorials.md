@@ -86,11 +86,25 @@ step(NoteTarget.Body) {
 }
 ```
 
-While the block runs nothing is highlighted and nothing is blocked. See [Async Gates](async-gates.md) for the details.
+While the block runs nothing is highlighted and, by default, nothing is blocked. See [Async Gates](async-gates.md) for the details.
+
+## Keep the screen covered between steps
+
+Between two steps the scrim can be gone for a moment: the `beforeShow` gate is running, or the next target is not laid out yet. The simplest fix is to let the spotlight stay up:
+
+```kotlin
+WaypointHost(
+    state = state,
+    highlightStyle = HighlightStyle.Spotlight(coverWhilePending = true),
+    ...
+)
+```
+
+While a step is pending the host then draws the scrim with no cutout and blocks all input. Escape and the overlay click behavior still work, and a target the user scrolls away during a `PassThrough` step does not count as pending. See [Highlight Styles](highlight-styles.md#covering-pending-steps).
 
 ## Block your own UI while a step is pending
 
-Between two steps the scrim can be gone for a moment: the `beforeShow` gate is running, or the next target is not laid out yet. `WaypointState.isStepVisible` tells you whether the current step is actually on screen, so you can keep the user from wandering off in the meantime:
+The alternative is to leave the screen uncovered and disable your own controls. `WaypointState.isStepVisible` tells you whether the current step is actually on screen:
 
 ```kotlin
 // True while a step is pending: its beforeShow gate is still running.
@@ -141,7 +155,7 @@ highlightStyle = HighlightStyle.Spotlight(
 
 ## A tooltip without a Next button
 
-The Material3 tooltip always shows a Next button, which lets the user skip the action you are teaching. For a tutorial a custom tooltip is usually a better fit. Everything it needs is on the `StepScope`, and `TooltipArrowBox` draws the arrow:
+The Material3 tooltip hides its Next button while a step advances automatically (`StepScope.advancesAutomatically`), so with `advanceOn` on every hands-on step the user has to perform the action. When the user goes back into such a step, the trigger is not re-armed and the Next button comes back, see [Event-Driven Progression](advance-on.md#forward-only). For a tutorial a custom tooltip is often still a better fit. Everything it needs is on the `StepScope`, and `TooltipArrowBox` draws the arrow:
 
 ```kotlin
 private val TooltipColor = Color(0xFF1B1B2F)

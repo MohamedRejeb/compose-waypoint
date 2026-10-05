@@ -42,6 +42,7 @@ The slot signature is `@Composable (StepScope) -> Unit`.
 | `totalSteps` | `Int` | Number of currently-visible steps (steps whose `showIf` passes). |
 | `isFirstStep` | `Boolean` | True if the step is the first visible step. |
 | `isLastStep` | `Boolean` | True if the step is the last visible step. |
+| `advancesAutomatically` | `Boolean` | True when the step's `advanceOn` is armed for this visit, so it will move on by itself. Hide your Next button in that case, see [Event-Driven Progression](advance-on.md#how-it-interacts-with-the-next-button). |
 | `next()` | | Advance to the next step, or complete the tour on the last one. |
 | `previous()` | | Go back one step. |
 | `skip()` | | Cancel the tour (the host's `onTourCancel` fires). |

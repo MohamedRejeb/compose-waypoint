@@ -68,7 +68,7 @@ Advances to the next visible step. If already on the last step, completes the to
 
 Goes back to the previous visible step. No-op when inactive, paused, or already on the first visible step.
 
-### `goTo(index: Int)`
+### `goToStep(index: Int)`
 
 Jumps to a specific step by index. Ignores the jump when:
 
@@ -78,7 +78,7 @@ Jumps to a specific step by index. Ignores the jump when:
 
 ### `goTo(key: K)`
 
-Jumps to a step by its target key. Looks up the first step whose `targetKey == key` and delegates to `goTo(index)`. Steps without a target can only be reached by index.
+Jumps to a step by its target key. Looks up the first step whose `targetKey == key` and delegates to `goToStep(index)`. Steps without a target can only be reached by index.
 
 ### `stop()`
 
@@ -102,7 +102,8 @@ Removes the completion record from persistence so `start()` will run the tour ag
 
 ### Invariants
 
-- `next()`, `previous()`, and both `goTo(...)` methods no-op while `!isActive || isPaused`.
+- `next()`, `previous()`, `goToStep(...)` and `goTo(...)` no-op while `!isActive || isPaused`.
+- Exactly one primary `WaypointHost` is composed per state at a time. If the host that owns the current step's target leaves the composition mid-step (a dialog the user closed), the tour stays active with nothing shown: call `stop()` or `next()` from that code path.
 - `start()` no-ops when `isActive` is already true.
 - `stop()` transitions through the current step's `onExit` before resetting.
 - Completion via `next()` on the last step marks persistence; cancellation (`stop()`, `skip`) does **not**.
@@ -234,7 +235,6 @@ Touch blocking only exists for `HighlightStyle.Spotlight`. Every other highlight
 The DSL builds a list of `WaypointStep<K>`. Construct them directly when using the pre-built list overload:
 
 ```kotlin
-@Immutable
 public data class WaypointStep<K>(
     val targetKey: K? = null,
     val title: String? = null,

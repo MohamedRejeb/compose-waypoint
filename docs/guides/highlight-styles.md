@@ -50,6 +50,7 @@ highlightStyle = HighlightStyle.Spotlight(
     overlayColor = Color.Black,
     overlayAlpha = 0.6f,
     effect = SpotlightEffect.None,
+    coverWhilePending = false,
 )
 ```
 
@@ -60,6 +61,7 @@ highlightStyle = HighlightStyle.Spotlight(
 | `overlayColor` | `Color` | `Color.Black` | Color of the dimmed scrim outside the cutout. |
 | `overlayAlpha` | `Float` | `0.6f` | Opacity of the scrim, 0f-1f. |
 | `effect` | `SpotlightEffect` | `None` | Optional glow / soft-edge / custom decoration. See [Spotlight Effects](spotlight-effects.md). |
+| `coverWhilePending` | `Boolean` | `false` | Keep the screen covered and blocked between steps. See [covering pending steps](#covering-pending-steps). |
 
 Use Spotlight when you want to completely block distractions and focus attention on one element. It's the best fit for product onboarding and guided flows.
 
@@ -82,6 +84,18 @@ highlightStyle = HighlightStyle.Spotlight(overlayAlpha = 0f)
 ```
 
 A [step without a target](interactive-tutorials.md#intro-and-outro-cards) draws the scrim with no cutout, which blocks the whole host. The other styles draw nothing for such a step.
+
+For `SpotlightShape.Circle` the drawn circle reaches beyond a wide or tall target (its radius is half the longer side), and the interactive area follows what is drawn: taps and pass-through use the circle's bounding square.
+
+#### Covering pending steps
+
+Between two steps the scrim can be gone for a moment: the next step's `beforeShow` gate is running, or its target is not laid out yet. By default the app is uncovered and usable meanwhile. With `coverWhilePending = true` the host draws the scrim with no cutout and blocks all input while the current step is pending, so the user cannot wander off between steps:
+
+```kotlin
+highlightStyle = HighlightStyle.Spotlight(coverWhilePending = true)
+```
+
+The host's `overlayClickBehavior` and the dismiss keys still apply, so `Dismiss` or Escape end the tour from under the cover. A target that scrolls out of view after its step was shown does not count as pending, a `PassThrough` user who scrolls the target away is never trapped. The alternative is to leave the screen uncovered and block your own UI from `WaypointState.isStepVisible`, see [Interactive Tutorials](interactive-tutorials.md#block-your-own-ui-while-a-step-is-pending).
 
 ### `Pulse`
 
@@ -173,12 +187,13 @@ Use `None` for tooltip-only tours, or when you want to handle highlighting yours
 
 ### `Custom`
 
-Fully custom highlight. The composable receives both the raw target bounds and the animated (interpolated) bounds, and can render anything.
+Fully custom highlight. The composable receives the raw target bounds, the animated (interpolated) bounds of the primary target, and the bounds of the step's `additionalTargets` that are registered in this host, and can render anything.
 
 ```kotlin
-highlightStyle = HighlightStyle.Custom { targetBounds, animatedBounds ->
+highlightStyle = HighlightStyle.Custom { targetBounds, animatedBounds, additionalBounds ->
     // targetBounds: the current target's true rectangle
     // animatedBounds: tween-interpolated rectangle used for smooth transitions
+    // additionalBounds: the step's additional targets, not animated
     Canvas(modifier = Modifier.fillMaxSize()) {
         drawRoundRect(
             color = Color.Magenta.copy(alpha = 0.3f),

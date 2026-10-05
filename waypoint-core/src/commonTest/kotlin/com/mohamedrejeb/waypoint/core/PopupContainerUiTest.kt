@@ -46,7 +46,7 @@ class PopupContainerUiTest {
             Dialog(onDismissRequest = {}) {
                 WaypointHost(
                     state = state,
-                    tooltipContent = { _, _ ->
+                    tooltipContent = { _ ->
                         BasicText(
                             text = state.currentStep?.title ?: "",
                             modifier = Modifier.testTag("tooltip"),
@@ -104,7 +104,7 @@ class PopupContainerUiTest {
             Dialog(onDismissRequest = {}) {
                 WaypointHost(
                     state = state,
-                    tooltipContent = { _, _ ->
+                    tooltipContent = { _ ->
                         BasicText("Tooltip", Modifier.testTag("tooltip"))
                     },
                 ) {
@@ -148,7 +148,7 @@ class PopupContainerUiTest {
             Dialog(onDismissRequest = {}) {
                 WaypointHost(
                     state = state,
-                    tooltipContent = { _, _ ->
+                    tooltipContent = { _ ->
                         BasicText(
                             text = state.currentStep?.targetKey ?: "",
                             modifier = Modifier.testTag("tooltip"),
@@ -189,7 +189,7 @@ class PopupContainerUiTest {
             Dialog(onDismissRequest = {}) {
                 WaypointHost(
                     state = state,
-                    tooltipContent = { _, _ ->
+                    tooltipContent = { _ ->
                         BasicText("Tooltip", Modifier.testTag("tooltip"))
                     },
                 ) {

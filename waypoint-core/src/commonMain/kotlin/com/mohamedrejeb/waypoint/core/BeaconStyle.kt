@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
  */
 public sealed interface BeaconStyle {
     /**
-     * Animated pulsing beacon — a solid dot with expanding ring.
+     * Animated pulsing beacon, a solid dot with expanding ring.
      *
      * @param color the color of both the dot and the expanding pulse ring
      * @param beaconRadius radius of the solid center dot
@@ -24,7 +24,7 @@ public sealed interface BeaconStyle {
     ) : BeaconStyle
 
     /**
-     * Static dot beacon — no animation, just a colored circle.
+     * Static dot beacon, no animation, just a colored circle.
      *
      * @param color the dot color
      * @param radius the dot radius

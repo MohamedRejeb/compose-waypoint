@@ -32,7 +32,7 @@ class ShowIfStepScopeUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { scope, _ ->
+                tooltipContent = { scope ->
                     latestScope = scope
                     BasicText("Tooltip")
                 },

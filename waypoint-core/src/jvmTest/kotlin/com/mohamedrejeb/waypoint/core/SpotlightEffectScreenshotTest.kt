@@ -45,15 +45,14 @@ class SpotlightEffectScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 SpotlightOverlay(
-                    targetBounds = bounds,
-                    additionalBounds = emptyList(),
+                    targetBounds = listOf(bounds),
                     style = HighlightStyle.Spotlight(
                         shape = shape,
                         overlayColor = Color.Black,
                         overlayAlpha = 0.6f,
                         effect = effect,
                     ),
-                    allowTargetInteraction = false,
+                    passThrough = false,
                     onOverlayClick = {},
                     onTargetClick = {},
                     modifier = Modifier.fillMaxSize(),
@@ -119,15 +118,14 @@ class SpotlightEffectScreenshotTest {
                     .testTag("softedge-pixel"),
             ) {
                 SpotlightOverlay(
-                    targetBounds = cutoutBounds,
-                    additionalBounds = emptyList(),
+                    targetBounds = listOf(cutoutBounds),
                     style = HighlightStyle.Spotlight(
                         shape = SpotlightShape.Circle,
                         overlayColor = Color.Black,
                         overlayAlpha = 0.6f,
                         effect = SpotlightEffect.SoftEdge(fadeWidth = fadeWidthDp),
                     ),
-                    allowTargetInteraction = false,
+                    passThrough = false,
                     onOverlayClick = {},
                     onTargetClick = {},
                     modifier = Modifier.fillMaxSize(),
@@ -200,15 +198,14 @@ class SpotlightEffectScreenshotTest {
                     .testTag("softedge-pill"),
             ) {
                 SpotlightOverlay(
-                    targetBounds = pillBounds,
-                    additionalBounds = emptyList(),
+                    targetBounds = listOf(pillBounds),
                     style = HighlightStyle.Spotlight(
                         shape = SpotlightShape.Pill,
                         overlayColor = Color.Black,
                         overlayAlpha = 0.6f,
                         effect = SpotlightEffect.SoftEdge(fadeWidth = fadeWidthDp),
                     ),
-                    allowTargetInteraction = false,
+                    passThrough = false,
                     onOverlayClick = {},
                     onTargetClick = {},
                     modifier = Modifier.fillMaxSize(),

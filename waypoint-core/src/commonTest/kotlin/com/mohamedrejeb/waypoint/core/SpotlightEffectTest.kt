@@ -163,7 +163,7 @@ class SpotlightEffectTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -202,7 +202,7 @@ class SpotlightEffectTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -238,7 +238,7 @@ class SpotlightEffectTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -273,7 +273,7 @@ class SpotlightEffectTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -313,7 +313,7 @@ class SpotlightEffectTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -364,7 +364,7 @@ class SpotlightEffectTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -405,7 +405,7 @@ class SpotlightEffectTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tip", Modifier.testTag("tooltip"))
                 },
             ) {

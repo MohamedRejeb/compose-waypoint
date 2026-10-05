@@ -52,7 +52,7 @@ class KeyboardNavigationUiTest {
                 keyboardConfig = keyboardConfig,
                 onTourComplete = onTourComplete,
                 onTourCancel = onTourCancel,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = state.currentStep?.title ?: "",
                         modifier = Modifier.testTag("tooltip"),

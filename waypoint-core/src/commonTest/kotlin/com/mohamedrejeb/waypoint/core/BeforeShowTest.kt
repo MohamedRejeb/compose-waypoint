@@ -144,8 +144,8 @@ class BeforeShowTest {
         val state = WaypointState(steps = steps)
 
         state.start()
-        // Simulate that beforeShow has completed (WaypointHost would call setStepReady)
-        state.setStepReady(true)
+        // Simulate that beforeShow has completed (WaypointHost would call markStepReady)
+        state.markStepReady()
 
         state.next() // single-step tour — next() completes the tour
 

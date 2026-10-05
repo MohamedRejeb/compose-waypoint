@@ -27,7 +27,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Tests for event-driven step progression via [WaypointTrigger].
+ * Tests for event-driven step progression via [WaypointStep.advanceOn].
  *
  * Uses [CompletableDeferred] to control exactly when a Custom trigger fires,
  * making tests deterministic without real delays.
@@ -45,7 +45,7 @@ class AdvanceOnTriggerUiTest {
             steps = listOf(
                 WaypointStep(
                     targetKey = "a",
-                    advanceOn = WaypointTrigger.Custom { trigger.await() },
+                    advanceOn = { trigger.await() },
                 ),
                 WaypointStep(targetKey = "b"),
             ),
@@ -54,7 +54,7 @@ class AdvanceOnTriggerUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = state.currentStep?.targetKey ?: "",
                         modifier = Modifier.testTag("tooltip"),
@@ -87,15 +87,15 @@ class AdvanceOnTriggerUiTest {
         assertEquals(1, state.currentStepIndex)
     }
 
-    // -- NextButton does NOT auto-advance --
+    // -- No advanceOn does NOT auto-advance --
 
     @Test
-    fun `NextButton trigger does not auto-advance`() = runComposeUiTest {
+    fun `step without advanceOn does not auto-advance`() = runComposeUiTest {
         val state = WaypointState(
             steps = listOf(
                 WaypointStep(
                     targetKey = "a",
-                    advanceOn = WaypointTrigger.NextButton, // explicit default
+                    advanceOn = null, // explicit default
                 ),
                 WaypointStep(targetKey = "b"),
             ),
@@ -104,7 +104,7 @@ class AdvanceOnTriggerUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = state.currentStep?.targetKey ?: "",
                         modifier = Modifier.testTag("tooltip"),
@@ -146,7 +146,7 @@ class AdvanceOnTriggerUiTest {
             steps = listOf(
                 WaypointStep(
                     targetKey = "a",
-                    advanceOn = WaypointTrigger.Custom {
+                    advanceOn = {
                         try {
                             neverCompletes.await()
                         } catch (e: kotlinx.coroutines.CancellationException) {
@@ -162,7 +162,7 @@ class AdvanceOnTriggerUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = state.currentStep?.targetKey ?: "",
                         modifier = Modifier.testTag("tooltip"),
@@ -204,7 +204,7 @@ class AdvanceOnTriggerUiTest {
             steps = listOf(
                 WaypointStep(
                     targetKey = "a",
-                    advanceOn = WaypointTrigger.Custom { neverCompletes.await() },
+                    advanceOn = { neverCompletes.await() },
                 ),
                 WaypointStep(targetKey = "b"),
             ),
@@ -213,7 +213,7 @@ class AdvanceOnTriggerUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -251,7 +251,7 @@ class AdvanceOnTriggerUiTest {
             steps = listOf(
                 WaypointStep(
                     targetKey = "only",
-                    advanceOn = WaypointTrigger.Custom { trigger.await() },
+                    advanceOn = { trigger.await() },
                 ),
             ),
         )
@@ -260,7 +260,7 @@ class AdvanceOnTriggerUiTest {
             WaypointHost(
                 state = state,
                 onTourComplete = { tourCompleted = true },
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -292,7 +292,7 @@ class AdvanceOnTriggerUiTest {
             steps = listOf(
                 WaypointStep(
                     targetKey = "a",
-                    advanceOn = WaypointTrigger.Custom { neverCompletes.await() },
+                    advanceOn = { neverCompletes.await() },
                 ),
                 WaypointStep(targetKey = "b"),
             ),
@@ -301,7 +301,7 @@ class AdvanceOnTriggerUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = state.currentStep?.targetKey ?: "",
                         modifier = Modifier.testTag("tooltip"),
@@ -340,7 +340,7 @@ class AdvanceOnTriggerUiTest {
             steps = listOf(
                 WaypointStep(
                     targetKey = "a",
-                    advanceOn = WaypointTrigger.Custom {
+                    advanceOn = {
                         snapshotFlow { searchQuery.value }
                             .filter { it.isNotEmpty() }
                             .first()
@@ -353,7 +353,7 @@ class AdvanceOnTriggerUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = state.currentStep?.targetKey ?: "",
                         modifier = Modifier.testTag("tooltip"),
@@ -400,7 +400,7 @@ class AdvanceOnTriggerUiTest {
                     beforeShow = { gate.await() },
                     // Already satisfied when the step is entered - without the
                     // gate this would advance instantly and skip the step.
-                    advanceOn = WaypointTrigger.Custom { },
+                    advanceOn = { },
                 ),
             ),
         )
@@ -408,7 +408,7 @@ class AdvanceOnTriggerUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = state.currentStep?.targetKey ?: "",
                         modifier = Modifier.testTag("tooltip"),

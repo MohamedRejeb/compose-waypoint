@@ -10,9 +10,6 @@ public object WaypointDefaults {
     /** Default highlight style */
     public val HighlightStyle: HighlightStyle = com.mohamedrejeb.waypoint.core.HighlightStyle.Spotlight()
 
-    /** Default tooltip placement */
-    public val TooltipPlacement: TooltipPlacement = com.mohamedrejeb.waypoint.core.TooltipPlacement.Auto
-
     /** Default overlay click behavior */
     public val OverlayClickBehavior: OverlayClickBehavior =
         com.mohamedrejeb.waypoint.core.OverlayClickBehavior.Nothing

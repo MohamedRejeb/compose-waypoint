@@ -72,7 +72,7 @@ class WaypointHintUiTest {
             WaypointHint(
                 state = state,
                 key = HintKey.Search,
-                tooltipContent = { _, _ -> BasicText("tooltip") },
+                tooltipContent = { _ -> BasicText("tooltip") },
             ) {
                 Box(
                     modifier = Modifier
@@ -100,7 +100,7 @@ class WaypointHintUiTest {
             WaypointHint(
                 state = state,
                 key = HintKey.Search,
-                tooltipContent = { scope, _ ->
+                tooltipContent = { scope ->
                     BasicText(
                         text = scope.title ?: "",
                         modifier = Modifier.testTag("tooltip-title"),
@@ -136,7 +136,7 @@ class WaypointHintUiTest {
             WaypointHint(
                 state = state,
                 key = HintKey.Search,
-                tooltipContent = { scope, _ ->
+                tooltipContent = { scope ->
                     Box {
                         BasicText(
                             text = scope.title ?: "",
@@ -180,7 +180,7 @@ class WaypointHintUiTest {
                 WaypointHint(
                     state = state,
                     key = HintKey.Search,
-                    tooltipContent = { scope, _ ->
+                    tooltipContent = { scope ->
                         BasicText(
                             text = scope.title ?: "",
                             modifier = Modifier.testTag("tooltip-title"),
@@ -225,7 +225,7 @@ class WaypointHintUiTest {
             WaypointHint(
                 state = state,
                 key = HintKey.Search,
-                tooltipContent = { scope, _ ->
+                tooltipContent = { scope ->
                     Box {
                         BasicText(
                             text = scope.title ?: "",
@@ -273,7 +273,7 @@ class WaypointHintUiTest {
             WaypointHint(
                 state = state,
                 key = HintKey.Search,
-                tooltipContent = { scope, _ ->
+                tooltipContent = { scope ->
                     Box {
                         BasicText(
                             text = scope.title ?: "",
@@ -319,7 +319,7 @@ class WaypointHintUiTest {
             WaypointHint(
                 state = state,
                 key = HintKey.Search,
-                tooltipContent = { scope, _ ->
+                tooltipContent = { scope ->
                     BasicText(
                         text = scope.title ?: "",
                         modifier = Modifier.testTag("tooltip-title"),
@@ -368,7 +368,7 @@ class WaypointHintUiTest {
             WaypointHint(
                 state = state,
                 key = HintKey.Filter,
-                tooltipContent = { _, _ -> BasicText("should-not-render") },
+                tooltipContent = { _ -> BasicText("should-not-render") },
             ) {
                 Box(
                     modifier = Modifier

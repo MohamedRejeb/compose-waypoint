@@ -47,7 +47,7 @@ public fun <K> Modifier.waypointTarget(
         .bringIntoViewRequester(bringIntoViewRequester)
         .onGloballyPositioned { coordinates ->
             if (!coordinates.isAttached) return@onGloballyPositioned
-            // No host in scope — target can't be registered anywhere useful.
+            // No host in scope, target can't be registered anywhere useful.
             if (hostId == null) return@onGloballyPositioned
 
             val hostCoords = state.hostCoordinatesMap[hostId] ?: return@onGloballyPositioned

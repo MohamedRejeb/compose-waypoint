@@ -1,10 +1,23 @@
 package com.mohamedrejeb.waypoint.core
 
+import androidx.compose.runtime.Stable
+
 /**
- * Scope provided to custom tooltip content composables.
- * Exposes tour state and navigation controls.
+ * Scope provided to tooltip content composables.
+ * Exposes everything a tooltip needs: the step's texts, where the tooltip sits,
+ * progress among the visible steps, and navigation.
  */
+@Stable
 public interface StepScope {
+    /** Title configured on the current step */
+    public val title: String?
+
+    /** Description configured on the current step */
+    public val description: String?
+
+    /** Resolved side of the target the tooltip sits on, null for a step without a target */
+    public val placement: ResolvedPlacement?
+
     /** Index of the current step in [WaypointState.steps] (0-based, includes hidden steps) */
     public val currentStepIndex: Int
 
@@ -21,26 +34,35 @@ public interface StepScope {
     public val isLastStep: Boolean
 
     /** Navigate to the next step (or complete the tour if on the last step) */
-    public val onNext: () -> Unit
+    public fun next()
 
     /** Navigate to the previous step */
-    public val onPrevious: () -> Unit
+    public fun previous()
 
-    /** Skip/cancel the tour */
-    public val onSkip: () -> Unit
-
-    /** Close/cancel the tour (alias for onSkip) */
-    public val onClose: () -> Unit
+    /** Skip the rest of the tour (cancels it) */
+    public fun skip()
 }
 
 internal data class StepScopeImpl(
+    private val state: WaypointState<*>,
+    override val title: String?,
+    override val description: String?,
+    override val placement: ResolvedPlacement?,
     override val currentStepIndex: Int,
     override val currentStepNumber: Int,
     override val totalSteps: Int,
     override val isFirstStep: Boolean,
     override val isLastStep: Boolean,
-    override val onNext: () -> Unit,
-    override val onPrevious: () -> Unit,
-    override val onSkip: () -> Unit,
-    override val onClose: () -> Unit,
-) : StepScope
+) : StepScope {
+    override fun next() {
+        state.next()
+    }
+
+    override fun previous() {
+        state.previous()
+    }
+
+    override fun skip() {
+        state.stop()
+    }
+}

@@ -60,7 +60,7 @@ class DialogSpotlightPositionTest {
             Dialog(onDismissRequest = {}) {
                 WaypointHost(
                     state = state,
-                    tooltipContent = { _, _ ->
+                    tooltipContent = { _ ->
                         BasicText("Tooltip", Modifier.testTag("tooltip"))
                     },
                 ) {
@@ -148,7 +148,7 @@ class DialogSpotlightPositionTest {
             Dialog(onDismissRequest = {}) {
                 WaypointHost(
                     state = state,
-                    tooltipContent = { _, _ ->
+                    tooltipContent = { _ ->
                         BasicText("Tooltip", Modifier.testTag("tooltip"))
                     },
                 ) {

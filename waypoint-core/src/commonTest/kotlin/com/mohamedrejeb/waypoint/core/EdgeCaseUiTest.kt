@@ -49,7 +49,7 @@ class EdgeCaseUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = state.currentStep?.targetKey ?: "",
                         modifier = Modifier.testTag("tooltip"),
@@ -114,7 +114,7 @@ class EdgeCaseUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -163,7 +163,7 @@ class EdgeCaseUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     Column(Modifier.testTag("tooltip")) {
                         BasicText(
                             text = state.currentStep?.title ?: "",
@@ -215,7 +215,7 @@ class EdgeCaseUiTest {
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                 WaypointHost(
                     state = state,
-                    tooltipContent = { _, _ ->
+                    tooltipContent = { _ ->
                         BasicText("RTL Tooltip", Modifier.testTag("tooltip"))
                     },
                 ) {
@@ -261,7 +261,7 @@ class EdgeCaseUiTest {
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                 WaypointHost(
                     state = state,
-                    tooltipContent = { _, _ ->
+                    tooltipContent = { _ ->
                         BasicText("RTL Tooltip", Modifier.testTag("tooltip"))
                     },
                 ) {
@@ -302,7 +302,7 @@ class EdgeCaseUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { scope, _ ->
+                tooltipContent = { scope ->
                     Column(Modifier.testTag("tooltip")) {
                         BasicText("first:${scope.isFirstStep}", Modifier.testTag("first"))
                         BasicText("last:${scope.isLastStep}", Modifier.testTag("last"))

@@ -10,7 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
@@ -58,7 +58,7 @@ public data class WaypointHint<K>(
  * WaypointHint(
  *     state = hints,
  *     key = MyHintKeys.NewFeature,
- *     tooltipContent = { scope, _ ->
+ *     tooltipContent = { scope ->
  *         MyHintCard(
  *             title = scope.title,
  *             description = scope.description,
@@ -75,7 +75,7 @@ public data class WaypointHint<K>(
  * @param modifier modifier for the outer wrapper
  * @param tooltipSpacing spacing between tooltip and target
  * @param screenMargin margin from screen edges for the tooltip
- * @param tooltipContent composable for the tooltip body, receives [HintScope] + [ResolvedPlacement]
+ * @param tooltipContent composable for the tooltip body, receives a [HintScope]
  * @param content the UI element to decorate with the hint beacon
  */
 @Composable
@@ -85,7 +85,7 @@ public fun <K> WaypointHint(
     modifier: Modifier = Modifier,
     tooltipSpacing: Dp = WaypointDefaults.TooltipSpacing,
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
-    tooltipContent: @Composable (HintScope, ResolvedPlacement) -> Unit,
+    tooltipContent: @Composable (HintScope) -> Unit,
     content: @Composable () -> Unit,
 ) {
     val hint = state.find(key)
@@ -112,9 +112,7 @@ public fun <K> WaypointHint(
     var targetSize by remember { mutableStateOf(IntSize.Zero) }
 
     Box(
-        modifier = modifier.onGloballyPositioned { coords ->
-            targetSize = coords.size
-        },
+        modifier = modifier.onSizeChanged { targetSize = it },
     ) {
         WaypointBeacon(
             visible = true,
@@ -127,14 +125,6 @@ public fun <K> WaypointHint(
         }
 
         if (isOpen && targetSize != IntSize.Zero) {
-            val hintScope = remember(state, key, hint.title, hint.description) {
-                HintScopeImpl(
-                    title = hint.title,
-                    description = hint.description,
-                    onDismiss = { state.dismiss(key) },
-                    onClose = { state.close() },
-                )
-            }
             TooltipPopup(
                 targetBounds = Rect(
                     left = 0f,
@@ -146,7 +136,16 @@ public fun <K> WaypointHint(
                 tooltipSpacing = tooltipSpacingPx,
                 screenMargin = screenMarginPx,
             ) { resolvedPlacement ->
-                tooltipContent(hintScope, resolvedPlacement)
+                val hintScope = remember(state, key, hint.title, hint.description, resolvedPlacement) {
+                    HintScopeImpl(
+                        title = hint.title,
+                        description = hint.description,
+                        placement = resolvedPlacement,
+                        onDismiss = { state.dismiss(key) },
+                        onClose = { state.close() },
+                    )
+                }
+                tooltipContent(hintScope)
             }
         }
     }

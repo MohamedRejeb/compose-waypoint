@@ -25,14 +25,15 @@ import androidx.compose.ui.unit.dp
  * @param placement the tooltip's resolved placement; the arrow points from the
  *   tooltip toward the target (e.g. Bottom placement draws an upward arrow)
  * @param color arrow fill color, typically the tooltip background color
+ * @param modifier modifier sizing and positioning the arrow
  * @param size distance the arrow protrudes from the tooltip edge
  */
 @Composable
 public fun TooltipArrow(
     placement: ResolvedPlacement,
     color: Color,
-    size: Dp = 10.dp,
     modifier: Modifier = Modifier,
+    size: Dp = 10.dp,
 ) {
     val layoutDirection = LocalLayoutDirection.current
 
@@ -41,14 +42,14 @@ public fun TooltipArrow(
         val path = Path()
 
         when (placement) {
-            // Arrow points UP (tooltip is below target) — no RTL change
+            // Arrow points UP (tooltip is below target), no RTL change
             ResolvedPlacement.Bottom -> {
                 path.moveTo(this.size.width / 2f - arrowSizePx, arrowSizePx)
                 path.lineTo(this.size.width / 2f, 0f)
                 path.lineTo(this.size.width / 2f + arrowSizePx, arrowSizePx)
             }
 
-            // Arrow points DOWN (tooltip is above target) — no RTL change
+            // Arrow points DOWN (tooltip is above target), no RTL change
             ResolvedPlacement.Top -> {
                 path.moveTo(this.size.width / 2f - arrowSizePx, 0f)
                 path.lineTo(this.size.width / 2f, arrowSizePx)

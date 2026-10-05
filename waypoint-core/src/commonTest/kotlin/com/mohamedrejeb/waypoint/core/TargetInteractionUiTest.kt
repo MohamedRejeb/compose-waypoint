@@ -11,10 +11,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotFocused
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -23,98 +23,98 @@ import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
- * Tests that targets with [TargetInteraction.AllowClick] allow the user
- * to interact with the underlying composable (e.g., type in a text field)
- * during a tour step.
- *
- * Known bugs:
- * 1. The spotlight overlay intercepts ALL touch events via `pointerInput { detectTapGestures }`,
- *    preventing taps from reaching the target even when AllowClick is set.
- * 2. WaypointHost's keyboard FocusRequester steals focus from text fields
- *    when the tour is active.
+ * Tests that a target with [TargetInteraction.PassThrough] can be used
+ * normally during its step (clicked, focused, typed into), and that the host
+ * leaves keyboard focus alone while the user works inside such a target.
  */
 @OptIn(ExperimentalTestApi::class)
 class TargetInteractionUiTest {
 
-    // Fixed: overlay passes taps through in target area + onPreviewKeyEvent doesn't steal focus
-    @Test
-    fun `text field target is typeable when AllowClick is set`() = runComposeUiTest {
-        val textState = mutableStateOf("")
+    private fun ComposeUiTest.awaitText(text: String) {
+        waitUntil(timeoutMillis = 3000) {
+            onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
 
-        val state = WaypointState(
-            steps = listOf(
-                WaypointStep(
-                    targetKey = "search",
-                    title = "Try searching",
-                    interaction = TargetInteraction.AllowClick,
-                ),
-            ),
-        )
-
+    /** A host with a text field target ("field") above a plain target ("other"). */
+    private fun ComposeUiTest.setFieldContent(
+        state: WaypointState<String>,
+        textState: androidx.compose.runtime.MutableState<String>,
+        keyboardConfig: KeyboardConfig = KeyboardConfig.Default,
+    ) {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
-                    BasicText("Tooltip", Modifier.testTag("tooltip"))
+                keyboardConfig = keyboardConfig,
+                tooltipContent = { _ ->
+                    BasicText("tip-${state.currentStep?.targetKey}")
                 },
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    BasicTextField(
-                        value = textState.value,
-                        onValueChange = { textState.value = it },
-                        modifier = Modifier
-                            .size(200.dp, 48.dp)
-                            .waypointTarget(state, "search")
-                            .testTag("search-field"),
-                    )
+                    Column {
+                        BasicTextField(
+                            value = textState.value,
+                            onValueChange = { textState.value = it },
+                            modifier = Modifier
+                                .size(200.dp, 48.dp)
+                                .waypointTarget(state, "field")
+                                .testTag("text-field"),
+                        )
+                        Box(
+                            modifier = Modifier
+                                .size(200.dp, 48.dp)
+                                .waypointTarget(state, "other"),
+                        )
+                    }
                 }
             }
         }
+    }
+
+    @Test
+    fun `text field target is typeable when PassThrough is set`() = runComposeUiTest {
+        val textState = mutableStateOf("")
+        val state = WaypointState(
+            steps = listOf(
+                WaypointStep(targetKey = "field", interaction = TargetInteraction.PassThrough),
+            ),
+        )
+        setFieldContent(state, textState)
 
         runOnIdle { state.start() }
-        waitUntil(timeoutMillis = 3000) {
-            onAllNodesWithText("Tooltip").fetchSemanticsNodes().isNotEmpty()
-        }
+        awaitText("tip-field")
 
         // Click the text field to focus it
-        onNodeWithTag("search-field").performClick()
+        onNodeWithTag("text-field").performClick()
         waitForIdle()
+        onNodeWithTag("text-field").assertIsFocused()
 
-        // The text field should be focused and accept input
-        onNodeWithTag("search-field").assertIsFocused()
-
-        // Type text
-        onNodeWithTag("search-field").performTextInput("hello")
+        onNodeWithTag("text-field").performTextInput("hello")
         waitForIdle()
 
         assertEquals("hello", textState.value)
     }
 
-    // Fixed: overlay passes taps through in target area + onPreviewKeyEvent doesn't steal focus
     @Test
-    fun `button target is clickable when AllowClick is set`() = runComposeUiTest {
+    fun `button target is clickable when PassThrough is set`() = runComposeUiTest {
         var clicked = false
 
         val state = WaypointState(
             steps = listOf(
-                WaypointStep(
-                    targetKey = "btn",
-                    interaction = TargetInteraction.AllowClick,
-                ),
+                WaypointStep(targetKey = "btn", interaction = TargetInteraction.PassThrough),
             ),
         )
 
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
-                    BasicText("Tooltip", Modifier.testTag("tooltip"))
-                },
+                tooltipContent = { _ -> BasicText("Tooltip") },
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -134,149 +134,119 @@ class TargetInteractionUiTest {
         }
 
         runOnIdle { state.start() }
-        waitUntil(timeoutMillis = 3000) {
-            onAllNodesWithText("Tooltip").fetchSemanticsNodes().isNotEmpty()
-        }
+        awaitText("Tooltip")
 
-        // Click the button target
         onNodeWithTag("button").performClick()
         waitForIdle()
 
-        // The click should have reached the actual button
         assertTrue(clicked, "Button click did not propagate through overlay")
     }
 
-    private fun assertTrue(value: Boolean, message: String) {
-        kotlin.test.assertTrue(value, message)
-    }
+    // Focus is left to the app during pass-through steps
 
-    // -- Focus Clearing on Step Transition --
-
-    // Fixed: focusManager.clearFocus() on step transition
     @Test
-    fun `text field loses focus when tour advances to next step`() = runComposeUiTest {
+    fun `text field keeps focus when the tour moves between PassThrough steps`() = runComposeUiTest {
         val textState = mutableStateOf("")
-
         val state = WaypointState(
             steps = listOf(
+                WaypointStep(targetKey = "field", interaction = TargetInteraction.PassThrough),
                 WaypointStep(
-                    targetKey = "field",
-                    interaction = TargetInteraction.AllowClick,
+                    targetKey = "other",
+                    interaction = TargetInteraction.PassThrough,
+                    additionalTargets = listOf("field"),
                 ),
-                WaypointStep(targetKey = "other"),
             ),
         )
-
-        setContent {
-            WaypointHost(
-                state = state,
-                tooltipContent = { _, _ ->
-                    BasicText(
-                        text = state.currentStep?.targetKey ?: "",
-                        modifier = Modifier.testTag("tooltip"),
-                    )
-                },
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Column {
-                        BasicTextField(
-                            value = textState.value,
-                            onValueChange = { textState.value = it },
-                            modifier = Modifier
-                                .size(200.dp, 48.dp)
-                                .waypointTarget(state, "field")
-                                .testTag("text-field"),
-                        )
-                        Box(
-                            modifier = Modifier
-                                .size(60.dp)
-                                .waypointTarget(state, "other")
-                                .testTag("other-target"),
-                        )
-                    }
-                }
-            }
-        }
+        setFieldContent(state, textState)
 
         runOnIdle { state.start() }
-        waitUntil(timeoutMillis = 3000) {
-            onAllNodesWithText("field").fetchSemanticsNodes().isNotEmpty()
-        }
+        awaitText("tip-field")
 
-        // Focus the text field and type
         onNodeWithTag("text-field").performClick()
         waitForIdle()
         onNodeWithTag("text-field").assertIsFocused()
         onNodeWithTag("text-field").performTextInput("hi")
-        waitForIdle()
 
-        // Advance to next step
         runOnIdle { state.next() }
+        awaitText("tip-other")
+
+        // The user is still working in the field: it stays focused and typeable.
+        onNodeWithTag("text-field").assertIsFocused()
+        onNodeWithTag("text-field").performTextInput("!")
         waitForIdle()
-
-        waitUntil(timeoutMillis = 3000) {
-            onAllNodesWithText("other").fetchSemanticsNodes().isNotEmpty()
-        }
-
-        // The text field should no longer be focused
-        onNodeWithTag("text-field").assertIsNotFocused()
+        assertEquals("hi!", textState.value)
     }
 
-    // Fixed: focusManager.clearFocus() on step transition
     @Test
-    fun `text field loses focus when tour is stopped`() = runComposeUiTest {
+    fun `text field keeps focus when the tour is stopped`() = runComposeUiTest {
         val textState = mutableStateOf("")
-
         val state = WaypointState(
             steps = listOf(
-                WaypointStep(
-                    targetKey = "field",
-                    interaction = TargetInteraction.AllowClick,
-                ),
+                WaypointStep(targetKey = "field", interaction = TargetInteraction.PassThrough),
             ),
         )
-
-        setContent {
-            WaypointHost(
-                state = state,
-                tooltipContent = { _, _ ->
-                    BasicText("Tooltip", Modifier.testTag("tooltip"))
-                },
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    BasicTextField(
-                        value = textState.value,
-                        onValueChange = { textState.value = it },
-                        modifier = Modifier
-                            .size(200.dp, 48.dp)
-                            .waypointTarget(state, "field")
-                            .testTag("text-field"),
-                    )
-                }
-            }
-        }
+        setFieldContent(state, textState)
 
         runOnIdle { state.start() }
-        waitUntil(timeoutMillis = 3000) {
-            onAllNodesWithText("Tooltip").fetchSemanticsNodes().isNotEmpty()
-        }
+        awaitText("tip-field")
 
-        // Focus and type
         onNodeWithTag("text-field").performClick()
         waitForIdle()
         onNodeWithTag("text-field").assertIsFocused()
 
-        // Stop the tour
         runOnIdle { state.stop() }
         waitForIdle()
 
-        // Focus should be cleared
+        // Ending the tour does not touch the app's focus.
+        onNodeWithTag("text-field").assertIsFocused()
+    }
+
+    @Test
+    fun `host takes focus for keyboard navigation on a step that is not PassThrough`() = runComposeUiTest {
+        val textState = mutableStateOf("")
+        val state = WaypointState(
+            steps = listOf(
+                WaypointStep(targetKey = "field", interaction = TargetInteraction.PassThrough),
+                WaypointStep(targetKey = "other"),
+            ),
+        )
+        setFieldContent(state, textState)
+
+        runOnIdle { state.start() }
+        awaitText("tip-field")
+
+        onNodeWithTag("text-field").performClick()
+        waitForIdle()
+        onNodeWithTag("text-field").assertIsFocused()
+
+        runOnIdle { state.next() }
+        awaitText("tip-other")
+
+        // The next step is navigated with the keyboard, so the host owns focus.
         onNodeWithTag("text-field").assertIsNotFocused()
+    }
+
+    @Test
+    fun `host never takes focus when keyboard navigation is disabled`() = runComposeUiTest {
+        val textState = mutableStateOf("")
+        val state = WaypointState(
+            steps = listOf(
+                WaypointStep(targetKey = "field", interaction = TargetInteraction.PassThrough),
+                WaypointStep(targetKey = "other"),
+            ),
+        )
+        setFieldContent(state, textState, keyboardConfig = KeyboardConfig.Disabled)
+
+        runOnIdle { state.start() }
+        awaitText("tip-field")
+
+        onNodeWithTag("text-field").performClick()
+        waitForIdle()
+        onNodeWithTag("text-field").assertIsFocused()
+
+        runOnIdle { state.next() }
+        awaitText("tip-other")
+
+        onNodeWithTag("text-field").assertIsFocused()
     }
 }

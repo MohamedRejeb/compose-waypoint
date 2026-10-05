@@ -2,6 +2,7 @@ package com.mohamedrejeb.waypoint.core
 
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
+import kotlin.test.assertNotNull
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -193,5 +194,45 @@ class WaypointStepBuilderTest {
         assertNull(step.showIf)
         assertNull(step.onEnter)
         assertNull(step.onExit)
+    }
+
+    @Test
+    fun `step without a key builds a step without a target`() {
+        val builder = WaypointStepBuilder<String>()
+        builder.step {
+            title = "Welcome"
+        }
+        builder.step("target")
+
+        val steps = builder.build()
+
+        assertNull(steps[0].targetKey)
+        assertEquals("Welcome", steps[0].title)
+        assertEquals("target", steps[1].targetKey)
+    }
+
+    @Test
+    fun `advanceOn and content are set through their functions`() {
+        val builder = WaypointStepBuilder<String>()
+        builder.step("target") {
+            advanceOn { }
+            content { }
+        }
+
+        val step = builder.build().single()
+
+        assertNotNull(step.advanceOn)
+        assertNotNull(step.content)
+    }
+
+    @Test
+    fun `advanceOn and content default to null`() {
+        val builder = WaypointStepBuilder<String>()
+        builder.step("target")
+
+        val step = builder.build().single()
+
+        assertNull(step.advanceOn)
+        assertNull(step.content)
     }
 }

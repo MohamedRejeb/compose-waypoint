@@ -51,7 +51,7 @@ class WaypointHostUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -70,7 +70,7 @@ class WaypointHostUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = state.currentStep?.title ?: "",
                         modifier = Modifier.testTag("tooltip-title"),
@@ -103,7 +103,7 @@ class WaypointHostUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     Column {
                         BasicText(
                             text = state.currentStep?.title ?: "",
@@ -143,7 +143,7 @@ class WaypointHostUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = state.currentStep?.title ?: "",
                         modifier = Modifier.testTag("title"),
@@ -183,7 +183,7 @@ class WaypointHostUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = state.currentStep?.title ?: "",
                         modifier = Modifier.testTag("title"),
@@ -226,7 +226,7 @@ class WaypointHostUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip visible", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -259,7 +259,7 @@ class WaypointHostUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -302,7 +302,7 @@ class WaypointHostUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Default Content", Modifier.testTag("default-tooltip"))
                 },
             ) {
@@ -339,7 +339,7 @@ class WaypointHostUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { scope, _ ->
+                tooltipContent = { scope ->
                     Column {
                         BasicText("index:${scope.currentStepIndex}", Modifier.testTag("index"))
                         BasicText("total:${scope.totalSteps}", Modifier.testTag("total"))
@@ -396,7 +396,7 @@ class WaypointHostUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Visible", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -447,7 +447,7 @@ class WaypointHostUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip Text", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -519,7 +519,7 @@ class WaypointHostUiTest {
             WaypointHost(
                 state = state,
                 highlightStyle = HighlightStyle.Spotlight(), // host default
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -556,7 +556,7 @@ class WaypointHostUiTest {
             WaypointHost(
                 state = state,
                 highlightStyle = HighlightStyle.Pulse(color = Color.Magenta),
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -591,7 +591,7 @@ class WaypointHostUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = "Tooltip Text",
                         modifier = Modifier.testTag("tooltip-position"),
@@ -666,7 +666,7 @@ class WaypointHostUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = state.currentStep?.targetKey?.toString() ?: "",
                         modifier = Modifier.testTag("tooltip-multi"),
@@ -687,7 +687,7 @@ class WaypointHostUiTest {
                     ) {
                         WaypointOverlayHost(
                             state = state,
-                            tooltipContent = { _, _ ->
+                            tooltipContent = { _ ->
                                 BasicText(
                                     text = state.currentStep?.targetKey?.toString() ?: "",
                                     modifier = Modifier.testTag("tooltip-multi"),
@@ -762,7 +762,7 @@ class WaypointHostUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = state.currentStep?.targetKey?.toString() ?: "",
                         modifier = Modifier.testTag("tooltip-trans"),

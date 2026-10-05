@@ -70,7 +70,7 @@ class SpotlightRestartTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -169,7 +169,7 @@ class SpotlightRestartTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {

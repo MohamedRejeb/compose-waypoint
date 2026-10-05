@@ -52,7 +52,7 @@ class WaypointCanvasTargetUiTest {
             density = LocalDensity.current.density
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ -> },
+                tooltipContent = { _ -> },
             ) {
                 Box(
                     modifier = Modifier
@@ -87,7 +87,7 @@ class WaypointCanvasTargetUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ -> },
+                tooltipContent = { _ -> },
             ) {
                 Box(
                     modifier = Modifier
@@ -126,7 +126,7 @@ class WaypointCanvasTargetUiTest {
             density = LocalDensity.current.density
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ -> },
+                tooltipContent = { _ -> },
             ) {
                 Box(
                     modifier = Modifier
@@ -170,7 +170,7 @@ class WaypointCanvasTargetUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ -> },
+                tooltipContent = { _ -> },
             ) {
                 Column(
                     modifier = Modifier
@@ -224,7 +224,7 @@ class WaypointCanvasTargetUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ -> },
+                tooltipContent = { _ -> },
             ) {
                 if (visible) {
                     Box(
@@ -259,7 +259,7 @@ class WaypointCanvasTargetUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ -> },
+                tooltipContent = { _ -> },
             ) {
                 Box(
                     modifier = Modifier
@@ -313,7 +313,7 @@ class WaypointCanvasTargetUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ -> },
+                tooltipContent = { _ -> },
             ) {
                 Target(shape)
             }

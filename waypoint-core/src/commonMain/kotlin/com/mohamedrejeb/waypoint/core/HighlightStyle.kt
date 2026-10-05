@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
  * Defines how a target element is visually highlighted during a tour step.
  *
  * Each style controls the full-screen layer rendered between the screen content
- * and the tooltip. The highlight mechanism is independent from the tooltip --
+ * and the tooltip. The highlight mechanism is independent from the tooltip,
  * any style can be combined with any tooltip content.
  */
 public sealed interface HighlightStyle {
@@ -18,6 +18,12 @@ public sealed interface HighlightStyle {
     /**
      * Dimmed overlay with a transparent cutout around the target.
      * This is the classic product-tour look and the default.
+     *
+     * It is also the only style that blocks pointer input: touches outside
+     * the cutouts never reach the app (see [OverlayClickBehavior] for what a
+     * tap there does), and [TargetInteraction] decides what happens inside
+     * them. Every other style leaves the whole screen interactive. For
+     * blocking without dimming use `Spotlight(overlayAlpha = 0f)`.
      *
      * @param effect optional decoration applied around or instead of the
      *   hard-edge cutout (glow, soft edge, or custom draw). Defaults to

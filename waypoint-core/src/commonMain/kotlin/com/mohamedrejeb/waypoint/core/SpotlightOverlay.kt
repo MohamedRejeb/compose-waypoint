@@ -1,10 +1,8 @@
 package com.mohamedrejeb.waypoint.core
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -16,7 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
@@ -26,20 +23,20 @@ import kotlin.math.pow
 
 /**
  * Renders a semi-transparent overlay with transparent cutouts (spotlights)
- * around the target elements.
+ * around the target elements, and blocks pointer input outside of them.
  *
- * Supports multiple cutouts for multi-element highlight. The primary target
- * cutout is always drawn; additional cutouts are drawn for secondary targets.
+ * [targetBounds] holds the primary target first, then any additional targets.
+ * It is empty for a step without a target, which draws the scrim with no
+ * cutout and blocks the whole area.
  *
- * When [allowTargetInteraction] is true, the overlay becomes visual-only
- * with no touch interception, so all taps pass through to content underneath.
+ * The canvas only draws. Pointer input is handled by [SpotlightBlockers]
+ * layered on top of it, see there for what [passThrough] does.
  */
 @Composable
 internal fun SpotlightOverlay(
-    targetBounds: Rect,
-    additionalBounds: List<Rect>,
+    targetBounds: List<Rect>,
     style: HighlightStyle.Spotlight,
-    allowTargetInteraction: Boolean,
+    passThrough: Boolean,
     onOverlayClick: () -> Unit,
     onTargetClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -47,75 +44,58 @@ internal fun SpotlightOverlay(
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
 
-    val paddedBounds = padBounds(targetBounds, style.padding, density, layoutDirection)
-    val allPaddedBounds = buildList {
-        add(paddedBounds)
-        additionalBounds.forEach { add(padBounds(it, style.padding, density, layoutDirection)) }
-    }
+    val allPaddedBounds = targetBounds.map { padBounds(it, style.padding, density, layoutDirection) }
 
-    // Keep the pointerInput alive across bounds animation frames and read the
-    // latest values through rememberUpdatedState; keying pointerInput on the
-    // animating bounds would restart the gesture detector every frame and drop
-    // taps that land mid-animation.
-    val currentPaddedBounds by rememberUpdatedState(allPaddedBounds)
-    val currentOnOverlayClick by rememberUpdatedState(onOverlayClick)
-    val currentOnTargetClick by rememberUpdatedState(onTargetClick)
+    Box(modifier = modifier) {
+        Canvas(
+            modifier = Modifier
+                .matchParentSize()
+                .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen),
+        ) {
+            // 1. Draw the scrim
+            drawRect(color = style.overlayColor.copy(alpha = style.overlayAlpha))
 
-    val touchModifier = if (!allowTargetInteraction) {
-        Modifier.pointerInput(Unit) {
-            detectTapGestures { offset ->
-                val tappedInCutout = currentPaddedBounds.any { it.contains(offset) }
-                if (tappedInCutout) {
-                    currentOnTargetClick()
-                } else {
-                    currentOnOverlayClick()
-                }
-            }
-        }
-    } else {
-        Modifier
-    }
-
-    Canvas(
-        modifier = modifier
-            .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-            .then(touchModifier),
-    ) {
-        // 1. Draw the scrim
-        drawRect(color = style.overlayColor.copy(alpha = style.overlayAlpha))
-
-        // 2. Punch hard cutouts for all targets
-        for (bounds in allPaddedBounds) {
-            drawCutout(bounds, style.shape, density)
-        }
-
-        // 3. Apply SoftEdge feather on top of the hard cutouts (still clearing)
-        val effect = style.effect
-        if (effect is SpotlightEffect.SoftEdge) {
-            val fadeWidthPx = with(density) { effect.fadeWidth.toPx() }
+            // 2. Punch hard cutouts for all targets
             for (bounds in allPaddedBounds) {
-                drawSoftEdge(bounds, style.shape, fadeWidthPx, density)
+                drawCutout(bounds, style.shape, density)
             }
-        }
 
-        // 4. Draw on-top effects (Glow / Custom) after cutouts.
-        when (effect) {
-            is SpotlightEffect.None,
-            is SpotlightEffect.SoftEdge -> Unit
-
-            is SpotlightEffect.Glow -> {
-                val radiusPx = with(density) { effect.radius.toPx() }
+            // 3. Apply SoftEdge feather on top of the hard cutouts (still clearing)
+            val effect = style.effect
+            if (effect is SpotlightEffect.SoftEdge) {
+                val fadeWidthPx = with(density) { effect.fadeWidth.toPx() }
                 for (bounds in allPaddedBounds) {
-                    drawGlow(bounds, effect.color, effect.alpha, radiusPx)
+                    drawSoftEdge(bounds, style.shape, fadeWidthPx, density)
                 }
             }
 
-            is SpotlightEffect.Custom -> {
-                for (bounds in allPaddedBounds) {
-                    effect.draw(this, bounds)
+            // 4. Draw on-top effects (Glow / Custom) after cutouts.
+            when (effect) {
+                is SpotlightEffect.None,
+                is SpotlightEffect.SoftEdge -> Unit
+
+                is SpotlightEffect.Glow -> {
+                    val radiusPx = with(density) { effect.radius.toPx() }
+                    for (bounds in allPaddedBounds) {
+                        drawGlow(bounds, effect.color, effect.alpha, radiusPx)
+                    }
+                }
+
+                is SpotlightEffect.Custom -> {
+                    for (bounds in allPaddedBounds) {
+                        effect.draw(this, bounds)
+                    }
                 }
             }
         }
+
+        SpotlightBlockers(
+            holes = allPaddedBounds,
+            passThrough = passThrough,
+            onOverlayClick = onOverlayClick,
+            onTargetClick = onTargetClick,
+            modifier = Modifier.matchParentSize(),
+        )
     }
 }
 

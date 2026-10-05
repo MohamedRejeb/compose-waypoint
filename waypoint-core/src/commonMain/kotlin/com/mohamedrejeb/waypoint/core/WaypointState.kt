@@ -41,9 +41,33 @@ public class WaypointState<K>(
     public var isPaused: Boolean by mutableStateOf(false)
         private set
 
-    /** Whether the current step's beforeShow gate has completed */
+    /** Whether the current step's beforeShow gate has completed (true when it has none) */
     internal var isStepReady: Boolean by mutableStateOf(true)
         private set
+
+    /**
+     * True while a pending beforeShow gate keeps the current step's highlight
+     * and tooltip hidden. Set up front when the step has nothing to show yet,
+     * otherwise by the primary host once the gate turns out to suspend, so a
+     * gate that returns immediately never hides an already-visible target.
+     */
+    internal var isStepHeld: Boolean by mutableStateOf(false)
+        private set
+
+    /**
+     * Whether the current step is on screen: the tour is active and not paused,
+     * the step's [WaypointStep.beforeShow] gate has completed, and the step has
+     * something to show (its target's bounds are registered, or it has no
+     * target). Backed by snapshot state, so it can be observed from composition
+     * or `snapshotFlow`. Apps can use it to block their own UI while a step is
+     * pending.
+     */
+    public val isStepVisible: Boolean
+        get() {
+            val step = currentStep ?: return false
+            if (!isActive || isPaused || !isStepReady) return false
+            return step.targetKey == null || boundsOf(step.targetKey) != null
+        }
 
     /**
      * How the most recent tour run ended, or null if this state instance has
@@ -86,11 +110,20 @@ public class WaypointState<K>(
 
     /** The host id that owns the current step's target, or null if unregistered. */
     internal val currentTargetHostId: Any?
-        get() = currentStep?.let { targetHostIds[it.targetKey] }
+        get() = currentStep?.targetKey?.let { targetHostIds[it] }
 
-    internal fun setStepReady(ready: Boolean) {
-        isStepReady = ready
+    /** Hides the current step while its gate is still running. */
+    internal fun holdStep() {
+        isStepHeld = true
     }
+
+    /** Marks the current step's gate as completed and reveals the step. */
+    internal fun markStepReady() {
+        isStepReady = true
+        isStepHeld = false
+    }
+
+    private fun boundsOf(key: K?): Rect? = if (key == null) null else targetCoordinates[key]
 
     /**
      * Restores state after process death or configuration change.
@@ -105,6 +138,7 @@ public class WaypointState<K>(
         currentStepIndex = savedStepIndex
         isActive = savedIsActive
         isPaused = savedIsPaused
+        armGate()
     }
 
     /** Whether this tour has been completed (requires tourId and persistence) */
@@ -114,14 +148,16 @@ public class WaypointState<K>(
             return persistence?.isCompleted(id) ?: false
         }
 
-    /** The bounds of the current step's target, or null if not available */
+    /**
+     * The bounds of the current step's target, in the local coordinates of the
+     * host that owns the target (the [WaypointHost], or the [WaypointOverlayHost]
+     * the target is inside of). Null when the tour is inactive, the target is
+     * not laid out or is scrolled out of view, or the step has no target.
+     */
     public val currentTargetBounds: Rect?
-        get() {
-            val step = currentStep ?: return null
-            return targetCoordinates[step.targetKey]
-        }
+        get() = boundsOf(currentStep?.targetKey)
 
-    // -- Navigation --
+    // Navigation
 
     /** Start the tour from the first visible step */
     public fun start() {
@@ -154,10 +190,10 @@ public class WaypointState<K>(
         }
     }
 
-    /** Jump to a specific step by index */
+    /** Jump to a specific step by index. Does nothing if that step is already the current one. */
     public fun goTo(index: Int) {
         if (!isActive || isPaused) return
-        if (index !in steps.indices) return
+        if (index !in steps.indices || index == currentStepIndex) return
         if (steps[index].showIf?.invoke() == false) return
         transitionTo(index)
     }
@@ -176,7 +212,7 @@ public class WaypointState<K>(
         isActive = false
         isPaused = false
         currentStepIndex = -1
-        isStepReady = true
+        markStepReady()
         exitingStep?.onExit?.invoke()
         analytics?.onTourCancelled(tourId, cancelledAtIndex, steps.size)
         lastEndReason = WaypointEndReason.Cancelled
@@ -195,7 +231,7 @@ public class WaypointState<K>(
         isPaused = false
     }
 
-    // -- Auto-scroll --
+    // Auto-scroll
 
     /**
      * Scrolls the current step's target into view using [BringIntoViewRequester].
@@ -204,12 +240,11 @@ public class WaypointState<K>(
      * Call this before showing the highlight/tooltip for a step.
      */
     internal suspend fun scrollCurrentTargetIntoView() {
-        val step = currentStep ?: return
-        val requester = bringIntoViewRequesters[step.targetKey] ?: return
-        requester.bringIntoView()
+        val key = currentStep?.targetKey ?: return
+        bringIntoViewRequesters[key]?.bringIntoView()
     }
 
-    // -- Host registration (called by WaypointHost / WaypointOverlayHost) --
+    // Host registration (called by WaypointHost / WaypointOverlayHost)
 
     internal fun registerHost(hostId: Any, coords: LayoutCoordinates) {
         hostCoordinatesMap[hostId] = coords
@@ -228,7 +263,7 @@ public class WaypointState<K>(
         }
     }
 
-    // -- Target registration (called by Modifier.waypointTarget) --
+    // Target registration (called by Modifier.waypointTarget)
 
     internal fun registerTarget(key: K, hostId: Any, bounds: Rect) {
         targetCoordinates[key] = bounds
@@ -352,7 +387,7 @@ public class WaypointState<K>(
         targetHostIds.remove(key)
     }
 
-    // -- Internal --
+    // Internal
 
     private fun complete() {
         val exitingStep = currentStep
@@ -362,7 +397,7 @@ public class WaypointState<K>(
         isActive = false
         isPaused = false
         currentStepIndex = -1
-        isStepReady = true
+        markStepReady()
         analytics?.onTourCompleted(tourId, steps.size)
         val id = tourId
         if (id != null) persistence?.markCompleted(id)
@@ -393,15 +428,21 @@ public class WaypointState<K>(
         val enteringStep = currentStep
         enteringStep?.onEnter?.invoke()
         analytics?.onStepViewed(tourId, newIndex, enteringStep?.targetKey)
-        // Gate highlight/tooltip only if the step has a beforeShow AND the new
-        // target isn't already registered. When the target is already laid out
-        // (e.g., navigating between two steps inside the same open dialog) we
-        // keep isStepReady true so the highlight animates smoothly to the new
-        // position instead of flickering through a hidden frame.
-        val targetRegistered = targetCoordinates[steps[newIndex].targetKey] != null
-        if (steps[newIndex].beforeShow != null && !targetRegistered) {
-            isStepReady = false
-        }
+        armGate()
+    }
+
+    /**
+     * Prepares the gate flags for the step that just became current. A step with a gate
+     * is not ready until the primary host has run it. It is hidden up front
+     * only when it has nothing to show yet anyway (target not registered) or
+     * has no target; for an already laid out target the host hides it only if
+     * the gate actually suspends, so a gate that returns immediately causes no
+     * hidden frame.
+     */
+    private fun armGate() {
+        val hasGate = currentStep?.beforeShow != null
+        isStepReady = !hasGate
+        isStepHeld = hasGate && currentTargetBounds == null
     }
 
     /**
@@ -417,7 +458,7 @@ public class WaypointState<K>(
         return null
     }
 
-    // -- Visible-step queries (used to build StepScope) --
+    // Visible-step queries (used to build StepScope)
 
     /** Number of steps whose showIf currently passes. */
     internal fun visibleStepCount(): Int = steps.count { it.showIf?.invoke() != false }

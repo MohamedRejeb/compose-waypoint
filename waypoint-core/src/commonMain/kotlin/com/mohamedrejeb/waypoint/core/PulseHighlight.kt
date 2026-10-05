@@ -20,7 +20,7 @@ import kotlin.math.max
 
 /**
  * Renders an animated pulsing shape around the target elements.
- * No dimming overlay -- the shape breathes (scales) to draw attention.
+ * No dimming overlay, the shape breathes (scales) to draw attention.
  * Supports both stroke (border) and filled rendering, and multiple targets.
  */
 @Composable

@@ -54,7 +54,7 @@ class ScrollVisibilityUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip Text", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -106,7 +106,7 @@ class ScrollVisibilityUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { scope, _ ->
+                tooltipContent = { scope ->
                     Column(Modifier.testTag("tooltip")) {
                         BasicText("Step ${scope.currentStepIndex}")
                         BasicText("Next", Modifier.testTag("next-text"))
@@ -165,7 +165,7 @@ class ScrollVisibilityUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {

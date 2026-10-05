@@ -49,7 +49,7 @@ class OverlayInteractionUiTest {
                 state = state,
                 overlayClickBehavior = overlayClickBehavior,
                 onTourCancel = onTourCancel,
-                tooltipContent = { _, _ -> BasicText("Tooltip") },
+                tooltipContent = { _ -> BasicText("Tooltip") },
             ) {
                 Box(
                     Modifier.fillMaxSize().testTag("screen"),
@@ -163,7 +163,7 @@ class OverlayInteractionUiTest {
             WaypointHost(
                 state = state,
                 overlayClickBehavior = OverlayClickBehavior.Dismiss,
-                tooltipContent = { _, _ -> BasicText("Tooltip") },
+                tooltipContent = { _ -> BasicText("Tooltip") },
             ) {
                 Box(Modifier.fillMaxSize().testTag("screen")) {
                     Box(

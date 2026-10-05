@@ -41,7 +41,7 @@ class TourEndCallbackTest {
                 state = state,
                 onTourComplete = { completed++ },
                 onTourCancel = { cancelled++ },
-                tooltipContent = { _, _ -> BasicText("Tooltip") },
+                tooltipContent = { _ -> BasicText("Tooltip") },
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Box(Modifier.size(100.dp).waypointTarget(state, "first"))
@@ -71,7 +71,7 @@ class TourEndCallbackTest {
                 state = state,
                 onTourComplete = { completed++ },
                 onTourCancel = { cancelled++ },
-                tooltipContent = { _, _ -> BasicText("Tooltip") },
+                tooltipContent = { _ -> BasicText("Tooltip") },
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Box(Modifier.size(100.dp).waypointTarget(state, "first"))
@@ -97,7 +97,7 @@ class TourEndCallbackTest {
             WaypointHost(
                 state = state,
                 onTourComplete = { completed++ },
-                tooltipContent = { _, _ -> BasicText("Primary tooltip") },
+                tooltipContent = { _ -> BasicText("Primary tooltip") },
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Box(Modifier.size(100.dp).waypointTarget(state, "first"))
@@ -105,7 +105,7 @@ class TourEndCallbackTest {
                     // Simulates a Dialog/Sheet content tree with its own host.
                     WaypointOverlayHost(
                         state = state,
-                        tooltipContent = { scope, _ ->
+                        tooltipContent = { scope ->
                             overlayScope = scope
                             BasicText("Overlay tooltip", Modifier.testTag("overlay-tooltip"))
                         },
@@ -121,7 +121,7 @@ class TourEndCallbackTest {
         waitUntil(timeoutMillis = 3000) { overlayScope != null }
 
         // Finish the tour from the overlay host's tooltip (the Dialog case).
-        runOnIdle { overlayScope?.onNext?.invoke() }
+        runOnIdle { overlayScope?.next() }
         waitForIdle()
 
         assertFalse(state.isActive)
@@ -138,14 +138,14 @@ class TourEndCallbackTest {
             WaypointHost(
                 state = state,
                 onTourCancel = { cancelled++ },
-                tooltipContent = { _, _ -> BasicText("Primary tooltip") },
+                tooltipContent = { _ -> BasicText("Primary tooltip") },
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Box(Modifier.size(100.dp).waypointTarget(state, "first"))
 
                     WaypointOverlayHost(
                         state = state,
-                        tooltipContent = { scope, _ ->
+                        tooltipContent = { scope ->
                             overlayScope = scope
                             BasicText("Overlay tooltip")
                         },
@@ -160,7 +160,7 @@ class TourEndCallbackTest {
         runOnIdle { state.next() }
         waitUntil(timeoutMillis = 3000) { overlayScope != null }
 
-        runOnIdle { overlayScope?.onSkip?.invoke() }
+        runOnIdle { overlayScope?.skip() }
         waitForIdle()
 
         assertFalse(state.isActive)
@@ -178,7 +178,7 @@ class TourEndCallbackTest {
                 state = state,
                 onTourComplete = { completed++ },
                 onTourCancel = { cancelled++ },
-                tooltipContent = { _, _ -> BasicText("Tooltip") },
+                tooltipContent = { _ -> BasicText("Tooltip") },
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Box(Modifier.size(100.dp).waypointTarget(state, "first"))

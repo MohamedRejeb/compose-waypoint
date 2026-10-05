@@ -49,7 +49,7 @@ class MultiElementHighlightUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Multi Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -114,7 +114,7 @@ class MultiElementHighlightUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -151,7 +151,7 @@ class MultiElementHighlightUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Solo Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -186,7 +186,7 @@ class MultiElementHighlightUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Multi", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -228,7 +228,7 @@ class MultiElementHighlightUiTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Border Multi", Modifier.testTag("tooltip"))
                 },
             ) {

@@ -679,4 +679,41 @@ class WaypointStateTest {
         assertFalse(state.isActive)
         assertEquals(-1, state.currentStepIndex)
     }
+
+    @Test
+    fun `goTo the current step does nothing`() {
+        val events = mutableListOf<String>()
+        val state = WaypointState(
+            steps = listOf(
+                WaypointStep(
+                    targetKey = "a",
+                    onEnter = { events += "enter" },
+                    onExit = { events += "exit" },
+                ),
+                WaypointStep(targetKey = "b"),
+            ),
+        )
+        state.start()
+
+        state.goTo(0)
+        state.goTo("a")
+
+        assertEquals(listOf("enter"), events)
+        assertEquals(0, state.currentStepIndex)
+    }
+
+    @Test
+    fun `goTo by key ignores steps without a target`() {
+        val state = WaypointState(
+            steps = listOf(
+                WaypointStep(title = "Intro"),
+                WaypointStep(targetKey = "a"),
+            ),
+        )
+        state.start()
+
+        state.goTo("a")
+
+        assertEquals(1, state.currentStepIndex)
+    }
 }

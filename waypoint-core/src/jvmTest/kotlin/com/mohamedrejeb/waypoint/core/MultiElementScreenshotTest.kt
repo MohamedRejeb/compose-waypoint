@@ -45,14 +45,13 @@ class MultiElementScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 SpotlightOverlay(
-                    targetBounds = primaryBounds,
-                    additionalBounds = additionalBounds,
+                    targetBounds = listOf(primaryBounds) + additionalBounds,
                     style = HighlightStyle.Spotlight(
                         shape = SpotlightShape.RoundedRect(cornerRadius = 8.dp),
                         overlayColor = Color.Black,
                         overlayAlpha = 0.6f,
                     ),
-                    allowTargetInteraction = false,
+                    passThrough = false,
                     onOverlayClick = {},
                     onTargetClick = {},
                     modifier = Modifier.fillMaxSize(),
@@ -75,14 +74,13 @@ class MultiElementScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 SpotlightOverlay(
-                    targetBounds = primaryBounds,
-                    additionalBounds = additionalBounds,
+                    targetBounds = listOf(primaryBounds) + additionalBounds,
                     style = HighlightStyle.Spotlight(
                         shape = SpotlightShape.Circle,
                         overlayColor = Color.Black,
                         overlayAlpha = 0.6f,
                     ),
-                    allowTargetInteraction = false,
+                    passThrough = false,
                     onOverlayClick = {},
                     onTargetClick = {},
                     modifier = Modifier.fillMaxSize(),

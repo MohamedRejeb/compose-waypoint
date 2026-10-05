@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalDensity
@@ -38,9 +39,9 @@ internal fun TooltipPopup(
     content: @Composable (ResolvedPlacement) -> Unit,
 ) {
     // Carries the last resolved placement across provider recreations (the
-    // provider is keyed on targetBounds, which changes every frame during the
-    // bounds animation). Seeding the new provider avoids a one-frame flicker
-    // back to the default placement before its first layout pass.
+    // provider is keyed on targetBounds, which changes whenever the target
+    // moves). Seeding the new provider avoids a one-frame flicker back to the
+    // default placement before its first layout pass.
     val lastResolved = remember { arrayOf(ResolvedPlacement.Bottom) }
 
     val arrowEdgeInsetPx = with(LocalDensity.current) { ArrowEdgeInset.toPx() }
@@ -56,19 +57,11 @@ internal fun TooltipPopup(
     }
     SideEffect { lastResolved[0] = positionProvider.resolvedPlacement }
 
-    // Real enter transition: starts invisible, animates in on first frame.
-    val visibleState = remember { MutableTransitionState(false) }
-    visibleState.targetState = true
-
     Popup(
         popupPositionProvider = positionProvider,
         onDismissRequest = null,
     ) {
-        AnimatedVisibility(
-            visibleState = visibleState,
-            enter = fadeIn() + slideInVertically { it / 4 },
-            exit = fadeOut() + slideOutVertically { it / 4 },
-        ) {
+        TooltipFrame {
             val resolvedPlacement = positionProvider.resolvedPlacement
             val geometry = TooltipArrowGeometry(
                 placement = resolvedPlacement,
@@ -80,14 +73,56 @@ internal fun TooltipPopup(
                 },
             )
             CompositionLocalProvider(LocalTooltipArrowGeometry provides geometry) {
-                Box(
-                    modifier = Modifier.semantics {
-                        liveRegion = LiveRegionMode.Polite
-                    },
-                ) {
-                    content(resolvedPlacement)
-                }
+                content(resolvedPlacement)
             }
+        }
+    }
+}
+
+/**
+ * Renders the tooltip of a step without a target as a Popup centered over the
+ * layout it is composed in. There is nothing to point at, so no arrow geometry
+ * is provided.
+ */
+@Composable
+internal fun CenteredTooltipPopup(
+    content: @Composable () -> Unit,
+) {
+    Popup(
+        alignment = Alignment.Center,
+        onDismissRequest = null,
+    ) {
+        TooltipFrame {
+            CompositionLocalProvider(LocalTooltipArrowGeometry provides null) {
+                content()
+            }
+        }
+    }
+}
+
+/**
+ * Shared tooltip chrome: the enter transition and the live region that makes
+ * screen readers announce a newly shown tooltip.
+ */
+@Composable
+private fun TooltipFrame(
+    content: @Composable () -> Unit,
+) {
+    // Real enter transition: starts invisible, animates in on first frame.
+    val visibleState = remember { MutableTransitionState(false) }
+    visibleState.targetState = true
+
+    AnimatedVisibility(
+        visibleState = visibleState,
+        enter = fadeIn() + slideInVertically { it / 4 },
+        exit = fadeOut() + slideOutVertically { it / 4 },
+    ) {
+        Box(
+            modifier = Modifier.semantics {
+                liveRegion = LiveRegionMode.Polite
+            },
+        ) {
+            content()
         }
     }
 }

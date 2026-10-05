@@ -140,6 +140,14 @@ val tourState = rememberWaypointState(
 }
 ```
 
+!!! note "The steps are built once"
+    The builder runs a single time, when the state is first remembered, and the first `steps` list passed to the other overload is the one that is used. Everything captured in there is frozen at that moment:
+
+    - `title` and `description` are plain strings. A value resolved in composition (for example with `stringResource`) does not follow a later locale change. Resolve such strings where they are shown instead, inside the step's `content { }` or the host's `tooltipContent`.
+    - Lambdas (`showIf`, `onEnter`, `onExit`, `beforeShow`, `advanceOn`) keep the variables they captured. Capture state holders and read them inside the lambda (`showIf { viewModel.isPremium }`, `advanceOn { snapshotFlow { query }.first { it.isNotEmpty() } }`) rather than a value read in composition.
+
+    If the steps themselves must change, key the call site (`key(locale) { rememberWaypointState { ... } }`). That creates a new state, so a running tour does not carry over.
+
 ### Pre-built list overload
 
 Use this when you build the list of `WaypointStep<K>` elsewhere (for example, from a remote config).

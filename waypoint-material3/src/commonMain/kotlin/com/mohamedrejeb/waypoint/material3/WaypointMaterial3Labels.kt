@@ -22,6 +22,11 @@ import androidx.compose.runtime.Immutable
  * @param finish label that replaces [next] on the last step
  * @param progress formats the progress text from the 1-based number of the
  *   current step and the total number of visible steps
+ *
+ * Two instances are equal when their texts are equal and they share the same
+ * [progress] function instance. When you build one inline in a composable with
+ * a custom [progress], `remember` it (or keep the function in a top-level val)
+ * so the tooltip can skip recomposition.
  */
 @Immutable
 public class WaypointMaterial3Labels(
@@ -31,6 +36,25 @@ public class WaypointMaterial3Labels(
     public val finish: String = "Finish",
     public val progress: (current: Int, total: Int) -> String = { current, total -> "$current of $total" },
 ) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is WaypointMaterial3Labels) return false
+        return skip == other.skip &&
+            next == other.next &&
+            back == other.back &&
+            finish == other.finish &&
+            progress == other.progress
+    }
+
+    override fun hashCode(): Int {
+        var result = skip.hashCode()
+        result = 31 * result + next.hashCode()
+        result = 31 * result + back.hashCode()
+        result = 31 * result + finish.hashCode()
+        result = 31 * result + progress.hashCode()
+        return result
+    }
+
     public companion object {
         /** English labels */
         public val Default: WaypointMaterial3Labels = WaypointMaterial3Labels()

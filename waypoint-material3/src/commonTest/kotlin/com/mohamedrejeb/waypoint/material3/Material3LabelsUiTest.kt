@@ -20,6 +20,7 @@ import com.mohamedrejeb.waypoint.core.waypointTarget
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 /**
@@ -70,6 +71,28 @@ class Material3LabelsUiTest {
         assertEquals("Continue", labels.next)
         assertEquals("Skip", labels.skip)
         assertEquals("1 of 2", labels.progress(1, 2))
+    }
+
+    @Test
+    fun `labels with the same texts and formatter are equal`() {
+        val formatter = { current: Int, total: Int -> "$current/$total" }
+        val first = WaypointMaterial3Labels(skip = "Passer", progress = formatter)
+        val second = WaypointMaterial3Labels(skip = "Passer", progress = formatter)
+
+        assertEquals(first, second)
+        assertEquals(first.hashCode(), second.hashCode())
+        assertEquals(WaypointMaterial3Labels(), WaypointMaterial3Labels.Default)
+    }
+
+    @Test
+    fun `labels differing in any property are not equal`() {
+        val base = WaypointMaterial3Labels()
+
+        assertNotEquals(base, WaypointMaterial3Labels(skip = "x"))
+        assertNotEquals(base, WaypointMaterial3Labels(next = "x"))
+        assertNotEquals(base, WaypointMaterial3Labels(back = "x"))
+        assertNotEquals(base, WaypointMaterial3Labels(finish = "x"))
+        assertNotEquals(base, WaypointMaterial3Labels(progress = { _, _ -> "x" }))
     }
 
     @Test

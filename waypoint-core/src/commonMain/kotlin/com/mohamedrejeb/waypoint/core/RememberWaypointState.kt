@@ -44,6 +44,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
  * (`key(locale) { rememberWaypointState { ... } }`). That creates a new state,
  * so a running tour does not carry over.
  *
+ * **Saved state.** The state is kept with `rememberSaveable`: the current step
+ * index and the active and paused flags survive configuration changes and
+ * process death, and a tour that was running resumes on the same step. Target
+ * bounds and the step lambdas are not saved, they are re-registered and
+ * re-created on the next composition. If the steps depend on app state that is
+ * not restored after process death (an editor whose content the tour assumed,
+ * a sheet that was open), check those preconditions when the screen comes back
+ * and call [WaypointState.stop] when they are gone, otherwise the restored tour
+ * waits on a step whose target will never appear.
+ *
  * @param tourId optional identifier for analytics tracking and persistence
  * @param analytics optional analytics tracker for tour events
  * @param persistence optional persistence for remembering tour completion

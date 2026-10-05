@@ -25,10 +25,29 @@ import androidx.compose.runtime.saveable.rememberSaveable
  * }
  * ```
  *
+ * **The steps are built once.** [builder] runs a single time, when the state
+ * is first remembered, and is not run again on recomposition. Everything it
+ * captures is frozen at that moment:
+ *
+ * - `title` and `description` are plain strings. A value resolved in
+ *   composition (for example with `stringResource`) does not follow a later
+ *   locale or configuration change. Resolve such strings where they are shown
+ *   instead, inside the step's `content { }` or the host's `tooltipContent`,
+ *   which recompose normally.
+ * - Lambdas (`showIf`, `onEnter`, `onExit`, `beforeShow`, `advanceOn`) keep the
+ *   variables they captured on that first run. Capture state holders and read
+ *   them inside the lambda (`showIf { viewModel.isPremium }`), or wrap changing
+ *   callbacks with `rememberUpdatedState`, rather than capturing a value that
+ *   was read in composition.
+ *
+ * If the steps themselves must change, key the call site
+ * (`key(locale) { rememberWaypointState { ... } }`). That creates a new state,
+ * so a running tour does not carry over.
+ *
  * @param tourId optional identifier for analytics tracking and persistence
  * @param analytics optional analytics tracker for tour events
  * @param persistence optional persistence for remembering tour completion
- * @param builder DSL block to configure steps
+ * @param builder DSL block to configure steps, run once
  */
 @Composable
 public fun <K> rememberWaypointState(
@@ -52,6 +71,13 @@ public fun <K> rememberWaypointState(
  * via [rememberSaveable]. Only primitive tour state (step index, active, paused) is
  * saved; target coordinates and lambdas are re-registered after recomposition.
  *
+ * **The first [steps] list is the one that is used.** A different list passed
+ * on a later recomposition is ignored, so texts and lambdas in it do not
+ * update. See the other overload for how to keep step texts and lambdas
+ * current; to really swap the steps, key the call site, which creates a new
+ * state.
+ *
+ * @param steps the steps of the tour, read once
  * @param tourId optional identifier for analytics tracking and persistence
  * @param analytics optional analytics tracker for tour events
  * @param persistence optional persistence for remembering tour completion

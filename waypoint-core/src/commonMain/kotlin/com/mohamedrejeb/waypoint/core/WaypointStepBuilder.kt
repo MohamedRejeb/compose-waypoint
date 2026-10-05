@@ -4,6 +4,11 @@ import androidx.compose.runtime.Composable
 
 /**
  * DSL builder for constructing a list of [WaypointStep]s.
+ *
+ * With [rememberWaypointState] the builder block runs once, so the steps keep
+ * whatever they captured at that time. Read changing values inside the step
+ * lambdas, and resolve localized strings inside tooltip content. See
+ * [rememberWaypointState] for details.
  */
 public class WaypointStepBuilder<K> internal constructor() {
     private val steps = mutableListOf<WaypointStep<K>>()
@@ -30,10 +35,14 @@ public class WaypointStepBuilder<K> internal constructor() {
  * Builder for configuring a single [WaypointStep].
  */
 public class StepBuilder<K> internal constructor(private val targetKey: K?) {
-    /** Optional title text */
+    /**
+     * Optional title text. A plain string fixed when the step is built: it does
+     * not follow a later locale change. For localized text, resolve the string
+     * inside tooltip content instead.
+     */
     public var title: String? = null
 
-    /** Optional description text */
+    /** Optional description text. Fixed when the step is built, like [title]. */
     public var description: String? = null
 
     /** Tooltip placement relative to target */
@@ -55,7 +64,11 @@ public class StepBuilder<K> internal constructor(private val targetKey: K?) {
     private var onExit: (() -> Unit)? = null
     private var beforeShow: (suspend () -> Unit)? = null
 
-    /** Set a condition for when this step should be shown */
+    /**
+     * Set a condition for when this step should be shown. It is evaluated each
+     * time the tour navigates, so read current state inside it rather than
+     * capturing a value read earlier.
+     */
     public fun showIf(condition: () -> Boolean) {
         showIf = condition
     }

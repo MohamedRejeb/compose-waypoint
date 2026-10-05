@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
@@ -70,6 +71,8 @@ internal fun <K> WaypointHostScope(
         step.targetKey == null -> isPrimary
         else -> state.currentTargetHostId == hostId
     }
+    // While a target is not registered anywhere, the primary host stands in.
+    val isResponsibleHost = isOwnedByThisHost || (isPrimary && step != null && state.currentTargetHostId == null)
 
     if (isPrimary) {
         TourEndEffect(state, onTourComplete, onTourCancel)
@@ -99,19 +102,26 @@ internal fun <K> WaypointHostScope(
     // Only animate to target bounds when the current step belongs to THIS host.
     val targetBounds = if (isOwnedByThisHost) state.currentTargetBounds else null
 
+    // The highlight glides only on a step change: the first bounds of a new
+    // step generation animate from the previous target, later bounds of the
+    // same step (the target moved with a scroll or the keyboard) snap, so the
+    // hole never lags behind the target.
+    val animatedGeneration = remember { AnimatedGeneration() }
     LaunchedEffect(targetBounds) {
-        if (targetBounds != null) {
-            if (animatedBounds.value == Rect.Zero) {
-                animatedBounds.snapTo(targetBounds)
-            } else {
-                animatedBounds.animateTo(
-                    targetValue = targetBounds,
-                    animationSpec = tween(
-                        durationMillis = 400,
-                        easing = FastOutSlowInEasing,
-                    ),
-                )
-            }
+        if (targetBounds == null) return@LaunchedEffect
+        val generation = state.stepGeneration
+        val isNewStep = generation != animatedGeneration.value
+        animatedGeneration.value = generation
+        if (animatedBounds.value == Rect.Zero || !isNewStep) {
+            animatedBounds.snapTo(targetBounds)
+        } else {
+            animatedBounds.animateTo(
+                targetValue = targetBounds,
+                animationSpec = tween(
+                    durationMillis = 400,
+                    easing = FastOutSlowInEasing,
+                ),
+            )
         }
     }
 
@@ -127,7 +137,16 @@ internal fun <K> WaypointHostScope(
     // so the frames of the bounds animation do not recompose the host.
     val readAnimatedBounds = remember(animatedBounds) { { animatedBounds.value } }
 
-    val isShowingStep = state.isActive && !state.isPaused && !state.isStepHeld && isOwnedByThisHost
+    val isRunning = state.isActive && !state.isPaused
+    val isShowingStep = isRunning && !state.isStepHeld && isOwnedByThisHost
+    // Pending: held by its gate, or its target never laid out during this
+    // visit. A target that scrolls away after the step was shown is not
+    // pending, so a pass-through user is never trapped under a cover.
+    val isPending = isRunning && step != null &&
+        (state.isStepHeld || (step.targetKey != null && targetBounds == null && !state.hasShownCurrentStep))
+    val resolvedStyle = step?.highlightStyle ?: highlightStyle
+    val coversPending = isPending && isResponsibleHost &&
+        resolvedStyle is HighlightStyle.Spotlight && resolvedStyle.coverWhilePending
 
     CompositionLocalProvider(LocalWaypointHostId provides hostId) {
         Box(
@@ -139,24 +158,38 @@ internal fun <K> WaypointHostScope(
             // 1. Screen content
             content()
 
-            // 2. Highlight + tooltip of the current step
-            if (step != null && isShowingStep) {
-                val onOverlayClick: () -> Unit = {
-                    when (overlayClickBehavior) {
-                        is OverlayClickBehavior.Nothing -> {}
-                        // onTourCancel fires via the end-event observer.
-                        is OverlayClickBehavior.Dismiss -> state.stop()
-                        is OverlayClickBehavior.NextStep -> state.next()
-                        is OverlayClickBehavior.Custom -> overlayClickBehavior.action()
-                    }
+            val onOverlayClick: () -> Unit = {
+                when (overlayClickBehavior) {
+                    is OverlayClickBehavior.Nothing -> {}
+                    // onTourCancel fires via the end-event observer.
+                    is OverlayClickBehavior.Dismiss -> state.stop()
+                    is OverlayClickBehavior.NextStep -> state.next()
+                    is OverlayClickBehavior.Custom -> overlayClickBehavior.action()
                 }
+            }
+
+            // 2. Cover while the step is pending (opt-in): scrim with no
+            // cutout, everything blocked, overlay clicks still handled.
+            if (coversPending && resolvedStyle is HighlightStyle.Spotlight) {
+                SpotlightOverlay(
+                    targetBounds = { emptyList() },
+                    style = resolvedStyle,
+                    passThrough = false,
+                    onOverlayClick = onOverlayClick,
+                    onTargetClick = {},
+                    modifier = Modifier.matchParentSize(),
+                )
+            }
+
+            // 3. Highlight + tooltip of the current step
+            if (step != null && isShowingStep) {
                 StepLayers(
                     state = state,
                     step = step,
                     hostId = hostId,
                     targetBounds = targetBounds,
                     animatedBounds = readAnimatedBounds,
-                    highlightStyle = step.highlightStyle ?: highlightStyle,
+                    highlightStyle = resolvedStyle,
                     onOverlayClick = onOverlayClick,
                     tooltipSpacing = tooltipSpacing,
                     screenMargin = screenMargin,
@@ -194,37 +227,52 @@ private fun TourEndEffect(
     }
 }
 
+/** Last step generation the highlight animated or snapped to. Plain holder, not snapshot state. */
+private class AnimatedGeneration {
+    var value: Int = -1
+}
+
 /**
  * Drives what happens when a step becomes current: runs its beforeShow gate,
  * then awaits its advanceOn condition once the step is on screen.
+ *
+ * Keyed on the step generation, so every entry into a step (including a
+ * `stop()` and `start()` within one frame) relaunches it. The generation is
+ * captured at launch, and the gate result or the trigger only act while it
+ * still matches, which keeps work from an earlier visit from touching the
+ * current one.
  */
 @Composable
 private fun <K> StepLifecycleEffect(
     state: WaypointState<K>,
     animatedBounds: AnimatedBounds,
 ) {
-    LaunchedEffect(state, state.currentStepIndex) {
+    LaunchedEffect(state, state.stepGeneration) {
         val step = state.currentStep ?: return@LaunchedEffect
+        val generation = state.stepGeneration
 
-        // If the new step has no bounds yet (its target is not registered, for
-        // example beforeShow will open the modal that mounts it, or it has no
-        // target), drop the previous step's bounds so they cannot show briefly
-        // once the step is revealed. The next target then snaps into place.
-        if (state.isActive && state.currentTargetBounds == null) {
+        // Drop the previous bounds when the new step has none yet (its target
+        // is not registered, for example beforeShow will open the modal that
+        // mounts it, or it has no target) and when a tour starts, so the
+        // first target snaps into place instead of gliding from stale bounds.
+        if (state.isActive && (state.currentTargetBounds == null || state.isFirstStepOfRun)) {
             animatedBounds.snapTo(Rect.Zero)
         }
 
-        step.beforeShow?.let { gate -> state.runGate(gate) }
+        step.beforeShow?.let { gate -> state.runGate(gate, generation) }
+        if (state.stepGeneration != generation) return@LaunchedEffect
 
         val advanceOn = step.advanceOn ?: return@LaunchedEffect
+        if (!state.isTriggerArmed) return@LaunchedEffect
         // Wait until the step is actually shown so a condition that is already
         // satisfied can't advance past a step the user never saw.
         snapshotFlow { state.isStepVisible }.first { it }
         advanceOn()
         snapshotFlow { !state.isPaused }.first { it }
-        state.next()
+        if (state.stepGeneration == generation) state.next()
     }
 }
+
 
 /**
  * Brings the current step's target into view once the step is showable: its
@@ -238,7 +286,7 @@ private fun <K> StepLifecycleEffect(
  */
 @Composable
 private fun <K> AutoScrollEffect(state: WaypointState<K>) {
-    LaunchedEffect(state, state.currentStepIndex) {
+    LaunchedEffect(state, state.stepGeneration) {
         if (state.currentStep?.targetKey == null) return@LaunchedEffect
         snapshotFlow { state.isActive && state.isStepReady && !state.isPaused }.first { it }
 
@@ -260,15 +308,16 @@ private fun <K> AutoScrollEffect(state: WaypointState<K>) {
  * visible target is never hidden for a frame. Only a gate that is still
  * running after that first run hides the step until it completes.
  *
- * On cancellation (rapid navigation) nothing is marked: the next step's
- * transition has already set the flags for itself.
+ * Nothing is marked once the step [generation] has moved on (rapid
+ * navigation, or a gate finishing in the same frame as `next()`): the new
+ * step's transition has already set the flags for itself.
  */
-private suspend fun WaypointState<*>.runGate(gate: suspend () -> Unit) {
+private suspend fun WaypointState<*>.runGate(gate: suspend () -> Unit, generation: Int) {
     coroutineScope {
         val job = launch(start = CoroutineStart.UNDISPATCHED) { gate() }
-        if (!job.isCompleted) holdStep()
+        if (!job.isCompleted && stepGeneration == generation) holdStep()
     }
-    markStepReady()
+    if (stepGeneration == generation) markStepReady()
 }
 
 /**
@@ -288,6 +337,9 @@ private fun <K> BoxScope.StepLayers(
     screenMargin: Dp,
     tooltipContent: @Composable (StepScope) -> Unit,
 ) {
+    // Something of this step is on screen from here on.
+    SideEffect { state.noteStepShown() }
+
     if (step.targetKey == null) {
         // A spotlight still dims and blocks the screen, with nothing cut out.
         // Every other style has nothing to draw without a target.
@@ -374,6 +426,7 @@ private fun <K> WaypointState<K>.stepScope(
     totalSteps = visibleStepCount(),
     isFirstStep = !hasVisibleStepBefore(currentStepIndex),
     isLastStep = !hasVisibleStepAfter(currentStepIndex),
+    advancesAutomatically = isTriggerArmed,
 )
 
 /**
@@ -424,6 +477,6 @@ private fun BoxScope.TargetHighlight(
 
         is HighlightStyle.None -> {}
 
-        is HighlightStyle.Custom -> style.content(targetBounds, highlightBounds())
+        is HighlightStyle.Custom -> style.content(targetBounds, highlightBounds(), additionalBounds)
     }
 }

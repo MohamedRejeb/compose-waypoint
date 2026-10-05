@@ -6,6 +6,8 @@ import androidx.compose.runtime.Stable
  * Scope provided to tooltip content composables.
  * Exposes everything a tooltip needs: the step's texts, where the tooltip sits,
  * progress among the visible steps, and navigation.
+ *
+ * Implemented by the library only; it may gain members in any release.
  */
 @Stable
 public interface StepScope {
@@ -33,6 +35,13 @@ public interface StepScope {
     /** Whether this is the last visible step */
     public val isLastStep: Boolean
 
+    /**
+     * True when the step's [WaypointStep.advanceOn] is armed for this visit
+     * (the step has one and was entered moving forward), so the tour moves on
+     * by itself. A tooltip can hide its Next button in that case.
+     */
+    public val advancesAutomatically: Boolean
+
     /** Navigate to the next step (or complete the tour if on the last step) */
     public fun next()
 
@@ -53,6 +62,7 @@ internal data class StepScopeImpl(
     override val totalSteps: Int,
     override val isFirstStep: Boolean,
     override val isLastStep: Boolean,
+    override val advancesAutomatically: Boolean,
 ) : StepScope {
     override fun next() {
         state.next()

@@ -9,6 +9,8 @@ import androidx.compose.runtime.Stable
  * to close the tooltip: [dismiss] removes the hint permanently (and persists
  * if configured), while [close] only hides the tooltip, leaving the beacon
  * visible.
+ *
+ * Implemented by the library only; it may gain members in any release.
  */
 @Stable
 public interface HintScope {

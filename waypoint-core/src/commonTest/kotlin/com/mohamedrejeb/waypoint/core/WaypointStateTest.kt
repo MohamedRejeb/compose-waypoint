@@ -168,7 +168,7 @@ class WaypointStateTest {
         val state = WaypointState(steps = threeSteps())
         state.start()
 
-        state.goTo(2)
+        state.goToStep(2)
 
         assertEquals(2, state.currentStepIndex)
         assertEquals("c", state.currentStep?.targetKey)
@@ -189,7 +189,7 @@ class WaypointStateTest {
         val state = WaypointState(steps = threeSteps())
         state.start()
 
-        state.goTo(5)
+        state.goToStep(5)
 
         assertEquals(0, state.currentStepIndex)
     }
@@ -199,7 +199,7 @@ class WaypointStateTest {
         val state = WaypointState(steps = threeSteps())
         state.start()
 
-        state.goTo(-1)
+        state.goToStep(-1)
 
         assertEquals(0, state.currentStepIndex)
     }
@@ -315,7 +315,7 @@ class WaypointStateTest {
         state.start()
         state.pause()
 
-        state.goTo(2)
+        state.goToStep(2)
 
         assertEquals(0, state.currentStepIndex)
     }
@@ -394,7 +394,7 @@ class WaypointStateTest {
         val state = WaypointState(steps = steps)
         state.start()
 
-        state.goTo(1) // step b is hidden
+        state.goToStep(1) // step b is hidden
 
         assertEquals(0, state.currentStepIndex)
     }
@@ -695,7 +695,7 @@ class WaypointStateTest {
         )
         state.start()
 
-        state.goTo(0)
+        state.goToStep(0)
         state.goTo("a")
 
         assertEquals(listOf("enter"), events)

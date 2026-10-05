@@ -65,9 +65,10 @@ public class StepBuilder<K> internal constructor(private val targetKey: K?) {
     private var beforeShow: (suspend () -> Unit)? = null
 
     /**
-     * Set a condition for when this step should be shown. It is evaluated each
-     * time the tour navigates, so read current state inside it rather than
-     * capturing a value read earlier.
+     * Set a condition for when this step should be shown. It is evaluated on
+     * every navigation and during composition (progress, first/last flags), so
+     * keep it cheap and side-effect free, and read current state inside it
+     * rather than capturing a value read earlier.
      */
     public fun showIf(condition: () -> Boolean) {
         showIf = condition
@@ -97,6 +98,8 @@ public class StepBuilder<K> internal constructor(private val targetKey: K?) {
      * Advance to the next step automatically when [await] returns. It is
      * awaited once the step is shown and cancelled if the step is exited
      * first. The Next button and keyboard shortcuts keep working alongside it.
+     * Armed only when the step is entered moving forward; going back into the
+     * step shows it with manual navigation (see [WaypointStep.advanceOn]).
      *
      * ```kotlin
      * step(Targets.SearchField) {

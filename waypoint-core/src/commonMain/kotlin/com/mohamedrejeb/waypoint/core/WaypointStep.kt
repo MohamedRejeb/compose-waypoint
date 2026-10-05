@@ -1,14 +1,12 @@
 package com.mohamedrejeb.waypoint.core
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 
 /**
  * Defines a single step in a Waypoint tour.
  *
  * @param K the type of the target key (typically an enum)
  */
-@Immutable
 public data class WaypointStep<K>(
     /**
      * The key identifying the target composable for this step, or null for a
@@ -33,11 +31,25 @@ public data class WaypointStep<K>(
      * paused) this is awaited, and the tour advances when it returns. It is
      * cancelled if the step is exited first. The Next button and keyboard
      * shortcuts keep working alongside it. Null means manual navigation only.
+     *
+     * The trigger is armed only when the step is entered moving forward
+     * (start, next, goTo to a higher index). Entered backward, the step shows
+     * with manual navigation, so a condition that already holds does not
+     * bounce the user forward again. [StepScope.advancesAutomatically] tells
+     * tooltip content which case it is in.
+     *
+     * An exception thrown here propagates to the composition of the primary
+     * host, nothing is swallowed.
      */
     val advanceOn: (suspend () -> Unit)? = null,
     /** Additional targets to highlight alongside the primary target; ignored without a target */
     val additionalTargets: List<K> = emptyList(),
-    /** Condition evaluated at runtime to determine if this step should be shown */
+    /**
+     * Condition deciding whether this step is shown. Evaluated on every
+     * navigation and also during composition, to compute progress and the
+     * first/last flags of the tooltip, so it must be cheap and free of side
+     * effects. Read snapshot state inside it to have changes picked up.
+     */
     val showIf: (() -> Boolean)? = null,
     /** Callback invoked when this step becomes active */
     val onEnter: (() -> Unit)? = null,
@@ -50,6 +62,9 @@ public data class WaypointStep<K>(
      * wait for the UI to settle (`beforeShow = { delay(300) }`). A gate that
      * returns without suspending never hides an already-visible target, which
      * keeps navigation between such steps flicker-free.
+     *
+     * An exception thrown here propagates to the composition of the primary
+     * host, nothing is swallowed.
      */
     val beforeShow: (suspend () -> Unit)? = null,
 ) {

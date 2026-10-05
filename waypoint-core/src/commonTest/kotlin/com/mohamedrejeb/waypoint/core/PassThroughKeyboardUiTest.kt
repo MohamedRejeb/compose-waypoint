@@ -27,6 +27,10 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CompletableDeferred
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.isFocusable
+import androidx.compose.ui.test.isNotFocusable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -146,5 +150,90 @@ class PassThroughKeyboardUiTest {
         waitForIdle()
 
         assertEquals(1, state.currentStepIndex)
+    }
+
+    @Test
+    fun `keys typed in the app are not stolen while a gate holds the step`() = runComposeUiTest {
+        val gate = CompletableDeferred<Unit>()
+        val state = WaypointState(
+            steps = listOf(
+                WaypointStep(targetKey = "field", title = "Field", interaction = TargetInteraction.PassThrough),
+                WaypointStep(targetKey = "field", title = "Held", beforeShow = { gate.await() }),
+                WaypointStep(targetKey = "field", title = "Last"),
+            ),
+        )
+        val appKeys = mutableListOf<Key>()
+        setContent {
+            WaypointHost(
+                state = state,
+                modifier = Modifier.testTag("host"),
+                tooltipContent = { scope -> BasicText("tip-${scope.title}") },
+            ) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    BasicTextField(
+                        value = "",
+                        onValueChange = {},
+                        modifier = Modifier
+                            .size(200.dp, 48.dp)
+                            .onPreviewKeyEvent { event ->
+                                if (event.type == KeyEventType.KeyDown) appKeys += event.key
+                                false
+                            }
+                            .waypointTarget(state, "field")
+                            .testTag("field"),
+                    )
+                }
+            }
+        }
+        runOnIdle { state.start() }
+        awaitTip("Field")
+        onNodeWithTag("field").performClick()
+        waitForIdle()
+        onNodeWithTag("field").assertIsFocused()
+
+        runOnIdle { state.next() }
+        waitForIdle()
+        assertFalse(state.isStepVisible)
+
+        onNodeWithTag("field").performKeyInput {
+            pressKey(Key.Enter)
+            pressKey(Key.DirectionRight)
+        }
+        waitForIdle()
+
+        assertEquals(1, state.currentStepIndex, "navigation keys moved a held step")
+        assertTrue(Key.Enter in appKeys && Key.DirectionRight in appKeys, "app did not get the keys: $appKeys")
+
+        // Escape still ends the tour.
+        onNodeWithTag("field").performKeyInput { pressKey(Key.Escape) }
+        waitForIdle()
+        assertFalse(state.isActive)
+    }
+
+    @Test
+    fun `host is not focusable while the tour is inactive`() = runComposeUiTest {
+        val state = WaypointState(steps = listOf(WaypointStep(targetKey = "a", title = "A")))
+        setContent {
+            WaypointHost(
+                state = state,
+                modifier = Modifier.testTag("host"),
+                tooltipContent = { scope -> BasicText("tip-${scope.title}") },
+            ) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Box(Modifier.size(60.dp).waypointTarget(state, "a"))
+                }
+            }
+        }
+        waitForIdle()
+        onNodeWithTag("host").assert(isNotFocusable())
+
+        runOnIdle { state.start() }
+        awaitTip("A")
+        onNodeWithTag("host").assert(isFocusable())
+        onNodeWithTag("host").assertIsFocused()
+
+        runOnIdle { state.stop() }
+        waitForIdle()
+        onNodeWithTag("host").assert(isNotFocusable())
     }
 }

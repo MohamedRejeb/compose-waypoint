@@ -501,7 +501,7 @@ class WaypointHostUiTest {
 
     @Test
     fun `tooltip shows with Custom highlight`() = runHighlightStyleTest(
-        highlightStyle = HighlightStyle.Custom { _, _ -> },
+        highlightStyle = HighlightStyle.Custom { _, _, _ -> },
     )
 
     @Test

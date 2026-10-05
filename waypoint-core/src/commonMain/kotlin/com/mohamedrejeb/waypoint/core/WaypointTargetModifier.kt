@@ -18,7 +18,8 @@ import androidx.compose.ui.layout.onGloballyPositioned
  * A [BringIntoViewRequester] is automatically attached so the tour can
  * scroll this target into view before showing the step.
  *
- * Bounds are recorded in the coordinate space of the nearest [WaypointHost]
+ * Bounds are the part of the composable that is visible through its clipping
+ * ancestors (scroll containers), recorded in the coordinate space of the nearest [WaypointHost]
  * (or [WaypointOverlayHost]) in the composition. For targets that live in a
  * different composition tree (e.g. inside a Dialog or Sheet), place a
  * [WaypointOverlayHost] that shares the same [WaypointState] inside that tree
@@ -36,7 +37,7 @@ public fun <K> Modifier.waypointTarget(
     val hostId = LocalWaypointHostId.current
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
 
-    DisposableEffect(currentKey) {
+    DisposableEffect(state, currentKey) {
         state.registerBringIntoViewRequester(currentKey, bringIntoViewRequester)
         onDispose {
             state.unregisterTarget(currentKey)
@@ -53,8 +54,10 @@ public fun <K> Modifier.waypointTarget(
             val hostCoords = state.hostCoordinatesMap[hostId] ?: return@onGloballyPositioned
             if (!hostCoords.isAttached) return@onGloballyPositioned
 
+            // Clipped, so a target half scrolled under an app bar registers
+            // only its visible part instead of opening a hole over the bar.
             val bounds = try {
-                hostCoords.localBoundingBoxOf(coordinates)
+                hostCoords.localBoundingBoxOf(coordinates, clipBounds = true)
             } catch (_: IllegalArgumentException) {
                 // Target is in a different hierarchy than this host. Shouldn't
                 // happen with correct CompositionLocal wiring, but guard anyway.

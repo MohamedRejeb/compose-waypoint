@@ -3,9 +3,7 @@ package com.mohamedrejeb.waypoint.core
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -45,7 +43,7 @@ internal fun TooltipPopup(
     val lastResolved = remember { arrayOf(ResolvedPlacement.Bottom) }
 
     val arrowEdgeInsetPx = with(LocalDensity.current) { ArrowEdgeInset.toPx() }
-    val positionProvider = remember(targetBounds, placement, tooltipSpacing, screenMargin) {
+    val positionProvider = remember(targetBounds, placement, tooltipSpacing, screenMargin, arrowEdgeInsetPx) {
         WaypointPositionProvider(
             targetBounds = targetBounds,
             requestedPlacement = placement,
@@ -112,10 +110,11 @@ private fun TooltipFrame(
     val visibleState = remember { MutableTransitionState(false) }
     visibleState.targetState = true
 
+    // Only an enter transition: the popup leaves the composition when its
+    // step ends, so an exit transition would never play.
     AnimatedVisibility(
         visibleState = visibleState,
         enter = fadeIn() + slideInVertically { it / 4 },
-        exit = fadeOut() + slideOutVertically { it / 4 },
     ) {
         Box(
             modifier = Modifier.semantics {

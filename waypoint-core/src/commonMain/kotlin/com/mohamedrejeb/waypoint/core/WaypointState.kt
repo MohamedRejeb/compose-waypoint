@@ -16,6 +16,13 @@ import androidx.compose.ui.layout.LayoutCoordinates
  * Create via [rememberWaypointState]. Manages step progression, target coordinate
  * tracking, auto-scrolling, and tour lifecycle.
  *
+ * Compose exactly one primary [WaypointHost] per state at a time; it drives
+ * the step lifecycle (gates, advanceOn, scrolling, end callbacks). Any number
+ * of [WaypointOverlayHost]s may share the state. If the host that owns the
+ * current step's target leaves the composition mid-step (a dialog closed by
+ * the user), the tour stays active with nothing shown; call [stop] or [next]
+ * from that code path.
+ *
  * @param K the type of the target key (typically an enum)
  */
 @Stable
@@ -53,6 +60,38 @@ public class WaypointState<K>(
      */
     internal var isStepHeld: Boolean by mutableStateOf(false)
         private set
+
+    /**
+     * Counts every entry into a step (navigation, start, restore), including
+     * re-entering the same index. Step effects key on it so a `stop()` and
+     * `start()` in one frame, or a `goTo` back to the current index, relaunch
+     * them, and work from an earlier visit can tell it is stale.
+     */
+    internal var stepGeneration: Int by mutableStateOf(0)
+        private set
+
+    /** True when the current step was entered moving backward (previous, or goTo to a lower index). */
+    internal var enteredBackward: Boolean by mutableStateOf(false)
+        private set
+
+    /** True when the current step is the one a tour run began on (start or restore), not reached by navigation. */
+    internal var isFirstStepOfRun: Boolean by mutableStateOf(false)
+        private set
+
+    /**
+     * True once the current step's highlight or tooltip has actually been
+     * composed during this visit. Lets a pending cover tell "not laid out yet"
+     * from "scrolled away after being shown".
+     */
+    internal var hasShownCurrentStep: Boolean by mutableStateOf(false)
+        private set
+
+    /**
+     * Whether the current step's [WaypointStep.advanceOn] is armed for this
+     * visit: the step has one and was entered moving forward.
+     */
+    internal val isTriggerArmed: Boolean
+        get() = currentStep?.advanceOn != null && !enteredBackward
 
     /**
      * Whether the current step is on screen: the tour is active and not paused,
@@ -127,6 +166,11 @@ public class WaypointState<K>(
         isStepHeld = false
     }
 
+    /** Records that the current step's highlight or tooltip has been composed. */
+    internal fun noteStepShown() {
+        hasShownCurrentStep = true
+    }
+
     private fun boundsOf(key: K?): Rect? = if (key == null) null else targetCoordinates[key]
 
     /**
@@ -142,7 +186,9 @@ public class WaypointState<K>(
         currentStepIndex = savedStepIndex
         isActive = savedIsActive
         isPaused = savedIsPaused
-        armGate()
+        enteredBackward = false
+        isFirstStepOfRun = true
+        enterStep()
     }
 
     /** Whether this tour has been completed (requires tourId and persistence) */
@@ -195,7 +241,7 @@ public class WaypointState<K>(
     }
 
     /** Jump to a specific step by index. Does nothing if that step is already the current one. */
-    public fun goTo(index: Int) {
+    public fun goToStep(index: Int) {
         if (!isActive || isPaused) return
         if (index !in steps.indices || index == currentStepIndex) return
         if (steps[index].showIf?.invoke() == false) return
@@ -205,7 +251,7 @@ public class WaypointState<K>(
     /** Jump to a specific step by target key */
     public fun goTo(key: K) {
         val index = steps.indexOfFirst { it.targetKey == key }
-        if (index >= 0) goTo(index)
+        if (index >= 0) goToStep(index)
     }
 
     /** Stop/cancel the tour */
@@ -425,21 +471,26 @@ public class WaypointState<K>(
             analytics?.onStepCompleted(tourId, exitingIndex, exitingStep?.targetKey)
         }
         currentStepIndex = newIndex
+        enteredBackward = newIndex < exitingIndex
+        isFirstStepOfRun = exitingIndex < 0
         val enteringStep = currentStep
         enteringStep?.onEnter?.invoke()
         analytics?.onStepViewed(tourId, newIndex, enteringStep?.targetKey)
-        armGate()
+        enterStep()
     }
 
     /**
-     * Prepares the gate flags for the step that just became current. A step with a gate
+     * Bookkeeping for the step that just became current: a new generation for
+     * the step effects, nothing shown yet, and the gate flags. A step with a gate
      * is not ready until the primary host has run it. It is hidden up front
      * only when it has nothing to show yet anyway (target not registered) or
      * has no target; for an already laid out target the host hides it only if
      * the gate actually suspends, so a gate that returns immediately causes no
      * hidden frame.
      */
-    private fun armGate() {
+    private fun enterStep() {
+        stepGeneration++
+        hasShownCurrentStep = false
         val hasGate = currentStep?.beforeShow != null
         isStepReady = !hasGate
         isStepHeld = hasGate && currentTargetBounds == null

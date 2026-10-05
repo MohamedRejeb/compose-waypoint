@@ -18,6 +18,7 @@ internal data class TestStepScope(
     override val title: String? = null,
     override val description: String? = null,
     override val placement: ResolvedPlacement? = ResolvedPlacement.Bottom,
+    override val advancesAutomatically: Boolean = false,
     val onNext: () -> Unit = {},
     val onPrevious: () -> Unit = {},
     val onSkip: () -> Unit = {},

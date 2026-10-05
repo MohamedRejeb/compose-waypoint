@@ -53,7 +53,7 @@ IconButton(onClick = { stepScope.skip() }) {
 }
 ```
 
-The buttons of `WaypointMaterial3Tooltip` are text buttons, read by their label, and the close icon of `WaypointMaterial3HintTooltip` has a configurable `closeContentDescription`.
+The buttons of `WaypointMaterial3Tooltip` are text buttons, read by their label, and the close icon of `WaypointMaterial3HintTooltip` takes its content description from `WaypointMaterial3Labels.close`.
 
 ### Reduced motion
 
@@ -76,7 +76,7 @@ fun accessibleHighlight(): HighlightStyle {
 For custom highlights that use `rememberInfiniteTransition`, conditionally switch to a static rendering:
 
 ```kotlin
-HighlightStyle.Custom { targetBounds, animatedBounds ->
+HighlightStyle.Custom { targetBounds, animatedBounds, additionalBounds ->
     if (reduceMotion) {
         drawStaticRing(animatedBounds)
     } else {

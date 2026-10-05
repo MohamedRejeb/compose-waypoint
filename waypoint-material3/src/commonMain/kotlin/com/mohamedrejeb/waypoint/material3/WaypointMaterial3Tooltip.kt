@@ -28,6 +28,8 @@ import com.mohamedrejeb.waypoint.core.TooltipArrowBox
  * The title, description and placement come from [stepScope]. When the step
  * has a target, an arrow pointing at it is drawn automatically (disable via
  * [showArrow]); a step without a target renders the same card with no arrow.
+ * While the step advances automatically ([StepScope.advancesAutomatically])
+ * the Next/Finish button is hidden; Skip and Back stay.
  *
  * @param stepScope scope of the step being shown, as handed to tooltip content
  * @param modifier modifier for the tooltip card
@@ -116,12 +118,15 @@ public fun WaypointMaterial3Tooltip(
                         }
                     }
 
-                    TextButton(onClick = stepScope::next) {
-                        Text(
-                            text = if (stepScope.isLastStep) labels.finish else labels.next,
-                            style = typography.button,
-                            color = colors.primaryButton,
-                        )
+                    // A step that advances by itself has no Next button.
+                    if (!stepScope.advancesAutomatically) {
+                        TextButton(onClick = stepScope::next) {
+                            Text(
+                                text = if (stepScope.isLastStep) labels.finish else labels.next,
+                                style = typography.button,
+                                color = colors.primaryButton,
+                            )
+                        }
                     }
                 }
             }

@@ -25,9 +25,8 @@ import com.mohamedrejeb.waypoint.core.WaypointHintState
  * @param modifier modifier for the outer wrapper
  * @param tooltipSpacing spacing between tooltip and target
  * @param screenMargin margin from screen edges for the tooltip
- * @param gotItText label for the primary dismiss button
+ * @param labels texts of the tooltip (got it button, close icon description)
  * @param showCloseButton whether to render a close-only button in the tooltip header
- * @param closeContentDescription accessibility description for the close button
  * @param content the UI element to decorate with the hint beacon
  */
 @Composable
@@ -37,9 +36,8 @@ public fun <K> WaypointMaterial3Hint(
     modifier: Modifier = Modifier,
     tooltipSpacing: Dp = WaypointDefaults.TooltipSpacing,
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
-    gotItText: String = "Got it",
+    labels: WaypointMaterial3Labels = WaypointMaterial3Labels.Default,
     showCloseButton: Boolean = false,
-    closeContentDescription: String = "Close",
     content: @Composable () -> Unit,
 ) {
     WaypointHint(
@@ -51,9 +49,8 @@ public fun <K> WaypointMaterial3Hint(
         tooltipContent = { hintScope ->
             WaypointMaterial3HintTooltip(
                 hintScope = hintScope,
-                gotItText = gotItText,
+                labels = labels,
                 showCloseButton = showCloseButton,
-                closeContentDescription = closeContentDescription,
             )
         },
         content = content,

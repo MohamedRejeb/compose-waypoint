@@ -35,18 +35,17 @@ import com.mohamedrejeb.waypoint.core.HintScope
  *
  * @param hintScope scope providing title/description and dismiss/close actions
  * @param modifier modifier for the tooltip container
- * @param gotItText label for the primary dismiss button
+ * @param labels texts: [WaypointMaterial3Labels.gotIt] for the dismiss button
+ * and [WaypointMaterial3Labels.close] as the close icon's content description
  * @param showCloseButton whether to render a close-only button in the header row
- * @param closeContentDescription accessibility description for the close button
  * @param showArrow whether to draw an arrow pointing at the hint target
  */
 @Composable
 public fun WaypointMaterial3HintTooltip(
     hintScope: HintScope,
     modifier: Modifier = Modifier,
-    gotItText: String = "Got it",
+    labels: WaypointMaterial3Labels = WaypointMaterial3Labels.Default,
     showCloseButton: Boolean = false,
-    closeContentDescription: String = "Close",
     showArrow: Boolean = true,
 ) {
     val colors = WaypointMaterial3Theme.colors
@@ -67,9 +66,9 @@ public fun WaypointMaterial3HintTooltip(
             dims = dims,
             title = title,
             description = description,
-            gotItText = gotItText,
+            gotItText = labels.gotIt,
             showCloseButton = showCloseButton,
-            closeContentDescription = closeContentDescription,
+            closeContentDescription = labels.close,
             hintScope = hintScope,
         )
     }

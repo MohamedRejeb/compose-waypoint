@@ -3,8 +3,9 @@ package com.mohamedrejeb.waypoint.material3
 import androidx.compose.runtime.Immutable
 
 /**
- * The texts shown by [WaypointMaterial3Tooltip]. Pass your own instance to
- * localize or reword them.
+ * The texts shown by [WaypointMaterial3Tooltip] and
+ * [WaypointMaterial3HintTooltip]. Pass your own instance to localize or
+ * reword them.
  *
  * ```kotlin
  * val labels = WaypointMaterial3Labels(
@@ -20,6 +21,8 @@ import androidx.compose.runtime.Immutable
  * @param next label of the button that advances to the next step
  * @param back label of the button that returns to the previous step
  * @param finish label that replaces [next] on the last step
+ * @param gotIt label of the hint tooltip's dismiss button
+ * @param close content description of the hint tooltip's close icon
  * @param progress formats the progress text from the 1-based number of the
  *   current step and the total number of visible steps
  *
@@ -34,6 +37,8 @@ public class WaypointMaterial3Labels(
     public val next: String = "Next",
     public val back: String = "Back",
     public val finish: String = "Finish",
+    public val gotIt: String = "Got it",
+    public val close: String = "Close",
     public val progress: (current: Int, total: Int) -> String = { current, total -> "$current of $total" },
 ) {
     override fun equals(other: Any?): Boolean {
@@ -43,6 +48,8 @@ public class WaypointMaterial3Labels(
             next == other.next &&
             back == other.back &&
             finish == other.finish &&
+            gotIt == other.gotIt &&
+            close == other.close &&
             progress == other.progress
     }
 
@@ -51,6 +58,8 @@ public class WaypointMaterial3Labels(
         result = 31 * result + next.hashCode()
         result = 31 * result + back.hashCode()
         result = 31 * result + finish.hashCode()
+        result = 31 * result + gotIt.hashCode()
+        result = 31 * result + close.hashCode()
         result = 31 * result + progress.hashCode()
         return result
     }

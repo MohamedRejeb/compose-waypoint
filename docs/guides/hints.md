@@ -94,7 +94,7 @@ For a ready-made tooltip, use `WaypointMaterial3Hint`:
 WaypointMaterial3Hint(
     state = hints,
     key = HomeHints.NewFilter,
-    gotItText = "Got it",
+    labels = WaypointMaterial3Labels(gotIt = "Got it", close = "Close"),
     showCloseButton = true,
 ) {
     FilterButton()
@@ -103,9 +103,8 @@ WaypointMaterial3Hint(
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `gotItText` | `"Got it"` | Label for the primary dismiss button. |
+| `labels` | `WaypointMaterial3Labels.Default` | Texts: `gotIt` for the primary dismiss button, `close` as the close icon's content description. |
 | `showCloseButton` | `false` | Render an extra close-only button that calls `scope.close()`. |
-| `closeContentDescription` | `"Close"` | Accessibility text for the close button. |
 
 The tooltip draws colors, typography, and dimensions from `WaypointMaterial3Theme`.
 

@@ -10,6 +10,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
@@ -61,6 +62,8 @@ class Material3LabelsUiTest {
         assertEquals("Next", labels.next)
         assertEquals("Back", labels.back)
         assertEquals("Finish", labels.finish)
+        assertEquals("Got it", labels.gotIt)
+        assertEquals("Close", labels.close)
         assertEquals("2 of 5", labels.progress(2, 5))
     }
 
@@ -92,6 +95,8 @@ class Material3LabelsUiTest {
         assertNotEquals(base, WaypointMaterial3Labels(next = "x"))
         assertNotEquals(base, WaypointMaterial3Labels(back = "x"))
         assertNotEquals(base, WaypointMaterial3Labels(finish = "x"))
+        assertNotEquals(base, WaypointMaterial3Labels(gotIt = "x"))
+        assertNotEquals(base, WaypointMaterial3Labels(close = "x"))
         assertNotEquals(base, WaypointMaterial3Labels(progress = { _, _ -> "x" }))
     }
 
@@ -251,5 +256,60 @@ class Material3LabelsUiTest {
         onNodeWithText("Skip").performClick()
         waitForIdle()
         assertFalse(state.isActive)
+    }
+
+    @Test
+    fun `next and finish are hidden while the step advances automatically`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                WaypointMaterial3Tooltip(stepScope = middleScope().copy(advancesAutomatically = true))
+            }
+        }
+
+        assertTrue(onAllNodesWithText("Next").fetchSemanticsNodes().isEmpty())
+        onNodeWithText("Skip").assertIsDisplayed()
+        onNodeWithText("Back").assertIsDisplayed()
+        onNodeWithText("2 of 3").assertIsDisplayed()
+    }
+
+    @Test
+    fun `finish is hidden on an automatically advancing last step`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                WaypointMaterial3Tooltip(
+                    stepScope = middleScope().copy(currentStepIndex = 2, currentStepNumber = 3, isLastStep = true, advancesAutomatically = true),
+                )
+            }
+        }
+
+        assertTrue(onAllNodesWithText("Finish").fetchSemanticsNodes().isEmpty())
+        onNodeWithText("Skip").assertIsDisplayed()
+    }
+
+    @Test
+    fun `hint tooltip uses the got it and close labels`() = runComposeUiTest {
+        var hints: com.mohamedrejeb.waypoint.core.WaypointHintState<String>? = null
+        setContent {
+            MaterialTheme {
+                val state = com.mohamedrejeb.waypoint.core.rememberWaypointHintState<String> {
+                    hint("h") { title = "Hint" }
+                }
+                hints = state
+                WaypointMaterial3Hint(
+                    state = state,
+                    key = "h",
+                    labels = WaypointMaterial3Labels(gotIt = "Compris", close = "Fermer"),
+                    showCloseButton = true,
+                ) {
+                    Box(Modifier.size(60.dp))
+                }
+            }
+        }
+        waitForIdle()
+        runOnIdle { hints?.open("h") }
+        awaitText("Compris")
+
+        onNodeWithText("Compris").assertIsDisplayed()
+        onNodeWithContentDescription("Fermer").assertIsDisplayed()
     }
 }

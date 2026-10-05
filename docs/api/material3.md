@@ -89,7 +89,7 @@ WaypointMaterial3Host(
 
 ## `WaypointMaterial3Labels`
 
-The texts shown by `WaypointMaterial3Tooltip`, passed as one `labels` parameter to `WaypointMaterial3Host`, `WaypointMaterial3OverlayHost` and `WaypointMaterial3Tooltip`.
+The texts shown by `WaypointMaterial3Tooltip` and `WaypointMaterial3HintTooltip`, passed as one `labels` parameter to `WaypointMaterial3Host`, `WaypointMaterial3OverlayHost`, `WaypointMaterial3Tooltip`, `WaypointMaterial3Hint` and `WaypointMaterial3HintTooltip`.
 
 ```kotlin
 @Immutable
@@ -98,6 +98,8 @@ public class WaypointMaterial3Labels(
     public val next: String = "Next",
     public val back: String = "Back",
     public val finish: String = "Finish",
+    public val gotIt: String = "Got it",
+    public val close: String = "Close",
     public val progress: (current: Int, total: Int) -> String = { current, total -> "$current of $total" },
 )
 ```
@@ -108,9 +110,11 @@ public class WaypointMaterial3Labels(
 | `next` | `"Next"` | Label of the button that advances to the next step. |
 | `back` | `"Back"` | Label of the back button (hidden on the first step). |
 | `finish` | `"Finish"` | Label that replaces `next` on the last step. |
+| `gotIt` | `"Got it"` | Label of the hint tooltip's dismiss button. |
+| `close` | `"Close"` | Content description of the hint tooltip's close icon. |
 | `progress` | `"1 of 3"` | Formats the progress text from the 1-based number of the current step and the total number of visible steps. |
 
-`WaypointMaterial3Labels.Default` holds the English defaults.
+`WaypointMaterial3Labels.Default` holds the English defaults. Two instances are equal when their texts are equal and they share the same `progress` function instance.
 
 ### Localization
 
@@ -184,7 +188,7 @@ public fun WaypointMaterial3Tooltip(
 )
 ```
 
-The title, description and placement are read from `stepScope`. Colors, typography, and dimensions come from [`WaypointMaterial3Theme`](#waypointmaterial3theme). When the step has a target, an arrow pointing at it is drawn automatically; pass `showArrow = false` to disable it. A step without a target renders the same card with no arrow. The progress text is `labels.progress(currentStepNumber, totalSteps)`, counting only visible steps.
+The title, description and placement are read from `stepScope`. Colors, typography, and dimensions come from [`WaypointMaterial3Theme`](#waypointmaterial3theme). When the step has a target, an arrow pointing at it is drawn automatically; pass `showArrow = false` to disable it. A step without a target renders the same card with no arrow. The progress text is `labels.progress(currentStepNumber, totalSteps)`, counting only visible steps. While the step advances automatically (`stepScope.advancesAutomatically`, see [Event-Driven Progression](../guides/advance-on.md#forward-only)) the Next/Finish button is hidden; Skip and Back stay.
 
 ```kotlin
 step(Targets.Special) {
@@ -228,9 +232,8 @@ public fun <K> WaypointMaterial3Hint(
     modifier: Modifier = Modifier,
     tooltipSpacing: Dp = WaypointDefaults.TooltipSpacing,
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
-    gotItText: String = "Got it",
+    labels: WaypointMaterial3Labels = WaypointMaterial3Labels.Default,
     showCloseButton: Boolean = false,
-    closeContentDescription: String = "Close",
     content: @Composable () -> Unit,
 )
 ```
@@ -241,9 +244,8 @@ public fun <K> WaypointMaterial3Hint(
 | `key` | `K` | required | The hint to render, must be registered in `state`. |
 | `tooltipSpacing` | `Dp` | `12.dp` | Gap between tooltip and target. |
 | `screenMargin` | `Dp` | `16.dp` | Minimum margin from screen edges. |
-| `gotItText` | `String` | `"Got it"` | Label for the primary dismiss button. |
+| `labels` | `WaypointMaterial3Labels` | `WaypointMaterial3Labels.Default` | `gotIt` labels the dismiss button, `close` is the close icon's content description. |
 | `showCloseButton` | `Boolean` | `false` | Render a close (`x`) icon in the tooltip header. |
-| `closeContentDescription` | `String` | `"Close"` | Accessibility label for the close icon. |
 
 ```kotlin
 WaypointMaterial3Hint(
@@ -264,9 +266,8 @@ The default Material3 hint tooltip. Renders an optional title, optional descript
 public fun WaypointMaterial3HintTooltip(
     hintScope: HintScope,
     modifier: Modifier = Modifier,
-    gotItText: String = "Got it",
+    labels: WaypointMaterial3Labels = WaypointMaterial3Labels.Default,
     showCloseButton: Boolean = false,
-    closeContentDescription: String = "Close",
     showArrow: Boolean = true,
 )
 ```

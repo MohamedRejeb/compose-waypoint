@@ -10,7 +10,7 @@ edit_uri: ""
 repo_name: 'compose-waypoint'
 repo_url: 'https://github.com/MohamedRejeb/compose-waypoint'
 
-# Configuration — side navigation (Calf-style titles on the side)
+# Configuration: side navigation (Calf-style titles on the side)
 theme:
   name: 'material'
   language: 'en'
@@ -31,7 +31,7 @@ theme:
     text: 'Roboto'
     code: 'Roboto Mono'
   features:
-    # No navigation.tabs — keep titles on the side, Calf-style
+    # No navigation.tabs, keep titles on the side, Calf-style
     - navigation.top
     - search.suggest
     - search.highlight
@@ -49,6 +49,10 @@ extra:
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/in/mohamedrejeb/
 
+# Internal planning notes, not part of the published site
+exclude_docs: |
+  superpowers/
+
 # Navigation (flat, side-loaded)
 nav:
   - 'Overview': index.md
@@ -63,6 +67,7 @@ nav:
     - 'Keyboard Navigation': guides/keyboard.md
     - 'Event-Driven Progression': guides/advance-on.md
     - 'Async Gates': guides/async-gates.md
+    - 'Interactive Tutorials': guides/interactive-tutorials.md
     - 'Cross-Hierarchy Tours': guides/multi-host.md
   - 'Ambient attention':
     - 'Tour Sequences': guides/tour-sequences.md

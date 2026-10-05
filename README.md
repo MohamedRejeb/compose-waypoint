@@ -27,16 +27,18 @@ Pick `waypoint-core` alone for full control over the tooltip UI, or `waypoint-ma
 - **Highlight styles**: Spotlight, Pulse, Border, Ripple, None, or fully Custom, configurable per step
 - **Spotlight effects**: Glow, SoftEdge, and custom draw lambdas decorate the cutout
 - **Tooltip positioning** with auto-flip and screen-edge clamping
-- **Step navigation**: `next`, `previous`, `skip`, `goTo`, `pause`, `resume`
+- **Step navigation**: `next`, `previous`, `goTo`, `stop`, `pause`, `resume`
 - **Conditional steps** (`showIf`) and lifecycle callbacks (`onEnter`/`onExit`)
+- **Interactive tutorials**: the user types and taps inside the highlighted element (`PassThrough`) while the rest of the screen is blocked
 - **Event-driven progression** (`advanceOn`) and async gates (`beforeShow`)
+- **Steps without a target**, shown as a centered card for intros and outros
 - **Multi-element highlight**: one tooltip, multiple targets
 - **Cross-hierarchy tours**: targets inside Dialog, Sheet, and Popup via `WaypointOverlayHost`
 - **Persistent hints**: ambient beacons that live outside of tours
 - **Tour sequences**: chain multiple tours with shared persistence
 - **Beacons** (pulse or dot) as standalone attention indicators
 - **Auto-scroll** targets into view through nested scroll containers
-- **Keyboard navigation** (arrow keys, Escape) on Desktop and Web
+- **Keyboard navigation** (arrow keys, Enter, Escape) on Desktop and Web
 - **Analytics**, **persistence**, **theming**, **accessibility** (live-region + RTL) built in
 - Survives **configuration changes** via `rememberSaveable`
 
@@ -109,6 +111,7 @@ fun HomeScreen() {
 - [Quick Start](docs/getting-started.md)
 - [Highlight Styles](docs/guides/highlight-styles.md)
 - [Custom Tooltips](docs/guides/custom-tooltips.md)
+- [Interactive Tutorials](docs/guides/interactive-tutorials.md)
 - [Tour Sequences](docs/guides/tour-sequences.md)
 - [Persistent Hints](docs/guides/hints.md)
 - [Theming](docs/guides/theming.md)
@@ -118,7 +121,7 @@ fun HomeScreen() {
 
 ## Sample
 
-The `:sample` module contains demos for every feature, runnable on all targets:
+The `:sample` module contains seven focused demos, runnable on all targets:
 
 ```bash
 # Desktop

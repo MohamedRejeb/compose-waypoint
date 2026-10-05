@@ -45,7 +45,7 @@ class MultiElementScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 SpotlightOverlay(
-                    targetBounds = listOf(primaryBounds) + additionalBounds,
+                    targetBounds = { listOf(primaryBounds) + additionalBounds },
                     style = HighlightStyle.Spotlight(
                         shape = SpotlightShape.RoundedRect(cornerRadius = 8.dp),
                         overlayColor = Color.Black,
@@ -74,7 +74,7 @@ class MultiElementScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 SpotlightOverlay(
-                    targetBounds = listOf(primaryBounds) + additionalBounds,
+                    targetBounds = { listOf(primaryBounds) + additionalBounds },
                     style = HighlightStyle.Spotlight(
                         shape = SpotlightShape.Circle,
                         overlayColor = Color.Black,
@@ -105,8 +105,7 @@ class MultiElementScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 BorderHighlight(
-                    targetBounds = primaryBounds,
-                    additionalBounds = additionalBounds,
+                    targetBounds = { listOf(primaryBounds) + additionalBounds },
                     style = HighlightStyle.Border(
                         color = Color(0xFFFF5722),
                         shape = SpotlightShape.RoundedRect(cornerRadius = 8.dp),
@@ -136,8 +135,7 @@ class MultiElementScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 PulseHighlight(
-                    targetBounds = primaryBounds,
-                    additionalBounds = additionalBounds,
+                    targetBounds = { listOf(primaryBounds) + additionalBounds },
                     style = HighlightStyle.Pulse(
                         color = Color(0xFF6200EE),
                         shape = SpotlightShape.RoundedRect(cornerRadius = 8.dp),
@@ -168,8 +166,7 @@ class MultiElementScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 RippleHighlight(
-                    targetBounds = primaryBounds,
-                    additionalBounds = additionalBounds,
+                    targetBounds = { listOf(primaryBounds) + additionalBounds },
                     style = HighlightStyle.Ripple(
                         color = Color(0xFF03DAC5),
                         ringCount = 3,

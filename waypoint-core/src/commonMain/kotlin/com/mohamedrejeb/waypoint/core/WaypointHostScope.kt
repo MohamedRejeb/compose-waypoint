@@ -16,6 +16,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.Dp
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -72,6 +74,7 @@ internal fun <K> WaypointHostScope(
     if (isPrimary) {
         TourEndEffect(state, onTourComplete, onTourCancel)
         StepLifecycleEffect(state, animatedBounds)
+        AutoScrollEffect(state)
 
         // Reset animated bounds when the tour becomes inactive so the next
         // start() snaps to the first target instead of animating from the
@@ -120,6 +123,10 @@ internal fun <K> WaypointHostScope(
         }
     }
 
+    // Handed down as a function and only invoked while drawing and laying out,
+    // so the frames of the bounds animation do not recompose the host.
+    val readAnimatedBounds = remember(animatedBounds) { { animatedBounds.value } }
+
     val isShowingStep = state.isActive && !state.isPaused && !state.isStepHeld && isOwnedByThisHost
 
     CompositionLocalProvider(LocalWaypointHostId provides hostId) {
@@ -148,7 +155,7 @@ internal fun <K> WaypointHostScope(
                     step = step,
                     hostId = hostId,
                     targetBounds = targetBounds,
-                    animatedBounds = animatedBounds.value,
+                    animatedBounds = readAnimatedBounds,
                     highlightStyle = step.highlightStyle ?: highlightStyle,
                     onOverlayClick = onOverlayClick,
                     tooltipSpacing = tooltipSpacing,
@@ -220,6 +227,32 @@ private fun <K> StepLifecycleEffect(
 }
 
 /**
+ * Brings the current step's target into view once the step is showable: its
+ * gate has completed and the target is in the composition. That also covers a
+ * target mounted by beforeShow, or one that registers some time after the step
+ * was entered.
+ *
+ * It scrolls once per step. After that the position is the user's: scrolling
+ * inside a pass-through step, or the target's bounds changing, never triggers
+ * another scroll.
+ */
+@Composable
+private fun <K> AutoScrollEffect(state: WaypointState<K>) {
+    LaunchedEffect(state, state.currentStepIndex) {
+        if (state.currentStep?.targetKey == null) return@LaunchedEffect
+        snapshotFlow { state.isActive && state.isStepReady && !state.isPaused }.first { it }
+
+        val registered = state.currentBringIntoViewRequester
+        val requester = registered
+            ?: snapshotFlow { state.currentBringIntoViewRequester }.filterNotNull().first()
+        // A target that only just entered the composition has not been laid
+        // out yet, give it a frame so there is a position to scroll to.
+        if (registered == null) withFrameNanos { }
+        requester.bringIntoView()
+    }
+}
+
+/**
  * Runs a beforeShow [gate] and marks the step ready when it returns.
  *
  * The gate is started undispatched: one that returns without suspending is
@@ -248,7 +281,7 @@ private fun <K> BoxScope.StepLayers(
     step: WaypointStep<K>,
     hostId: Any,
     targetBounds: Rect?,
-    animatedBounds: Rect,
+    animatedBounds: () -> Rect,
     highlightStyle: HighlightStyle,
     onOverlayClick: () -> Unit,
     tooltipSpacing: Dp,
@@ -260,7 +293,7 @@ private fun <K> BoxScope.StepLayers(
         // Every other style has nothing to draw without a target.
         if (highlightStyle is HighlightStyle.Spotlight) {
             SpotlightOverlay(
-                targetBounds = emptyList(),
+                targetBounds = { emptyList() },
                 style = highlightStyle,
                 passThrough = false,
                 onOverlayClick = onOverlayClick,
@@ -277,13 +310,8 @@ private fun <K> BoxScope.StepLayers(
         return
     }
 
-    // Until the bounds animation has caught up with a freshly shown target
-    // (animatedBounds is still Zero), draw at the target itself.
-    val highlightBounds = if (animatedBounds == Rect.Zero) targetBounds else animatedBounds
-
     // The modifier already unregisters degenerate bounds, this is a safety net.
-    val isTargetVisible = targetBounds != null && targetBounds.width > 1f && targetBounds.height > 1f
-    if (isTargetVisible && highlightBounds != null) {
+    if (targetBounds != null && targetBounds.width > 1f && targetBounds.height > 1f) {
         // Only include additional targets registered against THIS host:
         // bounds are host-relative, so a target living in another host
         // (e.g. inside a Dialog) would draw at a meaningless position.
@@ -293,7 +321,9 @@ private fun <K> BoxScope.StepLayers(
         TargetHighlight(
             style = highlightStyle,
             targetBounds = targetBounds,
-            highlightBounds = highlightBounds,
+            // Until the bounds animation has caught up with a freshly shown
+            // target (animated bounds still Zero), draw at the target itself.
+            highlightBounds = { animatedBounds().takeUnless { it == Rect.Zero } ?: targetBounds },
             additionalBounds = additionalBounds,
             interaction = step.interaction,
             onOverlayClick = onOverlayClick,
@@ -303,7 +333,7 @@ private fun <K> BoxScope.StepLayers(
 
     // The tooltip stays up while the tour has bounds to render at, even when
     // the target is momentarily unregistered (scrolled out of view).
-    val anchorBounds = targetBounds ?: animatedBounds
+    val anchorBounds = targetBounds ?: animatedBounds()
     if (anchorBounds != Rect.Zero) {
         val density = LocalDensity.current
         // Keyed by step so each step gets a fresh popup and enter animation.
@@ -346,20 +376,27 @@ private fun <K> WaypointState<K>.stepScope(
     isLastStep = !hasVisibleStepAfter(currentStepIndex),
 )
 
-/** The highlight layer for a step with a target, sized to the host. */
+/**
+ * The highlight layer for a step with a target, sized to the host.
+ *
+ * [highlightBounds] is the animated position of the primary target. The
+ * built-in styles read it while drawing or laying out; only a custom style,
+ * whose content takes the bounds as a parameter, recomposes with it.
+ */
 @Composable
 private fun BoxScope.TargetHighlight(
     style: HighlightStyle,
     targetBounds: Rect,
-    highlightBounds: Rect,
+    highlightBounds: () -> Rect,
     additionalBounds: List<Rect>,
     interaction: TargetInteraction,
     onOverlayClick: () -> Unit,
     onTargetClick: () -> Unit,
 ) {
+    val allBounds: () -> List<Rect> = { listOf(highlightBounds()) + additionalBounds }
     when (style) {
         is HighlightStyle.Spotlight -> SpotlightOverlay(
-            targetBounds = listOf(highlightBounds) + additionalBounds,
+            targetBounds = allBounds,
             style = style,
             passThrough = interaction == TargetInteraction.PassThrough,
             onOverlayClick = onOverlayClick,
@@ -368,28 +405,25 @@ private fun BoxScope.TargetHighlight(
         )
 
         is HighlightStyle.Pulse -> PulseHighlight(
-            targetBounds = highlightBounds,
-            additionalBounds = additionalBounds,
+            targetBounds = allBounds,
             style = style,
             modifier = Modifier.matchParentSize(),
         )
 
         is HighlightStyle.Border -> BorderHighlight(
-            targetBounds = highlightBounds,
-            additionalBounds = additionalBounds,
+            targetBounds = allBounds,
             style = style,
             modifier = Modifier.matchParentSize(),
         )
 
         is HighlightStyle.Ripple -> RippleHighlight(
-            targetBounds = highlightBounds,
-            additionalBounds = additionalBounds,
+            targetBounds = allBounds,
             style = style,
             modifier = Modifier.matchParentSize(),
         )
 
         is HighlightStyle.None -> {}
 
-        is HighlightStyle.Custom -> style.content(targetBounds, highlightBounds)
+        is HighlightStyle.Custom -> style.content(targetBounds, highlightBounds())
     }
 }

@@ -45,7 +45,7 @@ class SpotlightEffectScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 SpotlightOverlay(
-                    targetBounds = listOf(bounds),
+                    targetBounds = { listOf(bounds) },
                     style = HighlightStyle.Spotlight(
                         shape = shape,
                         overlayColor = Color.Black,
@@ -118,7 +118,7 @@ class SpotlightEffectScreenshotTest {
                     .testTag("softedge-pixel"),
             ) {
                 SpotlightOverlay(
-                    targetBounds = listOf(cutoutBounds),
+                    targetBounds = { listOf(cutoutBounds) },
                     style = HighlightStyle.Spotlight(
                         shape = SpotlightShape.Circle,
                         overlayColor = Color.Black,
@@ -198,7 +198,7 @@ class SpotlightEffectScreenshotTest {
                     .testTag("softedge-pill"),
             ) {
                 SpotlightOverlay(
-                    targetBounds = listOf(pillBounds),
+                    targetBounds = { listOf(pillBounds) },
                     style = HighlightStyle.Spotlight(
                         shape = SpotlightShape.Pill,
                         overlayColor = Color.Black,

@@ -47,3 +47,11 @@ private fun bandRects(top: Float, bottom: Float, width: Float, holes: List<Rect>
         if (x < width) add(Rect(x, top, width, bottom))
     }
 }
+
+/**
+ * Upper bound of how many rectangles [blockerRects] returns for [holeCount]
+ * holes: at most `2 * holeCount + 1` bands, each split into at most
+ * `holeCount + 1` pieces. Lets the blockers be composed once and merely moved
+ * while the holes animate.
+ */
+internal fun maxBlockerCount(holeCount: Int): Int = (2 * holeCount + 1) * (holeCount + 1)

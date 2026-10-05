@@ -65,10 +65,7 @@ public fun <K> WaypointHost(
         keyboardConfig.enabled && state.isActive && state.currentStep?.isPassThrough == false
 
     LaunchedEffect(state.currentStepIndex) {
-        if (state.isActive && !state.isPaused) {
-            if (wantsFocus()) focusRequester.requestFocus()
-            state.scrollCurrentTargetIntoView()
-        }
+        if (!state.isPaused && wantsFocus()) focusRequester.requestFocus()
     }
 
     // Re-request focus when the tour starts (in case focus was lost while inactive).

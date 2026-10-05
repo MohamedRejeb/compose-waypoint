@@ -95,8 +95,12 @@ public class WaypointState<K>(
      */
     internal val targetCoordinates = mutableStateMapOf<K, Rect>()
 
-    /** BringIntoViewRequesters for auto-scrolling targets into view */
-    internal val bringIntoViewRequesters = mutableMapOf<K, BringIntoViewRequester>()
+    /**
+     * BringIntoViewRequesters for auto-scrolling targets into view. Snapshot
+     * state, so the host can wait for a target that registers after its step
+     * was entered.
+     */
+    internal val bringIntoViewRequesters = mutableStateMapOf<K, BringIntoViewRequester>()
 
     /**
      * LayoutCoordinates for each registered host, keyed by the host's unique id.
@@ -234,15 +238,11 @@ public class WaypointState<K>(
     // Auto-scroll
 
     /**
-     * Scrolls the current step's target into view using [BringIntoViewRequester].
-     * This propagates through nested scroll containers automatically.
-     *
-     * Call this before showing the highlight/tooltip for a step.
+     * The [BringIntoViewRequester] of the current step's target, or null while
+     * the target is not in the composition or the step has no target.
      */
-    internal suspend fun scrollCurrentTargetIntoView() {
-        val key = currentStep?.targetKey ?: return
-        bringIntoViewRequesters[key]?.bringIntoView()
-    }
+    internal val currentBringIntoViewRequester: BringIntoViewRequester?
+        get() = currentStep?.targetKey?.let { bringIntoViewRequesters[it] }
 
     // Host registration (called by WaypointHost / WaypointOverlayHost)
 

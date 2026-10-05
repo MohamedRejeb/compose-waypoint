@@ -15,23 +15,18 @@ import androidx.compose.ui.platform.LocalDensity
 
 /**
  * Renders expanding concentric rings radiating from each target center.
- * Supports multiple targets and both stroke and filled rendering.
+ * Supports multiple targets ([targetBounds] returns the primary target first,
+ * then additional ones) and both stroke and filled rendering.
  */
 @Composable
 internal fun RippleHighlight(
-    targetBounds: Rect,
-    additionalBounds: List<Rect>,
+    targetBounds: () -> List<Rect>,
     style: HighlightStyle.Ripple,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
     val maxRadiusPx = with(density) { style.maxRadius.toPx() }
     val strokeWidthPx = with(density) { style.strokeWidth.toPx() }
-
-    val allCenters = buildList {
-        add(targetBounds.center)
-        additionalBounds.forEach { add(it.center) }
-    }
 
     val infiniteTransition = rememberInfiniteTransition()
 
@@ -44,6 +39,8 @@ internal fun RippleHighlight(
     )
 
     Canvas(modifier = modifier) {
+        // Bounds are read while drawing, so animating them only redraws.
+        val allCenters = targetBounds().map { it.center }
         for (center in allCenters) {
             for (i in 0 until style.ringCount) {
                 val ringProgress = (progress + i.toFloat() / style.ringCount) % 1f

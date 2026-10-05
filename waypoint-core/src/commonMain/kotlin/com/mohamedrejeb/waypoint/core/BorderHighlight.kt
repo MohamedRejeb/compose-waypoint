@@ -12,12 +12,12 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 /**
  * Renders a static colored shape around the target elements.
  * No animation, no overlay. Supports both stroke and filled rendering,
- * and multiple targets.
+ * and multiple targets ([targetBounds] returns the primary target first, then
+ * additional ones).
  */
 @Composable
 internal fun BorderHighlight(
-    targetBounds: Rect,
-    additionalBounds: List<Rect>,
+    targetBounds: () -> List<Rect>,
     style: HighlightStyle.Border,
     modifier: Modifier = Modifier,
 ) {
@@ -25,14 +25,11 @@ internal fun BorderHighlight(
     val layoutDirection = LocalLayoutDirection.current
     val borderWidthPx = with(density) { style.borderWidth.toPx() }
 
-    val allBounds = buildList {
-        add(padBounds(targetBounds, style.padding, density, layoutDirection))
-        additionalBounds.forEach { add(padBounds(it, style.padding, density, layoutDirection)) }
-    }
-
     val drawStyle = if (style.filled) Fill else Stroke(width = borderWidthPx)
 
     Canvas(modifier = modifier) {
+        // Bounds are read while drawing, so animating them only redraws.
+        val allBounds = targetBounds().map { padBounds(it, style.padding, density, layoutDirection) }
         for (bounds in allBounds) {
             drawShape(
                 shape = style.shape,

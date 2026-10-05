@@ -25,16 +25,17 @@ import kotlin.math.pow
  * Renders a semi-transparent overlay with transparent cutouts (spotlights)
  * around the target elements, and blocks pointer input outside of them.
  *
- * [targetBounds] holds the primary target first, then any additional targets.
- * It is empty for a step without a target, which draws the scrim with no
- * cutout and blocks the whole area.
+ * [targetBounds] returns the primary target first, then any additional
+ * targets. It is empty for a step without a target, which draws the scrim
+ * with no cutout and blocks the whole area. It is only read while drawing and
+ * laying out, so animating bounds do not recompose anything.
  *
  * The canvas only draws. Pointer input is handled by [SpotlightBlockers]
  * layered on top of it, see there for what [passThrough] does.
  */
 @Composable
 internal fun SpotlightOverlay(
-    targetBounds: List<Rect>,
+    targetBounds: () -> List<Rect>,
     style: HighlightStyle.Spotlight,
     passThrough: Boolean,
     onOverlayClick: () -> Unit,
@@ -44,7 +45,9 @@ internal fun SpotlightOverlay(
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
 
-    val allPaddedBounds = targetBounds.map { padBounds(it, style.padding, density, layoutDirection) }
+    val paddedBounds: () -> List<Rect> = {
+        targetBounds().map { padBounds(it, style.padding, density, layoutDirection) }
+    }
 
     Box(modifier = modifier) {
         Canvas(
@@ -52,6 +55,8 @@ internal fun SpotlightOverlay(
                 .matchParentSize()
                 .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen),
         ) {
+            val allPaddedBounds = paddedBounds()
+
             // 1. Draw the scrim
             drawRect(color = style.overlayColor.copy(alpha = style.overlayAlpha))
 
@@ -90,13 +95,32 @@ internal fun SpotlightOverlay(
         }
 
         SpotlightBlockers(
-            holes = allPaddedBounds,
+            // Hit decisions follow what is drawn, see cutoutBounds.
+            holes = { paddedBounds().map { cutoutBounds(it, style.shape) } },
             passThrough = passThrough,
             onOverlayClick = onOverlayClick,
             onTargetClick = onTargetClick,
             modifier = Modifier.matchParentSize(),
         )
     }
+}
+
+/**
+ * The rectangle that pointer input treats as the cutout drawn for
+ * [paddedBounds]. Every shape stays within its bounds except the circle, which
+ * is drawn around the center with a radius of half the longer side and so
+ * reaches beyond a non-square target: for it this is the circle's bounding
+ * square.
+ */
+internal fun cutoutBounds(paddedBounds: Rect, shape: SpotlightShape): Rect = when (shape) {
+    is SpotlightShape.Circle -> Rect(
+        center = paddedBounds.center,
+        radius = max(paddedBounds.width, paddedBounds.height) / 2f,
+    )
+
+    is SpotlightShape.Rect,
+    is SpotlightShape.RoundedRect,
+    is SpotlightShape.Pill -> paddedBounds
 }
 
 private fun DrawScope.drawCutout(

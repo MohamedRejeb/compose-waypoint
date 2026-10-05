@@ -46,7 +46,7 @@ class SpotlightShapeScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 SpotlightOverlay(
-                    targetBounds = listOf(targetBounds),
+                    targetBounds = { listOf(targetBounds) },
                     style = HighlightStyle.Spotlight(
                         shape = shape,
                         padding = padding,

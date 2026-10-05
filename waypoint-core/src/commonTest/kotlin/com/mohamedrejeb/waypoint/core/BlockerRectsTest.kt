@@ -163,4 +163,23 @@ class BlockerRectsTest {
 
         assertExactCover(listOf(outer), rects)
     }
+
+    @Test
+    fun `rect count never exceeds the bound the blockers are composed for`() {
+        // Staggered holes that all cross each other's bands are the worst case.
+        for (count in 0..6) {
+            val holes = List(count) { i ->
+                Rect(left = 5f + i * 14f, top = 5f + i * 6f, right = 15f + i * 14f, bottom = 60f + i * 6f)
+            }
+
+            val rects = blockerRects(size, holes)
+
+            assertTrue(
+                rects.size <= maxBlockerCount(count),
+                "$count holes gave ${rects.size} rects, bound is ${maxBlockerCount(count)}",
+            )
+            assertExactCover(holes, rects)
+        }
+        assertEquals(1, maxBlockerCount(0))
+    }
 }

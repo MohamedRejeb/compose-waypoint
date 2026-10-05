@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.waypoint.core.TargetInteraction
-import com.mohamedrejeb.waypoint.core.WaypointTrigger
 import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
@@ -38,19 +37,20 @@ import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
 import com.mohamedrejeb.waypoint.sample.components.ScreenPadding
 import com.mohamedrejeb.waypoint.sample.components.SectionLabel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 
 private enum class TutorialTarget { Name, Email, Plan, Summary, Create }
 
+private const val MinNameLength = 2
+
 /**
- * Event-driven progression: each step advances from what the user does in a
- * mock sign-up form, not from the Next button. Includes an async gate
- * (beforeShow) and a conditionally skipped step (showIf).
+ * A hands-on tutorial over a mock sign-up form. The user really types and taps
+ * inside the highlighted element (PassThrough) while the rest of the screen is
+ * blocked, and each step advances from what they do (advanceOn), not from the
+ * Next button. Opens and closes with a centered card (steps without a target),
+ * and includes an async gate (beforeShow) and a conditionally skipped step
+ * (showIf).
  */
-@OptIn(FlowPreview::class)
 @Composable
 fun InteractiveTutorialDemo(onBack: () -> Unit) {
     var name by remember { mutableStateOf("") }
@@ -58,33 +58,31 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
     var selectedPlan by remember { mutableStateOf<String?>(null) }
     var summaryLoading by remember { mutableStateOf(false) }
     var summaryVisible by remember { mutableStateOf(false) }
+    var accountCreated by remember { mutableStateOf(false) }
 
     val state = rememberWaypointState {
+        step {
+            title = "Create an account, hands on"
+            description = "You will fill in this form yourself. " +
+                "Only the highlighted part of the screen responds at each step."
+        }
         step(TutorialTarget.Name) {
             title = "Enter your name"
-            description = "Type at least 2 characters to continue."
-            interaction = TargetInteraction.AllowClick
-            advanceOn = WaypointTrigger.Custom {
-                // Debounced so the tour advances after a typing pause instead
-                // of yanking focus mid-word at the second character.
-                snapshotFlow { name }.filter { it.length >= 2 }.debounce(600).first()
-            }
+            description = "Type at least $MinNameLength characters to continue."
+            interaction = TargetInteraction.PassThrough
+            advanceOn { snapshotFlow { name }.first { it.trim().length >= MinNameLength } }
         }
         step(TutorialTarget.Email) {
             title = "Add your email"
-            description = "Type an address containing @ to continue."
-            interaction = TargetInteraction.AllowClick
-            advanceOn = WaypointTrigger.Custom {
-                snapshotFlow { email }.filter { "@" in it }.debounce(600).first()
-            }
+            description = "Type an address like you@example.com to continue."
+            interaction = TargetInteraction.PassThrough
+            advanceOn { snapshotFlow { email }.first { it.looksLikeEmail() } }
         }
         step(TutorialTarget.Plan) {
             title = "Pick a plan"
             description = "Select any plan to continue."
-            interaction = TargetInteraction.AllowClick
-            advanceOn = WaypointTrigger.Custom {
-                snapshotFlow { selectedPlan }.filter { it != null }.first()
-            }
+            interaction = TargetInteraction.PassThrough
+            advanceOn { snapshotFlow { selectedPlan }.first { it != null } }
         }
         step(TutorialTarget.Summary) {
             title = "Your summary"
@@ -99,31 +97,42 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
         }
         step(TutorialTarget.Create) {
             title = "Create your account"
-            description = "Tap the highlighted button to finish."
-            interaction = TargetInteraction.ClickToAdvance
-            showIf { selectedPlan != null && selectedPlan != "Free" }
+            description = "Tap the highlighted button."
+            interaction = TargetInteraction.PassThrough
+            showIf { selectedPlan != "Free" }
+            advanceOn { snapshotFlow { accountCreated }.first { it } }
+        }
+        step {
+            title = "That's the whole form"
+            description = "Every step advanced from something you did. " +
+                "Start the tour again to try another plan."
         }
     }
 
-    ResetOnLeave {
-        state.stop()
+    // While a step is pending (the summary gate is running) nothing is
+    // highlighted and nothing is blocked, so the form is disabled meanwhile.
+    val formEnabled = !state.isActive || state.isStepVisible
+
+    val resetForm = {
         name = ""
         email = ""
         selectedPlan = null
         summaryLoading = false
         summaryVisible = false
+        accountCreated = false
+    }
+
+    ResetOnLeave {
+        state.stop()
+        resetForm()
     }
 
     DemoScaffold(
         title = "Interactive tutorial",
-        description = "Steps advance from your actions in the form: typing, selecting a plan, and an async gate.",
+        description = "You work inside the highlighted element while the rest is blocked, and steps advance from your actions.",
         onBack = onBack,
         onStartTour = {
-            name = ""
-            email = ""
-            selectedPlan = null
-            summaryLoading = false
-            summaryVisible = false
+            resetForm()
             state.start()
         },
         startTourVisible = !state.isActive,
@@ -141,6 +150,7 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("Name") },
+                    enabled = formEnabled,
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
@@ -151,6 +161,7 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
                     value = email,
                     onValueChange = { email = it },
                     label = { Text("Email") },
+                    enabled = formEnabled,
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
@@ -169,6 +180,7 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
                             name = "Free",
                             price = "$0",
                             selected = selectedPlan == "Free",
+                            enabled = formEnabled,
                             onSelect = { selectedPlan = "Free" },
                             modifier = Modifier.weight(1f),
                         )
@@ -176,6 +188,7 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
                             name = "Pro",
                             price = "$12/mo",
                             selected = selectedPlan == "Pro",
+                            enabled = formEnabled,
                             onSelect = { selectedPlan = "Pro" },
                             modifier = Modifier.weight(1f),
                         )
@@ -183,6 +196,7 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
                             name = "Team",
                             price = "$29/mo",
                             selected = selectedPlan == "Team",
+                            enabled = formEnabled,
                             onSelect = { selectedPlan = "Team" },
                             modifier = Modifier.weight(1f),
                         )
@@ -213,13 +227,14 @@ fun InteractiveTutorialDemo(onBack: () -> Unit) {
                     )
                 }
                 Button(
-                    onClick = {},
+                    onClick = { accountCreated = true },
+                    enabled = formEnabled && !accountCreated,
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .waypointTarget(state, TutorialTarget.Create),
                 ) {
-                    Text("Create account")
+                    Text(if (accountCreated) "Account created" else "Create account")
                 }
                 Spacer(Modifier.height(80.dp))
             }
@@ -232,11 +247,13 @@ private fun PlanTile(
     name: String,
     price: String,
     selected: Boolean,
+    enabled: Boolean,
     onSelect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         onClick = onSelect,
+        enabled = enabled,
         modifier = modifier,
         shape = RoundedCornerShape(14.dp),
         color = if (selected) {
@@ -299,4 +316,12 @@ private fun SummaryRow(label: String, value: String) {
             style = MaterialTheme.typography.bodySmall,
         )
     }
+}
+
+/** Loose check, enough to know the user has finished typing an address. */
+private fun String.looksLikeEmail(): Boolean {
+    val domain = substringAfter('@', missingDelimiterValue = "")
+    return substringBefore('@').isNotBlank() &&
+        domain.substringBeforeLast('.', missingDelimiterValue = "").isNotEmpty() &&
+        domain.substringAfterLast('.', missingDelimiterValue = "").length >= 2
 }

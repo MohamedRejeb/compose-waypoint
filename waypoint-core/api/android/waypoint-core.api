@@ -423,7 +423,7 @@ public final class com/mohamedrejeb/waypoint/core/TargetInteraction : java/lang/
 }
 
 public final class com/mohamedrejeb/waypoint/core/TooltipArrowBoxKt {
-	public static final fun TooltipArrowBox-YJYuY3k (JLandroidx/compose/ui/Modifier;FLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun TooltipArrowBox-MJSPsJg (JLandroidx/compose/ui/Modifier;FFLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/mohamedrejeb/waypoint/core/TooltipArrowGeometry {
@@ -445,7 +445,7 @@ public final class com/mohamedrejeb/waypoint/core/TooltipArrowGeometryKt {
 }
 
 public final class com/mohamedrejeb/waypoint/core/TooltipArrowKt {
-	public static final fun TooltipArrow-N8B1yIo (Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;JLandroidx/compose/ui/Modifier;FLandroidx/compose/runtime/Composer;II)V
+	public static final fun TooltipArrow-zpKGrMw (Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;JLandroidx/compose/ui/Modifier;FFLandroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/mohamedrejeb/waypoint/core/TooltipPlacement : java/lang/Enum {

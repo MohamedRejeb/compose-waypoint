@@ -4,7 +4,11 @@ plugins {
 
 mavenPublishing {
     publishToMavenCentral()
-    signAllPublications()
+    // Sign only when a key is configured, so publishToMavenLocal works on
+    // machines without signing keys.
+    if (providers.gradleProperty("signingInMemoryKey").isPresent) {
+        signAllPublications()
+    }
 
     coordinates(group.toString(), project.name, version.toString())
 

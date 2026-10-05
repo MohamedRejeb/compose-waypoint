@@ -1,6 +1,6 @@
 [versions]
 waypoint = "0.1.0"
-java = "17"
+java = "11"
 agp = "8.13.2"
 android-compileSdk = "36"
 android-minSdk = "24"

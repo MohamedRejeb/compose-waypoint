@@ -155,7 +155,7 @@ highlightStyle = HighlightStyle.Spotlight(
 
 ## A tooltip without a Next button
 
-The Material3 tooltip hides its Next button while a step advances automatically (`StepScope.advancesAutomatically`), so with `advanceOn` on every hands-on step the user has to perform the action. When the user goes back into such a step, the trigger is not re-armed and the Next button comes back, see [Event-Driven Progression](advance-on.md#forward-only). For a tutorial a custom tooltip is often still a better fit. Everything it needs is on the `StepScope`, and `TooltipArrowBox` draws the arrow:
+The Material3 tooltip hides its Next button while a step advances automatically (`StepScope.advancesAutomatically`), so with `advanceOn` on every hands-on step the user has to perform the action. When the user goes back into such a step with Back, the trigger is not re-armed and the Next button comes back, see [Event-Driven Progression](advance-on.md#not-on-back). For a tutorial a custom tooltip is often still a better fit. Everything it needs is on the `StepScope`, and `TooltipArrowBox` draws the arrow:
 
 ```kotlin
 private val TooltipColor = Color(0xFF1B1B2F)

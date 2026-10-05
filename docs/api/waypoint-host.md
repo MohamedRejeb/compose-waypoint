@@ -84,7 +84,7 @@ public interface StepScope {
 | `currentStepNumber` | 1-based position among currently-visible steps, for "X of Y" progress. |
 | `totalSteps` | Number of currently-visible steps (steps whose `showIf` passes). |
 | `isFirstStep`, `isLastStep` | Whether this is the first or last visible step. |
-| `advancesAutomatically` | True when the step's `advanceOn` is armed for this visit (the step has one and was entered moving forward), so the tour moves on by itself. `WaypointMaterial3Tooltip` hides Next/Finish in that case. |
+| `advancesAutomatically` | True when the step's `advanceOn` is armed for this visit (the step has one and was not entered with `previous()`), so the tour moves on by itself. `WaypointMaterial3Tooltip` hides Next/Finish in that case. |
 | `next()` | Go to the next step, or complete the tour on the last one. |
 | `previous()` | Go to the previous step. |
 | `skip()` | Cancel the tour. |
@@ -99,6 +99,7 @@ public fun TooltipArrowBox(
     arrowColor: Color,
     modifier: Modifier = Modifier,
     arrowSize: Dp = 10.dp,
+    arrowWidth: Dp = arrowSize * 2,
     content: @Composable () -> Unit,
 )
 ```
@@ -114,7 +115,7 @@ WaypointHost(
 ) { MyScreen() }
 ```
 
-It renders the bare content for a step without a target. For fully custom arrow drawing, `TooltipArrow(placement, color, modifier, size)` and `LocalTooltipArrowGeometry` are public too. See [Custom Tooltips](../guides/custom-tooltips.md#arrows).
+It renders the bare content for a step without a target. For fully custom arrow drawing, `TooltipArrow(placement, color, modifier, size, arrowWidth)` and `LocalTooltipArrowGeometry` are public too. See [Custom Tooltips](../guides/custom-tooltips.md#arrows).
 
 ## `OverlayClickBehavior`
 

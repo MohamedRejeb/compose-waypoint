@@ -17,9 +17,10 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * advanceOn is armed only when a step is entered moving forward. Going back
- * into a step whose condition already holds shows it with manual navigation
- * instead of bouncing the user forward again.
+ * advanceOn is armed on every entry except the user's Back navigation
+ * (`previous()`). Going back into a step whose condition already holds shows
+ * it with manual navigation instead of bouncing the user forward again, while
+ * programmatic jumps keep the trigger live.
  */
 @OptIn(ExperimentalTestApi::class)
 class AdvanceOnDirectionUiTest {
@@ -111,6 +112,29 @@ class AdvanceOnDirectionUiTest {
     @Test
     fun `goToStep to a higher index arms the trigger`() = runDirectionTest { state, _ ->
         runOnIdle { state.goToStep(1) }
+
+        awaitTip("C")
+    }
+
+    @Test
+    fun `goToStep to a lower index arms the trigger too`() = runDirectionTest { state, observed ->
+        runOnIdle { state.goToStep(2) }
+        awaitTip("C")
+
+        // The app sends the user back to redo the step: the trigger is live.
+        runOnIdle { state.goToStep(1) }
+
+        awaitTip("C")
+        assertEquals(2, state.currentStepIndex)
+        assertEquals("C", observed.scope?.title)
+    }
+
+    @Test
+    fun `goTo by key to a lower index arms the trigger too`() = runDirectionTest { state, _ ->
+        runOnIdle { state.goToStep(2) }
+        awaitTip("C")
+
+        runOnIdle { state.goTo("b") }
 
         awaitTip("C")
     }

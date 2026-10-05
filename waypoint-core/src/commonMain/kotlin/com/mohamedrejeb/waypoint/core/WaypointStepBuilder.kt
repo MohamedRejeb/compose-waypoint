@@ -98,8 +98,8 @@ public class StepBuilder<K> internal constructor(private val targetKey: K?) {
      * Advance to the next step automatically when [await] returns. It is
      * awaited once the step is shown and cancelled if the step is exited
      * first. The Next button and keyboard shortcuts keep working alongside it.
-     * Armed only when the step is entered moving forward; going back into the
-     * step shows it with manual navigation (see [WaypointStep.advanceOn]).
+     * Armed on every entry except the user's Back navigation (`previous()`),
+     * which shows the step with manual navigation (see [WaypointStep.advanceOn]).
      *
      * ```kotlin
      * step(Targets.SearchField) {

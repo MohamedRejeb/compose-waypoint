@@ -37,8 +37,8 @@ public interface StepScope {
 
     /**
      * True when the step's [WaypointStep.advanceOn] is armed for this visit
-     * (the step has one and was entered moving forward), so the tour moves on
-     * by itself. A tooltip can hide its Next button in that case.
+     * (the step has one and was not entered through `previous()`), so the
+     * tour moves on by itself. A tooltip can hide its Next button in that case.
      */
     public val advancesAutomatically: Boolean
 

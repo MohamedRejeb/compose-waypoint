@@ -32,11 +32,14 @@ public data class WaypointStep<K>(
      * cancelled if the step is exited first. The Next button and keyboard
      * shortcuts keep working alongside it. Null means manual navigation only.
      *
-     * The trigger is armed only when the step is entered moving forward
-     * (start, next, goTo to a higher index). Entered backward, the step shows
-     * with manual navigation, so a condition that already holds does not
-     * bounce the user forward again. [StepScope.advancesAutomatically] tells
-     * tooltip content which case it is in.
+     * The trigger is armed on every entry except the user's Back navigation
+     * ([WaypointState.previous]): entered that way, the step shows with manual
+     * navigation, so a condition that already holds does not bounce the user
+     * forward again. `start`, `next`, [WaypointState.goToStep] and
+     * [WaypointState.goTo] in either direction arm it, so an app that sends
+     * the user back to redo a precondition keeps the trigger live.
+     * [StepScope.advancesAutomatically] tells tooltip content which case it is
+     * in.
      *
      * An exception thrown here propagates to the composition of the primary
      * host, nothing is swallowed.

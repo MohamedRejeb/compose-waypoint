@@ -23,11 +23,11 @@ val advanceOn: (suspend () -> Unit)?
 
 When the step becomes current, the host waits until the step is actually on screen (its `beforeShow` gate has completed, its target is laid out, and the tour is not paused), then runs the block. A condition that is already satisfied therefore cannot skip a step the user never saw. When the block returns, the host calls `state.next()`. If the step was the last one, the tour completes and `onTourComplete` fires.
 
-## Forward only
+## Not on Back
 
-The trigger is armed only when the step is entered moving forward: `start()`, `next()`, or `goToStep()` to a higher index. When the user goes **back** into a step whose condition already holds (the name is already typed), re-arming it would bounce them forward again, so an entry via `previous()` or `goToStep()` to a lower index shows the step with manual navigation instead. Moving forward out of it and back in re-arms the trigger.
+The trigger is armed on every entry into the step except the user's Back navigation. When the user goes **back** with `previous()` into a step whose condition already holds (the name is already typed), re-arming it would bounce them forward again, so that entry shows the step with manual navigation instead. Every other entry arms it: `start()`, `next()`, and `goToStep()` / `goTo(key)` in either direction, because an app that sends the user back to redo a precondition (a sheet was closed before a choice was made) needs the trigger live.
 
-`StepScope.advancesAutomatically` tells tooltip content which case it is in: `true` when the trigger is armed for this visit, `false` for a step without `advanceOn` or one entered backward.
+`StepScope.advancesAutomatically` tells tooltip content which case it is in: `true` when the trigger is armed for this visit, `false` for a step without `advanceOn` or one entered with `previous()`.
 
 ## How it interacts with the Next button
 
@@ -193,7 +193,7 @@ Use `showIf` on the intermediate steps so they are skipped. `advanceOn` always e
 No. It is started once per forward entry into the step and restarts only when the step is entered again. Stopping and starting the tour counts as a new entry.
 
 **Does it run when the user comes back to the step?**
-No. See [Forward only](#forward-only): entered backward, the step waits for manual navigation.
+Not through `previous()`, see [Not on Back](#not-on-back): the step then waits for manual navigation. A programmatic `goToStep()` back into it does arm the trigger.
 
 **What if the block throws?**
 The exception propagates to the composition of the primary host, nothing is swallowed. Catch and handle inside the block if a failure should not crash the screen.

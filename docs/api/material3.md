@@ -188,7 +188,7 @@ public fun WaypointMaterial3Tooltip(
 )
 ```
 
-The title, description and placement are read from `stepScope`. Colors, typography, and dimensions come from [`WaypointMaterial3Theme`](#waypointmaterial3theme). When the step has a target, an arrow pointing at it is drawn automatically; pass `showArrow = false` to disable it. A step without a target renders the same card with no arrow. The progress text is `labels.progress(currentStepNumber, totalSteps)`, counting only visible steps. While the step advances automatically (`stepScope.advancesAutomatically`, see [Event-Driven Progression](../guides/advance-on.md#forward-only)) the Next/Finish button is hidden; Skip and Back stay.
+The title, description and placement are read from `stepScope`. Colors, typography, and dimensions come from [`WaypointMaterial3Theme`](#waypointmaterial3theme). When the step has a target, an arrow pointing at it is drawn automatically; pass `showArrow = false` to disable it. A step without a target renders the same card with no arrow. The progress text is `labels.progress(currentStepNumber, totalSteps)`, counting only visible steps. While the step advances automatically (`stepScope.advancesAutomatically`, see [Event-Driven Progression](../guides/advance-on.md#not-on-back)) the Next/Finish button is hidden; Skip and Back stay.
 
 ```kotlin
 step(Targets.Special) {

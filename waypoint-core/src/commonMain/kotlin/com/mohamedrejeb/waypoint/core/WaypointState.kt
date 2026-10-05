@@ -70,7 +70,7 @@ public class WaypointState<K>(
     internal var stepGeneration: Int by mutableStateOf(0)
         private set
 
-    /** True when the current step was entered moving backward (previous, or goTo to a lower index). */
+    /** True when the current step was entered through [previous], the user's Back navigation. */
     internal var enteredBackward: Boolean by mutableStateOf(false)
         private set
 
@@ -88,7 +88,7 @@ public class WaypointState<K>(
 
     /**
      * Whether the current step's [WaypointStep.advanceOn] is armed for this
-     * visit: the step has one and was entered moving forward.
+     * visit: the step has one and was not entered through [previous].
      */
     internal val isTriggerArmed: Boolean
         get() = currentStep?.advanceOn != null && !enteredBackward
@@ -236,7 +236,7 @@ public class WaypointState<K>(
         if (!isActive || isPaused) return
         val prevIndex = resolveNextVisibleStep(fromIndex = currentStepIndex, direction = -1)
         if (prevIndex != null) {
-            transitionTo(prevIndex)
+            transitionTo(prevIndex, viaBack = true)
         }
     }
 
@@ -463,7 +463,7 @@ public class WaypointState<K>(
         persistence?.reset(id)
     }
 
-    private fun transitionTo(newIndex: Int) {
+    private fun transitionTo(newIndex: Int, viaBack: Boolean = false) {
         val exitingStep = currentStep
         val exitingIndex = currentStepIndex
         exitingStep?.onExit?.invoke()
@@ -471,7 +471,7 @@ public class WaypointState<K>(
             analytics?.onStepCompleted(tourId, exitingIndex, exitingStep?.targetKey)
         }
         currentStepIndex = newIndex
-        enteredBackward = newIndex < exitingIndex
+        enteredBackward = viaBack
         isFirstStepOfRun = exitingIndex < 0
         val enteringStep = currentStep
         enteringStep?.onEnter?.invoke()

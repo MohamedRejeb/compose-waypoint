@@ -48,10 +48,9 @@ public fun <K> WaypointMaterial3Hint(
         modifier = modifier,
         tooltipSpacing = tooltipSpacing,
         screenMargin = screenMargin,
-        tooltipContent = { hintScope, resolved ->
+        tooltipContent = { hintScope ->
             WaypointMaterial3HintTooltip(
                 hintScope = hintScope,
-                resolvedPlacement = resolved,
                 gotItText = gotItText,
                 showCloseButton = showCloseButton,
                 closeContentDescription = closeContentDescription,

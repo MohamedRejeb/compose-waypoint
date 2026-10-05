@@ -24,7 +24,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.waypoint.core.HintScope
-import com.mohamedrejeb.waypoint.core.ResolvedPlacement
 
 /**
  * Default Material3-styled tooltip content for [com.mohamedrejeb.waypoint.core.WaypointHint].
@@ -35,19 +34,15 @@ import com.mohamedrejeb.waypoint.core.ResolvedPlacement
  * [HintScope.close] to hide the tooltip without dismissing the hint.
  *
  * @param hintScope scope providing title/description and dismiss/close actions
- * @param resolvedPlacement placement resolved by the position provider, kept for
- * signature symmetry with [WaypointMaterial3Tooltip]
  * @param modifier modifier for the tooltip container
  * @param gotItText label for the primary dismiss button
  * @param showCloseButton whether to render a close-only button in the header row
  * @param closeContentDescription accessibility description for the close button
  * @param showArrow whether to draw an arrow pointing at the hint target
  */
-@Suppress("UNUSED_PARAMETER")
 @Composable
 public fun WaypointMaterial3HintTooltip(
     hintScope: HintScope,
-    resolvedPlacement: ResolvedPlacement,
     modifier: Modifier = Modifier,
     gotItText: String = "Got it",
     showCloseButton: Boolean = false,
@@ -61,9 +56,9 @@ public fun WaypointMaterial3HintTooltip(
     val title = hintScope.title
     val description = hintScope.description
 
-    Material3TooltipSurface(
-        arrowColor = colors.tooltipBackground,
+    OptionalTooltipArrowBox(
         showArrow = showArrow,
+        arrowColor = colors.tooltipBackground,
     ) {
         HintTooltipCard(
             modifier = modifier,

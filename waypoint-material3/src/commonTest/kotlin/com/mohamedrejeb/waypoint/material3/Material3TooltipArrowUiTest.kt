@@ -24,6 +24,8 @@ class Material3TooltipArrowUiTest {
         totalSteps = 3,
         isFirstStep = true,
         isLastStep = false,
+        title = "Title",
+        description = "Description",
     )
 
     @Composable
@@ -32,10 +34,7 @@ class Material3TooltipArrowUiTest {
             LocalTooltipArrowGeometry provides TooltipArrowGeometry(placement, arrowOffset),
         ) {
             WaypointMaterial3Tooltip(
-                stepScope = scope,
-                resolvedPlacement = placement,
-                title = "Title",
-                description = "Description",
+                stepScope = scope.copy(placement = placement),
             )
         }
     }
@@ -63,10 +62,7 @@ class Material3TooltipArrowUiTest {
     fun `tooltip renders without geometry when composed outside a popup`() = runComposeUiTest {
         setContent {
             WaypointMaterial3Tooltip(
-                stepScope = scope,
-                resolvedPlacement = ResolvedPlacement.Bottom,
-                title = "Title",
-                description = "Description",
+                stepScope = scope.copy(placement = ResolvedPlacement.Bottom),
             )
         }
 
@@ -81,10 +77,7 @@ class Material3TooltipArrowUiTest {
                     TooltipArrowGeometry(ResolvedPlacement.Bottom, 80f),
             ) {
                 WaypointMaterial3Tooltip(
-                    stepScope = scope,
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "Title",
-                    description = "Description",
+                    stepScope = scope.copy(placement = ResolvedPlacement.Bottom),
                     showArrow = false,
                 )
             }

@@ -31,10 +31,7 @@ public fun <K> WaypointMaterial3Host(
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
     onTourComplete: (() -> Unit)? = null,
     onTourCancel: (() -> Unit)? = null,
-    skipText: String = "Skip",
-    nextText: String = "Next",
-    backText: String = "Back",
-    finishText: String = "Finish",
+    labels: WaypointMaterial3Labels = WaypointMaterial3Labels.Default,
     showProgress: Boolean = true,
     content: @Composable () -> Unit,
 ) {
@@ -48,17 +45,10 @@ public fun <K> WaypointMaterial3Host(
         screenMargin = screenMargin,
         onTourComplete = onTourComplete,
         onTourCancel = onTourCancel,
-        tooltipContent = { stepScope, resolvedPlacement ->
-            val currentStep = state.currentStep
+        tooltipContent = { stepScope ->
             WaypointMaterial3Tooltip(
                 stepScope = stepScope,
-                resolvedPlacement = resolvedPlacement,
-                title = currentStep?.title,
-                description = currentStep?.description,
-                skipText = skipText,
-                nextText = nextText,
-                backText = backText,
-                finishText = finishText,
+                labels = labels,
                 showProgress = showProgress,
             )
         },

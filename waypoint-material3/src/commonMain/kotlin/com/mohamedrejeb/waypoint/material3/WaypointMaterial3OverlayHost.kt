@@ -38,10 +38,7 @@ public fun <K> WaypointMaterial3OverlayHost(
     overlayClickBehavior: OverlayClickBehavior = WaypointDefaults.OverlayClickBehavior,
     tooltipSpacing: Dp = WaypointDefaults.TooltipSpacing,
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
-    skipText: String = "Skip",
-    nextText: String = "Next",
-    backText: String = "Back",
-    finishText: String = "Finish",
+    labels: WaypointMaterial3Labels = WaypointMaterial3Labels.Default,
     showProgress: Boolean = true,
     content: @Composable () -> Unit,
 ) {
@@ -52,17 +49,10 @@ public fun <K> WaypointMaterial3OverlayHost(
         overlayClickBehavior = overlayClickBehavior,
         tooltipSpacing = tooltipSpacing,
         screenMargin = screenMargin,
-        tooltipContent = { stepScope, resolvedPlacement ->
-            val currentStep = state.currentStep
+        tooltipContent = { stepScope ->
             WaypointMaterial3Tooltip(
                 stepScope = stepScope,
-                resolvedPlacement = resolvedPlacement,
-                title = currentStep?.title,
-                description = currentStep?.description,
-                skipText = skipText,
-                nextText = nextText,
-                backText = backText,
-                finishText = finishText,
+                labels = labels,
                 showProgress = showProgress,
             )
         },

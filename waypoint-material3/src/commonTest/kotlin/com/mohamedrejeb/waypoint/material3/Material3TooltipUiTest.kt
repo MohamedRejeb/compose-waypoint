@@ -65,10 +65,7 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = firstStepScope(),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "Welcome",
-                    description = null,
+                    stepScope = firstStepScope().copy(title = "Welcome", description = null),
                 )
             }
         }
@@ -81,10 +78,7 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = firstStepScope(),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = null,
-                    description = "This is a description",
+                    stepScope = firstStepScope().copy(title = null, description = "This is a description"),
                 )
             }
         }
@@ -97,10 +91,7 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = firstStepScope(),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "Title",
-                    description = "Description",
+                    stepScope = firstStepScope().copy(title = "Title", description = "Description"),
                 )
             }
         }
@@ -116,10 +107,7 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = firstStepScope(totalSteps = 5),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "Step",
-                    description = null,
+                    stepScope = firstStepScope(totalSteps = 5).copy(title = "Step", description = null),
                     showProgress = true,
                 )
             }
@@ -133,10 +121,7 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = firstStepScope(),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "Step",
-                    description = null,
+                    stepScope = firstStepScope().copy(title = "Step", description = null),
                     showProgress = false,
                 )
             }
@@ -150,10 +135,7 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = middleStepScope(index = 2, totalSteps = 4),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "Middle",
-                    description = null,
+                    stepScope = middleStepScope(index = 2, totalSteps = 4).copy(title = "Middle", description = null),
                 )
             }
         }
@@ -168,10 +150,7 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = firstStepScope(),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "First",
-                    description = null,
+                    stepScope = firstStepScope().copy(title = "First", description = null),
                 )
             }
         }
@@ -186,10 +165,7 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = middleStepScope(),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "Middle",
-                    description = null,
+                    stepScope = middleStepScope().copy(title = "Middle", description = null),
                 )
             }
         }
@@ -203,10 +179,7 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = lastStepScope(),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "Last",
-                    description = null,
+                    stepScope = lastStepScope().copy(title = "Last", description = null),
                 )
             }
         }
@@ -221,10 +194,7 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = lastStepScope(),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "Last",
-                    description = null,
+                    stepScope = lastStepScope().copy(title = "Last", description = null),
                 )
             }
         }
@@ -239,13 +209,12 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = lastStepScope(),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "Done",
-                    description = null,
-                    skipText = "Dismiss",
-                    backText = "Previous",
-                    finishText = "Got it!",
+                    stepScope = lastStepScope().copy(title = "Done", description = null),
+                    labels = WaypointMaterial3Labels(
+                        skip = "Dismiss",
+                        back = "Previous",
+                        finish = "Got it!",
+                    ),
                 )
             }
         }
@@ -263,10 +232,7 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = firstStepScope(onNext = { nextCalled = true }),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "Test",
-                    description = null,
+                    stepScope = firstStepScope(onNext = { nextCalled = true }).copy(title = "Test", description = null),
                 )
             }
         }
@@ -282,10 +248,7 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = firstStepScope(onSkip = { skipCalled = true }),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "Test",
-                    description = null,
+                    stepScope = firstStepScope(onSkip = { skipCalled = true }).copy(title = "Test", description = null),
                 )
             }
         }
@@ -301,10 +264,7 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = middleStepScope(onPrevious = { previousCalled = true }),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "Test",
-                    description = null,
+                    stepScope = middleStepScope(onPrevious = { previousCalled = true }).copy(title = "Test", description = null),
                 )
             }
         }
@@ -320,10 +280,7 @@ class Material3TooltipUiTest {
         setContent {
             MaterialTheme {
                 WaypointMaterial3Tooltip(
-                    stepScope = lastStepScope(onNext = { nextCalled = true }),
-                    resolvedPlacement = ResolvedPlacement.Bottom,
-                    title = "Test",
-                    description = null,
+                    stepScope = lastStepScope(onNext = { nextCalled = true }).copy(title = "Test", description = null),
                 )
             }
         }

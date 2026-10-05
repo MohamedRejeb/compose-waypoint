@@ -204,8 +204,7 @@ class Material3HostUiTest {
             MaterialTheme {
                 WaypointMaterial3Host(
                     state = state,
-                    skipText = "Dismiss",
-                    finishText = "Done!",
+                    labels = WaypointMaterial3Labels(skip = "Dismiss", finish = "Done!"),
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),

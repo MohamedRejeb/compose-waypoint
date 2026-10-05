@@ -13,7 +13,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-// -- Colors --
+// Colors
 
 @Immutable
 public data class WaypointMaterial3Colors(
@@ -28,7 +28,7 @@ public data class WaypointMaterial3Colors(
     public companion object
 }
 
-// -- Typography --
+// Typography
 
 @Immutable
 public data class WaypointMaterial3Typography(
@@ -40,7 +40,7 @@ public data class WaypointMaterial3Typography(
     public companion object
 }
 
-// -- Dimensions --
+// Dimensions
 
 @Immutable
 public data class WaypointMaterial3Dimensions(
@@ -54,13 +54,13 @@ public data class WaypointMaterial3Dimensions(
     public companion object
 }
 
-// -- CompositionLocals --
+// CompositionLocals
 
 internal val LocalWaypointColors = staticCompositionLocalOf<WaypointMaterial3Colors?> { null }
 internal val LocalWaypointTypography = staticCompositionLocalOf<WaypointMaterial3Typography?> { null }
 internal val LocalWaypointDimensions = staticCompositionLocalOf<WaypointMaterial3Dimensions?> { null }
 
-// -- Theme composable --
+// Theme composable
 
 /**
  * Provides theming for Waypoint Material3 tooltips.

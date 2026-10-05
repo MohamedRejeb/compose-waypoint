@@ -374,4 +374,36 @@ class PositionProviderTest {
         val expectedArrowY = centeredTarget.center.y - offset.y.toFloat()
         assertEquals(expectedArrowY, provider.arrowVerticalOffset, 0.1f)
     }
+
+    // -- Placement axis clamping --
+
+    @Test
+    fun `tooltip wider than the space at its end is clamped to the margin`() {
+        val provider = createProvider(centeredTarget, TooltipPlacement.End)
+
+        val offset = provider.calculatePosition(
+            anchorBounds = IntRect.Zero,
+            windowSize = windowSize,
+            layoutDirection = LayoutDirection.Ltr,
+            popupContentSize = IntSize(600, 100),
+        )
+
+        assertEquals(ResolvedPlacement.End, provider.resolvedPlacement)
+        assertEquals(windowSize.width - margin.toInt() - 600, offset.x)
+    }
+
+    @Test
+    fun `tooltip taller than any side stays inside the vertical margins`() {
+        val provider = createProvider(centeredTarget, TooltipPlacement.Bottom)
+
+        val offset = provider.calculatePosition(
+            anchorBounds = IntRect.Zero,
+            windowSize = windowSize,
+            layoutDirection = LayoutDirection.Ltr,
+            popupContentSize = IntSize(200, 700),
+        )
+
+        assertTrue(offset.y >= margin.toInt(), "top ran past the margin: ${offset.y}")
+        assertTrue(offset.y + 700 <= windowSize.height - margin.toInt(), "bottom ran past the margin: ${offset.y}")
+    }
 }

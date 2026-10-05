@@ -22,6 +22,10 @@ import androidx.compose.ui.window.PopupPositionProvider
  * math consistent with the frame the popup is positioned in, which matters on
  * Android where Dialog/BottomSheet windows have their own frames and
  * `positionInWindow()` is not guaranteed to match them.
+ *
+ * The tooltip is clamped to the screen margin on both axes, so one that is
+ * larger than the space on its side slides over the target instead of
+ * running off screen.
  */
 internal class WaypointPositionProvider(
     private val targetBounds: Rect,
@@ -195,40 +199,46 @@ internal class WaypointPositionProvider(
     ): Pair<Float, Float> {
         val margin = screenMarginPx
 
+        // The cross axis is clamped to the margins so the tooltip stays on
+        // screen; the placement axis is clamped too, so a tooltip larger than
+        // the space on its side slides over the target rather than off screen.
+        fun clampX(x: Float) = x.coerceInOrCenter(margin, windowWidth - tooltipWidth - margin)
+        fun clampY(y: Float) = y.coerceInOrCenter(margin, windowHeight - tooltipHeight - margin)
+
         return when (placement) {
             ResolvedPlacement.Bottom -> {
-                val x = (targetBounds.center.x - tooltipWidth / 2f)
-                    .coerceInOrCenter(margin, windowWidth - tooltipWidth - margin)
-                val y = targetBounds.bottom + spacingPx
+                val x = clampX(targetBounds.center.x - tooltipWidth / 2f)
+                val y = clampY(targetBounds.bottom + spacingPx)
                 x to y
             }
 
             ResolvedPlacement.Top -> {
-                val x = (targetBounds.center.x - tooltipWidth / 2f)
-                    .coerceInOrCenter(margin, windowWidth - tooltipWidth - margin)
-                val y = targetBounds.top - tooltipHeight - spacingPx
+                val x = clampX(targetBounds.center.x - tooltipWidth / 2f)
+                val y = clampY(targetBounds.top - tooltipHeight - spacingPx)
                 x to y
             }
 
             ResolvedPlacement.End -> {
-                val x = if (layoutDirection == LayoutDirection.Ltr) {
-                    targetBounds.right + spacingPx
-                } else {
-                    targetBounds.left - tooltipWidth - spacingPx
-                }
-                val y = (targetBounds.center.y - tooltipHeight / 2f)
-                    .coerceInOrCenter(margin, windowHeight - tooltipHeight - margin)
+                val x = clampX(
+                    if (layoutDirection == LayoutDirection.Ltr) {
+                        targetBounds.right + spacingPx
+                    } else {
+                        targetBounds.left - tooltipWidth - spacingPx
+                    },
+                )
+                val y = clampY(targetBounds.center.y - tooltipHeight / 2f)
                 x to y
             }
 
             ResolvedPlacement.Start -> {
-                val x = if (layoutDirection == LayoutDirection.Ltr) {
-                    targetBounds.left - tooltipWidth - spacingPx
-                } else {
-                    targetBounds.right + spacingPx
-                }
-                val y = (targetBounds.center.y - tooltipHeight / 2f)
-                    .coerceInOrCenter(margin, windowHeight - tooltipHeight - margin)
+                val x = clampX(
+                    if (layoutDirection == LayoutDirection.Ltr) {
+                        targetBounds.left - tooltipWidth - spacingPx
+                    } else {
+                        targetBounds.right + spacingPx
+                    },
+                )
+                val y = clampY(targetBounds.center.y - tooltipHeight / 2f)
                 x to y
             }
         }

@@ -5,6 +5,7 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
@@ -13,9 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 
@@ -55,11 +58,14 @@ internal fun TooltipPopup(
     }
     SideEffect { lastResolved[0] = positionProvider.resolvedPlacement }
 
+    // Read in the host's window: inside the popup the window info is the popup's own.
+    val maxContentSize = maxTooltipSize(screenMargin)
+
     Popup(
         popupPositionProvider = positionProvider,
         onDismissRequest = null,
     ) {
-        TooltipFrame {
+        TooltipFrame(maxContentSize) {
             val resolvedPlacement = positionProvider.resolvedPlacement
             val geometry = TooltipArrowGeometry(
                 placement = resolvedPlacement,
@@ -84,13 +90,15 @@ internal fun TooltipPopup(
  */
 @Composable
 internal fun CenteredTooltipPopup(
+    screenMargin: Float,
     content: @Composable () -> Unit,
 ) {
+    val maxContentSize = maxTooltipSize(screenMargin)
     Popup(
         alignment = Alignment.Center,
         onDismissRequest = null,
     ) {
-        TooltipFrame {
+        TooltipFrame(maxContentSize) {
             CompositionLocalProvider(LocalTooltipArrowGeometry provides null) {
                 content()
             }
@@ -99,11 +107,27 @@ internal fun CenteredTooltipPopup(
 }
 
 /**
- * Shared tooltip chrome: the enter transition and the live region that makes
- * screen readers announce a newly shown tooltip.
+ * The largest size tooltip content may take: the host's window minus the
+ * screen margin on every side, so a long tooltip never runs past the margin.
+ */
+@Composable
+private fun maxTooltipSize(screenMargin: Float): DpSize {
+    val window = LocalWindowInfo.current.containerSize
+    return with(LocalDensity.current) {
+        DpSize(
+            width = (window.width - 2 * screenMargin).coerceAtLeast(0f).toDp(),
+            height = (window.height - 2 * screenMargin).coerceAtLeast(0f).toDp(),
+        )
+    }
+}
+
+/**
+ * Shared tooltip chrome: the size limit, the enter transition and the live
+ * region that makes screen readers announce a newly shown tooltip.
  */
 @Composable
 private fun TooltipFrame(
+    maxContentSize: DpSize,
     content: @Composable () -> Unit,
 ) {
     // Real enter transition: starts invisible, animates in on first frame.
@@ -117,9 +141,9 @@ private fun TooltipFrame(
         enter = fadeIn() + slideInVertically { it / 4 },
     ) {
         Box(
-            modifier = Modifier.semantics {
-                liveRegion = LiveRegionMode.Polite
-            },
+            modifier = Modifier
+                .sizeIn(maxWidth = maxContentSize.width, maxHeight = maxContentSize.height)
+                .semantics { liveRegion = LiveRegionMode.Polite },
         ) {
             content()
         }

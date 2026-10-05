@@ -355,7 +355,7 @@ private fun <K> BoxScope.StepLayers(
         }
         // Keyed by step so each step gets a fresh popup and enter animation.
         key(state.currentStepIndex) {
-            CenteredTooltipPopup {
+            CenteredTooltipPopup(screenMargin = with(LocalDensity.current) { screenMargin.toPx() }) {
                 tooltipContent(state.stepScope(step, placement = null))
             }
         }

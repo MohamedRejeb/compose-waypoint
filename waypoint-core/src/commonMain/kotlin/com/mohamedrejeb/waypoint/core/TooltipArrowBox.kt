@@ -3,7 +3,7 @@ package com.mohamedrejeb.waypoint.core
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.AbsoluteAlignment
@@ -40,8 +40,9 @@ import kotlin.math.roundToInt
  *
  * @param arrowColor arrow fill color, typically the tooltip background color
  * @param modifier modifier for the layout holding the arrow and [content]
- * @param arrowSize how far the arrow protrudes from the tooltip edge; its base
- *   along the edge is twice this
+ * @param arrowSize how far the arrow protrudes from the tooltip edge
+ * @param arrowWidth length of the arrow's base along the tooltip edge, twice
+ *   [arrowSize] by default
  * @param content the tooltip body
  */
 @Composable
@@ -49,6 +50,7 @@ public fun TooltipArrowBox(
     arrowColor: Color,
     modifier: Modifier = Modifier,
     arrowSize: Dp = 10.dp,
+    arrowWidth: Dp = arrowSize * 2,
     content: @Composable () -> Unit,
 ) {
     val geometry = LocalTooltipArrowGeometry.current
@@ -57,10 +59,12 @@ public fun TooltipArrowBox(
         return
     }
 
-    val arrowSizePx = with(LocalDensity.current) { arrowSize.toPx() }
-    // The arrow composable is 2 * arrowSize long along the tooltip edge, so
-    // shift by one arrowSize to center it on the geometry offset.
-    val alongEdgeOffset = (geometry.arrowOffset - arrowSizePx).roundToInt()
+    val halfBasePx = with(LocalDensity.current) { arrowWidth.toPx() / 2f }
+    // The arrow composable is arrowWidth long along the tooltip edge, so shift
+    // by half of it to center it on the geometry offset. The offset is a
+    // physical distance from the content's left (or top) edge, hence the
+    // absolute offset: it must not flip under RTL.
+    val alongEdgeOffset = (geometry.arrowOffset - halfBasePx).roundToInt()
 
     when (geometry.placement) {
         // Tooltip below the target: arrow sits on the top edge pointing up.
@@ -69,10 +73,11 @@ public fun TooltipArrowBox(
                 placement = ResolvedPlacement.Bottom,
                 color = arrowColor,
                 size = arrowSize,
+                arrowWidth = arrowWidth,
                 modifier = Modifier
                     .align(AbsoluteAlignment.Left)
-                    .offset { IntOffset(alongEdgeOffset, 0) }
-                    .size(width = arrowSize * 2, height = arrowSize),
+                    .absoluteOffset { IntOffset(alongEdgeOffset, 0) }
+                    .size(width = arrowWidth, height = arrowSize),
             )
             content()
         }
@@ -84,10 +89,11 @@ public fun TooltipArrowBox(
                 placement = ResolvedPlacement.Top,
                 color = arrowColor,
                 size = arrowSize,
+                arrowWidth = arrowWidth,
                 modifier = Modifier
                     .align(AbsoluteAlignment.Left)
-                    .offset { IntOffset(alongEdgeOffset, 0) }
-                    .size(width = arrowSize * 2, height = arrowSize),
+                    .absoluteOffset { IntOffset(alongEdgeOffset, 0) }
+                    .size(width = arrowWidth, height = arrowSize),
             )
         }
 
@@ -98,10 +104,11 @@ public fun TooltipArrowBox(
                 placement = ResolvedPlacement.End,
                 color = arrowColor,
                 size = arrowSize,
+                arrowWidth = arrowWidth,
                 modifier = Modifier
                     .align(Alignment.Top)
-                    .offset { IntOffset(0, alongEdgeOffset) }
-                    .size(width = arrowSize, height = arrowSize * 2),
+                    .absoluteOffset { IntOffset(0, alongEdgeOffset) }
+                    .size(width = arrowSize, height = arrowWidth),
             )
             content()
         }
@@ -112,10 +119,11 @@ public fun TooltipArrowBox(
                 placement = ResolvedPlacement.Start,
                 color = arrowColor,
                 size = arrowSize,
+                arrowWidth = arrowWidth,
                 modifier = Modifier
                     .align(Alignment.Top)
-                    .offset { IntOffset(0, alongEdgeOffset) }
-                    .size(width = arrowSize, height = arrowSize * 2),
+                    .absoluteOffset { IntOffset(0, alongEdgeOffset) }
+                    .size(width = arrowSize, height = arrowWidth),
             )
         }
     }

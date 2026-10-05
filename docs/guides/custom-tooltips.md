@@ -209,6 +209,7 @@ public fun TooltipArrowBox(
     arrowColor: Color,
     modifier: Modifier = Modifier,
     arrowSize: Dp = 10.dp,
+    arrowWidth: Dp = arrowSize * 2,
     content: @Composable () -> Unit,
 )
 ```
@@ -217,16 +218,19 @@ public fun TooltipArrowBox(
 |---|---|---|
 | `arrowColor` | required | Arrow fill color, typically the tooltip background color. |
 | `modifier` | `Modifier` | Applied to the layout holding the arrow and the content. |
-| `arrowSize` | `10.dp` | How far the arrow protrudes from the tooltip edge. Its base along the edge is twice this. |
+| `arrowSize` | `10.dp` | How far the arrow protrudes from the tooltip edge. |
+| `arrowWidth` | `arrowSize * 2` | Length of the arrow's base along the tooltip edge, for a flatter or sharper arrow. |
 
-The arrow sits on the edge that faces the target and keeps pointing at it when the tooltip is pushed sideways by a screen edge. For a step without a target, or outside a Waypoint tooltip, `TooltipArrowBox` renders the bare content. It works the same way inside hint tooltips.
+The arrow sits on the edge that faces the target and keeps pointing at it when the tooltip is pushed sideways by a screen edge, in LTR and RTL layouts alike (the geometry offset is a physical distance from the tooltip's left or top edge). For a step without a target, or outside a Waypoint tooltip, `TooltipArrowBox` renders the bare content. It works the same way inside hint tooltips.
+
+The tooltip's width and height are limited to the window minus the host's `screenMargin` on each side, so long content wraps instead of running past the margin, and a tooltip larger than the space on its side slides over the target rather than off screen.
 
 !!! tip
     Put the shadow, clip and background on the content inside the box, not on the box itself, otherwise the arrow gets clipped or sits inside the background.
 
 ### Drawing the arrow yourself
 
-`TooltipArrowBox` is built from two public pieces you can use directly: the `TooltipArrow(placement, color, modifier, size)` composable, which draws a triangle, and `LocalTooltipArrowGeometry`, which tells you where it goes.
+`TooltipArrowBox` is built from two public pieces you can use directly: the `TooltipArrow(placement, color, modifier, size, arrowWidth)` composable, which draws a triangle, and `LocalTooltipArrowGeometry`, which tells you where it goes.
 
 The arrow direction follows the resolved placement:
 

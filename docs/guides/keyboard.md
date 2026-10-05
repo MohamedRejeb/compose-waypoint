@@ -16,10 +16,13 @@ WaypointHost(
         previousKeys = setOf(Key.DirectionLeft),
         dismissKeys = setOf(Key.Escape),
     ),
+    tooltipContent = { stepScope -> MyTooltip(stepScope) },
 ) {
     MyScreen()
 }
 ```
+
+`WaypointMaterial3Host` takes the same `keyboardConfig` parameter.
 
 `KeyboardConfig` is an immutable data class:
 
@@ -58,21 +61,18 @@ Modifier
     .focusable()
 ```
 
-The host requests focus when the tour starts (`LaunchedEffect(state.isActive)`) and clears plus re-requests focus on every step transition (`LaunchedEffect(state.currentStepIndex)`). This ensures:
+The host requests focus when the tour starts and on every step change, so the keys reach it even if nothing on the screen was focused. Steps where the user works inside the target are the exception, see [Text input during a tour](#text-input-during-a-tour).
 
-- Text fields that had focus before the tour lose it, so arrow keys don't scrub through the field instead of stepping through the tour.
-- Each step starts with the host holding focus, so keys are captured by Waypoint instead of the previous step's target.
+On `KeyDown` events, while a step is current and the tour is not paused:
 
-On `KeyDown` events:
-
-- Keys in `nextKeys` call `state.next()`; if that was the last step and the tour ends, `onTourComplete` fires.
+- Keys in `nextKeys` call `state.next()`. If that was the last step, the tour completes and `onTourComplete` fires.
 - Keys in `previousKeys` call `state.previous()`.
-- Keys in `dismissKeys` call `state.stop()` and fire `onTourCancel`.
+- Keys in `dismissKeys` call `state.stop()`, and `onTourCancel` fires.
 
-All other keys fall through, including your app's own shortcuts, so Waypoint doesn't swallow unrelated input.
+All other keys fall through, including your app's own shortcuts, so Waypoint doesn't swallow unrelated input. While the tour is paused or inactive no key is handled.
 
 !!! note
-    Because `onPreviewKeyEvent` runs before descendant focus owners see the event, Waypoint catches arrow keys even if a `TextField` was momentarily focused. That's intentional, arrow keys are ambiguous and should belong to the tour while it's running.
+    Because `onPreviewKeyEvent` runs before descendant focus owners see the event, the host handles its keys even when a `TextField` inside it has focus. With the default config that includes Enter and the arrow keys, see [Text input during a tour](#text-input-during-a-tour).
 
 ## Disabling keyboard
 
@@ -80,12 +80,13 @@ All other keys fall through, including your app's own shortcuts, so Waypoint doe
 WaypointHost(
     state = state,
     keyboardConfig = KeyboardConfig.Disabled,
+    tooltipContent = { stepScope -> MyTooltip(stepScope) },
 ) {
     MyScreen()
 }
 ```
 
-When disabled, the host does not attach the key handler or focus requester. The tour still runs, users navigate via tooltip buttons (Next, Back, Skip) or custom triggers.
+When disabled, the host does not attach the key handler or take focus. The tour still runs, users navigate via tooltip buttons (Next, Back, Skip) or `advanceOn`.
 
 ## Custom shortcuts
 
@@ -129,16 +130,39 @@ keyboardConfig = KeyboardConfig(
 
     Same as Android, keys only arrive when an external keyboard is paired. Touch navigation is the primary input.
 
-## Focus management during tours
+## Text input during a tour
 
-On step transitions, `WaypointHost` calls `focusManager.clearFocus()` before re-requesting focus on itself. If your target is a `TextField`, this means the field loses focus the moment the tour lands on it. Users need to click into the field manually if they want to type, or you can re-request focus yourself inside `onEnter`:
+A step that asks the user to type should use `TargetInteraction.PassThrough`. During such a step the host steps back:
+
+- It does not take keyboard focus, so a field the user is typing in keeps it, including across the change to the next `PassThrough` step.
+- It only handles `dismissKeys`. Next and previous keys (Enter and the arrows by default) go to the app.
+
+```kotlin
+step(Targets.SearchField) {
+    title = "Try searching"
+    interaction = TargetInteraction.PassThrough
+    advanceOn { snapshotFlow { query }.first { it.isNotEmpty() } }
+}
+```
+
+On every other step the host takes focus and handles all configured keys. If the user can type during such steps too (for example with a non-blocking highlight like `Pulse`, where the whole screen stays interactive), remove the keys that clash with text input or disable keyboard navigation:
+
+```kotlin
+keyboardConfig = KeyboardConfig(
+    nextKeys = emptySet(),
+    previousKeys = emptySet(),
+)
+```
+
+The host does not move focus into the target for you. To put the cursor in a field when its step starts, request focus in `onEnter`:
 
 ```kotlin
 val fieldRequester = remember { FocusRequester() }
-step(Targets.SearchField) {
-    onEnter {
-        // Re-focus the field after the host clears focus.
-        fieldRequester.requestFocus()
+
+val state = rememberWaypointState {
+    step(Targets.SearchField) {
+        interaction = TargetInteraction.PassThrough
+        onEnter { fieldRequester.requestFocus() }
     }
 }
 
@@ -158,7 +182,7 @@ enum class Targets { Search, Filters, Results }
 
 @Composable
 fun SearchScreen() {
-    val state = rememberWaypointState<Targets> {
+    val state = rememberWaypointState {
         step(Targets.Search) { title = "Search bar" }
         step(Targets.Filters) { title = "Filters" }
         step(Targets.Results) { title = "Results" }
@@ -184,3 +208,4 @@ Press Right or Space to advance, Left to go back, Escape to dismiss.
 ## See also
 
 - [Accessibility](accessibility.md), how keyboard navigation interacts with focus and screen readers.
+- [Interactive Tutorials](interactive-tutorials.md), keyboard setup for hands-on steps.

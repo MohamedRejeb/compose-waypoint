@@ -26,7 +26,7 @@ Pick `waypoint-core` alone for full control over the tooltip UI, or `waypoint-ma
 
 -   :material-star-circle: __Highlight styles__
 
-    Spotlight, Pulse, Border, Ripple, None, or fully Custom — set per step or host-wide.
+    Spotlight, Pulse, Border, Ripple, None, or fully Custom, set per step or host-wide.
 
 -   :material-flare: __Spotlight effects__
 
@@ -34,15 +34,23 @@ Pick `waypoint-core` alone for full control over the tooltip UI, or `waypoint-ma
 
 -   :material-cursor-default-click: __Step navigation__
 
-    `next`, `previous`, `skip`, `goTo`, `pause`, `resume` — fully programmatic.
+    `next`, `previous`, `goTo`, `stop`, `pause`, `resume`, fully programmatic.
+
+-   :material-gesture-tap: __Interactive tutorials__
+
+    Let the user type and tap inside the highlighted element while the rest of the screen is blocked.
 
 -   :material-function: __Event-driven progression__
 
     Advance steps when the user clicks a button, types in a field, or scrolls.
 
+-   :material-card-text-outline: __Intro and outro cards__
+
+    Steps without a target are shown as a centered card.
+
 -   :material-timer-sand: __Async gates__
 
-    Hold a step until a `suspend` block finishes — wait for API responses, animations, or navigation.
+    Hold a step until a `suspend` block finishes: wait for API responses, animations, or navigation.
 
 -   :material-view-dashboard: __Cross-hierarchy tours__
 
@@ -116,22 +124,23 @@ fun HomeScreen() {
 
 ## Four entry points
 
-The public API is intentionally minimal — most use cases only need these:
+The public API is intentionally minimal, most use cases only need these:
 
 | API | Purpose |
 |-----|---------|
-| `rememberWaypointState { step(key) { … } }` | DSL builder that creates a [WaypointState](api/waypoint-state.md) with typed step definitions |
+| `rememberWaypointState { step(key) { ... } }` | DSL builder that creates a [WaypointState](api/waypoint-state.md) with typed step definitions |
 | `Modifier.waypointTarget(state, key)` | Marks a composable as a tour target and registers its bounds |
 | `WaypointHost(state) { content }` | Host composable that renders the highlight + tooltip ([docs](api/waypoint-host.md)) |
 | `WaypointMaterial3Host(state) { content }` | Same, with Material3-styled tooltip ([docs](api/material3.md)) |
 
 ## Next steps
 
-- [Installation](installation.md) — add Waypoint to your project
-- [Quick Start](getting-started.md) — build your first tour step by step
-- [Highlight Styles](guides/highlight-styles.md) — customize how targets are highlighted
-- [Tour Sequences](guides/tour-sequences.md) — chain multiple tours together
-- [Persistent Hints](guides/hints.md) — ambient beacons outside of tours
+- [Installation](installation.md), add Waypoint to your project
+- [Quick Start](getting-started.md), build your first tour step by step
+- [Highlight Styles](guides/highlight-styles.md), customize how targets are highlighted
+- [Interactive Tutorials](guides/interactive-tutorials.md), hands-on steps the user completes by doing
+- [Tour Sequences](guides/tour-sequences.md), chain multiple tours together
+- [Persistent Hints](guides/hints.md), ambient beacons outside of tours
 
 ## Contribution
 

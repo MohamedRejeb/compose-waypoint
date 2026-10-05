@@ -63,13 +63,33 @@ highlightStyle = HighlightStyle.Spotlight(
 
 Use Spotlight when you want to completely block distractions and focus attention on one element. It's the best fit for product onboarding and guided flows.
 
+#### Touch blocking
+
+Spotlight is the only style that blocks pointer input. Touches outside the cutouts never reach your app, a tap there follows the host's `overlayClickBehavior`. What happens inside the cutouts is decided by the step's `interaction`:
+
+| `TargetInteraction` | Inside the cutout |
+|---|---|
+| `None` (default) | Touches are swallowed. |
+| `ClickToAdvance` | A tap advances the tour. The target does not receive it. |
+| `PassThrough` | Every gesture reaches the app, in the target and in each of the step's `additionalTargets`. |
+
+Every other style leaves the whole screen interactive.
+
+To block touches without dimming the screen, make the scrim transparent:
+
+```kotlin
+highlightStyle = HighlightStyle.Spotlight(overlayAlpha = 0f)
+```
+
+A [step without a target](interactive-tutorials.md#intro-and-outro-cards) draws the scrim with no cutout, which blocks the whole host. The other styles draw nothing for such a step.
+
 ### `Pulse`
 
 An animated pulsing shape around the target. No dimming overlay, the shape breathes (scales + fades) to draw the eye.
 
 ```kotlin
 highlightStyle = HighlightStyle.Pulse(
-    color = MaterialTheme.colorScheme.primary,
+    color = Color(0xFF7C4DFF),
     shape = SpotlightShape.Circle,
     padding = SpotlightPadding(all = 8.dp),
     borderWidth = 3.dp,
@@ -89,7 +109,7 @@ highlightStyle = HighlightStyle.Pulse(
 | `pulseScale` | `Float` | `1.15f` | Peak scale of the outer copy. |
 | `durationMillis` | `Int` | `1200` | Full pulse cycle duration. |
 
-Use Pulse for subtle hints, feature callouts, or non-blocking tours where dimming the rest of the screen is too heavy-handed.
+Use Pulse for subtle hints, feature callouts, or non-blocking tours where dimming the rest of the screen is too heavy-handed. The app stays fully interactive while the step is shown.
 
 ### `Border`
 
@@ -121,7 +141,7 @@ Expanding concentric rings radiating from the target's center.
 
 ```kotlin
 highlightStyle = HighlightStyle.Ripple(
-    color = MaterialTheme.colorScheme.primary,
+    color = Color(0xFF7C4DFF),
     ringCount = 3,
     durationMillis = 2000,
     maxRadius = 60.dp,
@@ -214,6 +234,7 @@ padding = SpotlightPadding(start = 4.dp, top = 8.dp, end = 4.dp, bottom = 8.dp)
 
 ## See also
 
+- [Interactive Tutorials](interactive-tutorials.md), `PassThrough` steps and the transparent scrim
 - [Spotlight Effects](spotlight-effects.md), decorate the Spotlight cutout with glows, soft edges, or custom draw code
 - [Custom Tooltips](custom-tooltips.md), replace the tooltip body while keeping any highlight style
 - [WaypointState API](../api/waypoint-state.md), full reference for `rememberWaypointState` and step configuration

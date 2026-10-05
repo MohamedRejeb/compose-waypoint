@@ -12,13 +12,11 @@ This applies to both `WaypointHost` and `WaypointOverlayHost`, so tooltips insid
 
 ### Focus management
 
-`WaypointHost` clears the current focus on every step transition (`focusManager.clearFocus()`) and re-requests focus on itself if keyboard navigation is enabled. That way:
+When keyboard navigation is enabled, `WaypointHost` requests focus on itself when the tour starts and on every step change, so keyboard shortcuts (arrow keys, Enter, Escape) work immediately.
 
-- Focus doesn't get stuck on a text field that shouldn't be editable during a tour.
-- Each step starts with focus on the host so keyboard shortcuts (arrow keys, Escape) work immediately.
-- Screen readers reset their current position to the host between steps.
+The exception is a step with `TargetInteraction.PassThrough`, where the user works inside the target: the host leaves focus where it is and only handles the dismiss keys, so a text field keeps its cursor and receives every other key.
 
-If your step targets a text field and you want focus to return to the field afterward, re-request it yourself in `onEnter` or `onExit`.
+The host never moves focus into a target. If a step should start with the cursor in a field, request focus yourself in `onEnter`. See [Keyboard Navigation](keyboard.md#text-input-during-a-tour).
 
 ### RTL-aware positioning
 
@@ -47,7 +45,7 @@ Icon(
 If you write a custom tooltip with icon buttons:
 
 ```kotlin
-IconButton(onClick = { stepScope.close() }) {
+IconButton(onClick = { stepScope.skip() }) {
     Icon(
         imageVector = Icons.Default.Close,
         contentDescription = "Close tour",
@@ -55,7 +53,7 @@ IconButton(onClick = { stepScope.close() }) {
 }
 ```
 
-`WaypointMaterial3Tooltip` and `WaypointMaterial3HintTooltip` already provide content descriptions for their buttons.
+The buttons of `WaypointMaterial3Tooltip` are text buttons, read by their label, and the close icon of `WaypointMaterial3HintTooltip` has a configurable `closeContentDescription`.
 
 ### Reduced motion
 
@@ -96,7 +94,7 @@ Wrap your tour in a `CompositionLocalProvider` that flips layout direction, and 
 
 ```kotlin
 @Test
-fun `tooltip flips in RTL`() = runComposeTest {
+fun tooltipFlipsInRtl() = runComposeUiTest {
     setContent {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             MyTourScreen()
@@ -112,10 +110,7 @@ At runtime, test-flip your whole app by setting `LocalLayoutDirection` at the ro
 
 ```kotlin
 @Composable
-fun AccessibleTooltip(
-    stepScope: StepScope,
-    resolvedPlacement: ResolvedPlacement,
-) {
+fun AccessibleTooltip(stepScope: StepScope) {
     Column(
         modifier = Modifier
             .widthIn(max = 320.dp)
@@ -130,24 +125,22 @@ fun AccessibleTooltip(
             text = "Step ${stepScope.currentStepNumber}",
             style = MaterialTheme.typography.labelSmall,
         )
-        Text(
-            text = "Review your order",
-            style = MaterialTheme.typography.titleMedium,
-        )
-        Text(
-            text = "Tap the Review button to check your cart before checkout.",
-            style = MaterialTheme.typography.bodyMedium,
-        )
+        stepScope.title?.let {
+            Text(text = it, style = MaterialTheme.typography.titleMedium)
+        }
+        stepScope.description?.let {
+            Text(text = it, style = MaterialTheme.typography.bodyMedium)
+        }
 
         Row(horizontalArrangement = Arrangement.End) {
             TextButton(
-                onClick = { stepScope.onSkip() },
+                onClick = { stepScope.skip() },
                 modifier = Modifier.semantics { contentDescription = "Skip tour" },
             ) {
                 Text("Skip")
             }
             Button(
-                onClick = { stepScope.onNext() },
+                onClick = { stepScope.next() },
                 modifier = Modifier.semantics {
                     contentDescription = if (stepScope.isLastStep) "Finish tour" else "Next step"
                 },
@@ -159,7 +152,7 @@ fun AccessibleTooltip(
 }
 ```
 
-Because the outer `TooltipPopup` already sets `LiveRegionMode.Polite`, the tooltip's content is announced every time a new step appears.
+Because Waypoint already wraps the tooltip in a polite live region, its content is announced every time a new step appears.
 
 ## RTL test example
 
@@ -167,7 +160,7 @@ Because the outer `TooltipPopup` already sets `LiveRegionMode.Polite`, the toolt
 @Composable
 fun RtlTourPreview() {
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        val state = rememberWaypointState<Targets> {
+        val state = rememberWaypointState {
             step(Targets.Start) {
                 title = "ابدأ هنا"
                 description = "اضغط الزر للمتابعة"

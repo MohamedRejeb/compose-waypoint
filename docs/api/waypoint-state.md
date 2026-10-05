@@ -37,11 +37,12 @@ You usually don't construct `WaypointState` directly, use `rememberWaypointState
 | `isActive` | `Boolean` | True while the tour is showing steps. |
 | `isPaused` | `Boolean` | True if the tour is paused. |
 | `currentStep` | `WaypointStep<K>?` | The current step, or null when inactive. |
-| `currentTargetBounds` | `Rect?` | Bounds of the current step's target, or null if the target hasn't registered. |
+| `isStepVisible` | `Boolean` | True while the current step is on screen: the tour is active and not paused, the step's `beforeShow` gate has completed, and its target is laid out (or it has no target). Use it to block your own UI while a step is pending. |
+| `currentTargetBounds` | `Rect?` | Bounds of the current step's target in the coordinate space of the host that owns it. Null when the tour is inactive, the target isn't laid out or is scrolled out of view, or the step has no target. |
 | `lastEndReason` | `WaypointEndReason?` | How the most recent run ended (`Completed` or `Cancelled`), or null until a run ends. Updated on every completion or cancellation, including direct `stop()` calls. |
 | `hasCompleted` | `Boolean` | True if `tourId` and `persistence` are set and `persistence.isCompleted(tourId)` returns true. |
 
-All reactive properties are backed by Compose state, so reading them in a composable triggers recomposition.
+All reactive properties are backed by Compose state, so reading them in a composable triggers recomposition, and they can be observed with `snapshotFlow`.
 
 ## Public methods
 
@@ -72,12 +73,12 @@ Goes back to the previous visible step. No-op when inactive, paused, or already 
 Jumps to a specific step by index. Ignores the jump when:
 
 - Inactive or paused.
-- Index is out of range.
+- Index is out of range, or already the current step.
 - The step at that index has a `showIf` that returns false.
 
 ### `goTo(key: K)`
 
-Jumps to a step by its target key. Looks up the first step whose `targetKey == key` and delegates to `goTo(index)`.
+Jumps to a step by its target key. Looks up the first step whose `targetKey == key` and delegates to `goTo(index)`. Steps without a target can only be reached by index.
 
 ### `stop()`
 
@@ -153,26 +154,34 @@ public fun <K> rememberWaypointState(
 ): WaypointState<K>
 ```
 
-## DSL: `step(targetKey) { ... }`
+## DSL: `step`
 
-Inside the `rememberWaypointState { ... }` block, `step(key) { ... }` declares one step. Steps run in declaration order, subject to `showIf`.
+Inside the `rememberWaypointState { ... }` block, each `step` call declares one step. Steps run in declaration order, subject to `showIf`.
+
+| Function | Purpose |
+|---|---|
+| `step(targetKey) { ... }` | A step that highlights the composable marked with `Modifier.waypointTarget(state, targetKey)`. The block is optional. |
+| `step { ... }` | A step without a target. Its tooltip is shown centered over the primary `WaypointHost`, which suits intro and outro cards. |
 
 ```kotlin
 step(Targets.Search) {
     title = "Search"
     description = "Find anything fast."
     placement = TooltipPlacement.Bottom
-    highlightStyle = HighlightStyle.Pulse(color = MaterialTheme.colorScheme.primary)
-    interaction = TargetInteraction.AllowClick
+    highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.Pill)
+    interaction = TargetInteraction.PassThrough
+    additionalTargets = listOf(Targets.SearchHint)
     showIf { featureEnabled() }
     onEnter { analytics.log("search_step_viewed") }
     onExit { }
     beforeShow { viewModel.openSearchPanel() }
-    advanceOn = WaypointTrigger.Custom {
-        snapshotFlow { searchQuery.value }.filter { it.isNotEmpty() }.first()
-    }
-    additionalTargets = listOf(Targets.SearchHint)
+    advanceOn { snapshotFlow { searchQuery }.first { it.isNotEmpty() } }
     content { stepScope -> MyCustomTooltip(stepScope) }
+}
+
+step {
+    title = "You're all set"
+    description = "Search is always one tap away."
 }
 ```
 
@@ -180,14 +189,12 @@ step(Targets.Search) {
 
 | Property | Type | Default | Purpose |
 |---|---|---|---|
-| `title` | `String?` | `null` | Tooltip title (used by the Material3 tooltip). |
-| `description` | `String?` | `null` | Tooltip description. |
-| `content` | `(@Composable (StepScope) -> Unit)?` | `null` | Per-step custom tooltip. Bypasses the host-level `tooltipContent`. See [Custom Tooltips](../guides/custom-tooltips.md). |
-| `placement` | `TooltipPlacement` | `Auto` | Desired side. Waypoint auto-flips if space is tight. |
+| `title` | `String?` | `null` | Tooltip title, exposed to tooltips as `StepScope.title`. |
+| `description` | `String?` | `null` | Tooltip description, exposed as `StepScope.description`. |
+| `placement` | `TooltipPlacement` | `Auto` | Desired side. Waypoint auto-flips if space is tight. Ignored without a target. |
 | `highlightStyle` | `HighlightStyle?` | `null` (inherits host) | Per-step highlight. See [Highlight Styles](../guides/highlight-styles.md). |
-| `interaction` | `TargetInteraction` | `None` | Whether the user can tap the highlighted target. |
-| `advanceOn` | `WaypointTrigger` | `NextButton` | How the step progresses. Use `WaypointTrigger.Custom` for async gates. |
-| `additionalTargets` | `List<K>` | `emptyList()` | Extra keys to highlight alongside the primary target. Must live in the same host as the primary target; keys registered against a different host are ignored for that step. |
+| `interaction` | `TargetInteraction` | `None` | What touches on the highlighted target do. Ignored without a target. |
+| `additionalTargets` | `List<K>` | `emptyList()` | Extra keys to highlight alongside the primary target. Must live in the same host as the primary target; keys registered against a different host are ignored for that step. Ignored without a target. |
 
 ### StepBuilder methods
 
@@ -196,12 +203,48 @@ step(Targets.Search) {
 | `showIf { condition() }` | Skip this step when the predicate returns `false`. Called when navigating through the tour. |
 | `onEnter { }` | Callback when the step becomes active. |
 | `onExit { }` | Callback when the step is exited (advance, back, stop). |
-| `beforeShow { suspendWork() }` | Suspend block that runs on every step entry. Use for opening modals, waiting for navigation, async prefetching. |
-| `content { stepScope -> ... }` | Alternative to the property form, sets `content` via a method call. |
+| `beforeShow { suspendWork() }` | Suspend block that runs on every step entry. The step is not shown until it returns. See [Async Gates](../guides/async-gates.md). |
+| `advanceOn { awaitSomething() }` | Suspend block started once the step is shown. The tour advances when it returns. See [Event-Driven Progression](../guides/advance-on.md). |
+| `content { stepScope -> ... }` | Per-step custom tooltip. Bypasses the host-level `tooltipContent`. See [Custom Tooltips](../guides/custom-tooltips.md). |
 
-`beforeShow` is useful when the target mounts inside a `Dialog` or a scroll list, open the dialog, wait for composition, then let Waypoint render. The highlight and tooltip are held back until the gate completes only when the step's target isn't laid out yet (the dialog/sheet case); if the target is already visible, the step shows immediately while `beforeShow` runs.
+`beforeShow` always gates: the highlight and tooltip stay hidden until the block returns, so it can open a dialog that contains the target, wait for data, or just `delay(300)` to let the UI settle. A block that returns without suspending never hides a target that is already visible, which keeps navigation between such steps flicker-free.
 
-`advanceOn = WaypointTrigger.Custom { ... }` starts the suspend lambda once the `beforeShow` gate completes and the tour is un-paused, so a pre-satisfied trigger cannot skip a step that was never shown. When it returns, the step advances automatically. The Next button and keyboard shortcuts still work alongside it.
+`advanceOn` starts once the step is on screen (gate completed, target laid out, tour not paused), so a condition that is already satisfied cannot skip a step that was never shown. The Next button and keyboard shortcuts still work alongside it.
+
+### `TargetInteraction`
+
+| Value | Behavior |
+|---|---|
+| `None` | Touches on the target are swallowed. |
+| `ClickToAdvance` | Tapping the target advances the tour. The target itself does not receive the tap. |
+| `PassThrough` | All gestures inside the highlighted areas (the target and every additional target) reach the app, everything outside stays blocked. While such a step is shown the host does not take keyboard focus and only handles the dismiss keys, so the user can type in the target. |
+
+Touch blocking only exists for `HighlightStyle.Spotlight`. Every other highlight style leaves the whole screen interactive. For blocking without dimming use `HighlightStyle.Spotlight(overlayAlpha = 0f)`. See [Interactive Tutorials](../guides/interactive-tutorials.md).
+
+## `WaypointStep`
+
+The DSL builds a list of `WaypointStep<K>`. Construct them directly when using the pre-built list overload:
+
+```kotlin
+@Immutable
+public data class WaypointStep<K>(
+    val targetKey: K? = null,
+    val title: String? = null,
+    val description: String? = null,
+    val content: (@Composable (StepScope) -> Unit)? = null,
+    val placement: TooltipPlacement = TooltipPlacement.Auto,
+    val highlightStyle: HighlightStyle? = null,
+    val interaction: TargetInteraction = TargetInteraction.None,
+    val advanceOn: (suspend () -> Unit)? = null,
+    val additionalTargets: List<K> = emptyList(),
+    val showIf: (() -> Boolean)? = null,
+    val onEnter: (() -> Unit)? = null,
+    val onExit: (() -> Unit)? = null,
+    val beforeShow: (suspend () -> Unit)? = null,
+)
+```
+
+A `targetKey` of `null` makes a step without a target.
 
 ## Minimal end-to-end example
 
@@ -210,7 +253,7 @@ enum class Targets { Search, Add, Profile }
 
 @Composable
 fun TourScreen() {
-    val tourState = rememberWaypointState<Targets>(tourId = "home_onboarding") {
+    val tourState = rememberWaypointState(tourId = "home_onboarding") {
         step(Targets.Search) {
             title = "Search"
             description = "Find anything in your workspace."
@@ -237,6 +280,7 @@ fun TourScreen() {
 
 - [WaypointHost API](waypoint-host.md), the host that renders the tour
 - [Material3 API](material3.md), convenience wrappers with pre-styled tooltips
+- [Interactive Tutorials](../guides/interactive-tutorials.md), hands-on steps with `PassThrough` and `advanceOn`
 - [Highlight Styles](../guides/highlight-styles.md), visual emphasis per step or host-wide
 - [Custom Tooltips](../guides/custom-tooltips.md), replace the tooltip body
 - [Analytics](../guides/analytics.md), track tour engagement

@@ -7,24 +7,24 @@
 ```kotlin
 @Composable
 public fun WaypointBeacon(
+    modifier: Modifier = Modifier,
     visible: Boolean = true,
     style: BeaconStyle = BeaconStyle.Pulse(),
     alignment: Alignment = Alignment.TopEnd,
     offset: DpOffset = DpOffset.Zero,
     onClick: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 )
 ```
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
+| `modifier` | `Modifier` | Modifier applied to the outer `Box`. |
 | `visible` | `true` | Drives `AnimatedVisibility`, fades in/out. |
 | `style` | `Pulse()` | `BeaconStyle.Pulse` or `BeaconStyle.Dot`. |
 | `alignment` | `TopEnd` | Where the beacon sits relative to `content`. |
 | `offset` | `Zero` | Extra offset after alignment. |
 | `onClick` | `null` | Optional tap handler on the beacon itself. |
-| `modifier` | `Modifier` | Modifier applied to the outer `Box`. |
 | `content` | required | The UI element being decorated. |
 
 Content renders normally underneath; the beacon draws on top, aligned inside the same `Box`.

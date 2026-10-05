@@ -148,6 +148,27 @@ The lambda runs after cutouts are punched, so anything you draw appears on top o
 !!! warning
     Custom effects are invoked inside a composition with `CompositingStrategy.Offscreen`. Using `BlendMode.Clear` here will punch additional holes in the scrim, which may be what you want, but can also interact unexpectedly with `SoftEdge` if you combine them.
 
+## Outline without dimming
+
+Effects still draw when the scrim is fully transparent. Combined with `overlayAlpha = 0f` a `Custom` effect gives a spotlight that blocks touches outside the target and outlines it, without dimming the screen:
+
+```kotlin
+highlightStyle = HighlightStyle.Spotlight(
+    overlayAlpha = 0f,
+    effect = SpotlightEffect.Custom { bounds ->
+        drawRoundRect(
+            color = Color(0xFF7C4DFF),
+            topLeft = bounds.topLeft,
+            size = bounds.size,
+            cornerRadius = CornerRadius(8.dp.toPx()),
+            style = Stroke(width = 2.dp.toPx()),
+        )
+    },
+)
+```
+
+See [Interactive Tutorials](interactive-tutorials.md#block-without-dimming).
+
 ## Multi-element highlights
 
 When a step declares `additionalTargets`, each cutout is decorated independently. A `Glow` effect applies to every cutout, a `SoftEdge` fade hugs every cutout shape, and a `Custom` effect's lambda fires once per cutout with that cutout's bounds.
@@ -166,7 +187,7 @@ step(Targets.Primary) {
 ```kotlin
 enum class OnboardingTargets { Search, Filter, Profile }
 
-val state = rememberWaypointState<OnboardingTargets> {
+val state = rememberWaypointState {
     step(OnboardingTargets.Search) {
         title = "Search"
         description = "Find anything fast"
@@ -179,7 +200,7 @@ val state = rememberWaypointState<OnboardingTargets> {
         title = "Filter results"
         highlightStyle = HighlightStyle.Spotlight(
             effect = SpotlightEffect.Glow(
-                color = MaterialTheme.colorScheme.primary,
+                color = Color(0xFF7C4DFF),
                 radius = 28.dp,
             ),
         )
@@ -191,7 +212,7 @@ val state = rememberWaypointState<OnboardingTargets> {
                 drawRoundRect(
                     color = Color.White,
                     topLeft = bounds.topLeft - Offset(4.dp.toPx(), 4.dp.toPx()),
-                    size = bounds.size + Size(8.dp.toPx(), 8.dp.toPx()),
+                    size = Size(bounds.width + 8.dp.toPx(), bounds.height + 8.dp.toPx()),
                     cornerRadius = CornerRadius(bounds.height),
                     style = Stroke(width = 2.dp.toPx()),
                 )

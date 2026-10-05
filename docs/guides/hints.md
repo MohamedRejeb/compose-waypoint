@@ -30,7 +30,7 @@ val hints = rememberWaypointHintState<HomeHints>(
 WaypointHint(
     state = hints,
     key = HomeHints.NewFilter,
-    tooltipContent = { scope, _ ->
+    tooltipContent = { scope ->
         MyHintCard(
             title = scope.title,
             description = scope.description,
@@ -79,7 +79,7 @@ public fun <K> WaypointHint(
     modifier: Modifier = Modifier,
     tooltipSpacing: Dp = WaypointDefaults.TooltipSpacing,
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
-    tooltipContent: @Composable (HintScope, ResolvedPlacement) -> Unit,
+    tooltipContent: @Composable (HintScope) -> Unit,
     content: @Composable () -> Unit,
 )
 ```
@@ -117,13 +117,17 @@ Tooltip content composables receive a `HintScope`:
 public interface HintScope {
     public val title: String?
     public val description: String?
+    public val placement: ResolvedPlacement
     public fun dismiss()
     public fun close()
 }
 ```
 
+- **`placement`** is the side of the target the tooltip ended up on, after auto-flip.
 - **`dismiss()`** marks the hint permanently dismissed, persists the state if configured, and hides the beacon. Use for "Got it" actions.
 - **`close()`** hides the tooltip but leaves the beacon visible. Use for "X" close buttons when you want the user to be able to reopen the tooltip later.
+
+To give a custom hint tooltip an arrow, wrap it in `TooltipArrowBox`, exactly as for tour tooltips. See [Arrows](custom-tooltips.md#arrows).
 
 ## Persistence
 

@@ -29,7 +29,7 @@ enum class OnboardingTarget {
 }
 ```
 
-Step keys are generic -- you can use an enum, a sealed class, strings, or any type that works as a map key.
+Step keys are generic: you can use an enum, a sealed class, strings, or any type that works as a map key.
 
 ## 3. Create the tour state
 
@@ -98,9 +98,10 @@ The host composable renders the spotlight overlay and tooltip on top of your con
     ```kotlin
     WaypointHost(
         state = tourState,
-        tooltipContent = { stepScope, placement ->
-            // Your custom tooltip composable
-            MyTooltip(stepScope, placement)
+        tooltipContent = { stepScope ->
+            // Your custom tooltip composable. The scope carries the step's
+            // title and description, progress, and next() / previous() / skip().
+            MyTooltip(stepScope)
         },
     ) {
         MyScreenContent()
@@ -200,6 +201,30 @@ fun HomeScreen() {
 }
 ```
 
+## Going further
+
+A few things the steps above did not use:
+
+```kotlin
+val tourState = rememberWaypointState {
+    // A step without a target is shown as a centered card.
+    step {
+        title = "Welcome"
+        description = "A quick look around, it takes 20 seconds."
+    }
+    step(OnboardingTarget.SearchBar) {
+        title = "Search"
+        description = "Type something to continue."
+        // Let the user really use the highlighted element...
+        interaction = TargetInteraction.PassThrough
+        // ...and move on when they have. `query` is your own state.
+        advanceOn { snapshotFlow { query }.first { it.isNotEmpty() } }
+    }
+}
+```
+
+See [Interactive Tutorials](guides/interactive-tutorials.md) for the full pattern.
+
 ## The 4 key API entry points
 
 | API | Purpose |
@@ -211,7 +236,8 @@ fun HomeScreen() {
 
 ## Next steps
 
-- [Highlight Styles](guides/highlight-styles.md) -- customize how targets are highlighted
-- [Custom Tooltips](guides/custom-tooltips.md) -- build your own tooltip UI
-- [Analytics](guides/analytics.md) -- track tour engagement
-- [Persistence](guides/persistence.md) -- remember completed tours
+- [Highlight Styles](guides/highlight-styles.md), customize how targets are highlighted
+- [Custom Tooltips](guides/custom-tooltips.md), build your own tooltip UI
+- [Interactive Tutorials](guides/interactive-tutorials.md), steps the user completes by doing
+- [Analytics](guides/analytics.md), track tour engagement
+- [Persistence](guides/persistence.md), remember completed tours

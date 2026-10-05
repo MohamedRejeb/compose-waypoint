@@ -18,7 +18,7 @@ public fun <K> WaypointHost(
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
     onTourComplete: (() -> Unit)? = null,
     onTourCancel: (() -> Unit)? = null,
-    tooltipContent: @Composable (StepScope, ResolvedPlacement) -> Unit,
+    tooltipContent: @Composable (StepScope) -> Unit,
     content: @Composable () -> Unit,
 )
 ```
@@ -31,12 +31,12 @@ public fun <K> WaypointHost(
 | `modifier` | `Modifier` | `Modifier` | Applied to the host's outer `Box`. |
 | `highlightStyle` | `HighlightStyle` | `HighlightStyle.Spotlight()` | Default highlight for every step. Steps override via `step { highlightStyle = ... }`. |
 | `overlayClickBehavior` | `OverlayClickBehavior` | `Nothing` | What happens when the user clicks outside the highlighted target. Only applies to the `Spotlight` highlight style. |
-| `keyboardConfig` | `KeyboardConfig` | `KeyboardConfig.Default` | Keyboard navigation config (arrow keys, Enter, Escape). |
+| `keyboardConfig` | `KeyboardConfig` | `KeyboardConfig.Default` | Keyboard navigation config (arrow keys, Enter, Escape). See [`KeyboardConfig`](#keyboardconfig). |
 | `tooltipSpacing` | `Dp` | `12.dp` | Gap between the tooltip and the target. |
 | `screenMargin` | `Dp` | `16.dp` | Minimum margin from screen edges before the tooltip flips or shifts. |
 | `onTourComplete` | `(() -> Unit)?` | `null` | Called when a tour run ends with `WaypointEndReason.Completed`, no matter which host or code path finished it. |
 | `onTourCancel` | `(() -> Unit)?` | `null` | Called when a tour run ends with `WaypointEndReason.Cancelled`: skip, Escape, overlay dismiss, or a direct `state.stop()` call. |
-| `tooltipContent` | `@Composable (StepScope, ResolvedPlacement) -> Unit` | required | Slot for your tooltip composable. See [Custom Tooltips](../guides/custom-tooltips.md). |
+| `tooltipContent` | `@Composable (StepScope) -> Unit` | required | Tooltip of every step that has no `content` of its own. The [`StepScope`](#stepscope) carries the step's texts, the resolved placement, progress and navigation. |
 | `content` | `@Composable () -> Unit` | required | Your screen content. |
 
 Defaults live on `WaypointDefaults` so you can read or reuse them in your own wrappers.
@@ -46,18 +46,80 @@ Defaults live on `WaypointDefaults` so you can read or reuse them in your own wr
 !!! warning
     `WaypointHost` must wrap **all** content that contains tour targets. Place it at the root of your screen.
 
-Waypoint reads target bounds via `onGloballyPositioned` and stores them in the host's coordinate space. The host then renders the spotlight and tooltip in the same space. If a `Modifier.waypointTarget` sits outside any host, it is silently ignored (no host is in scope).
+Waypoint stores target bounds in the host's coordinate space, and the host renders the spotlight and tooltip in the same space. If a `Modifier.waypointTarget` sits outside any host, it is silently ignored (no host is in scope).
+
+The host is also the area that a step covers: the spotlight scrim dims and blocks the host's bounds, and a step without a target is centered over them.
 
 For tours that span a modal surface (Dialog, ModalBottomSheet, Popup), add a [`WaypointOverlayHost`](#waypointoverlayhost) inside the modal. The two hosts share the same `WaypointState`, and Waypoint renders the overlay + tooltip in whichever host owns the current step's target.
 
+## `StepScope`
+
+The scope handed to `tooltipContent` and to per-step `content { }`.
+
+```kotlin
+@Stable
+public interface StepScope {
+    public val title: String?
+    public val description: String?
+    public val placement: ResolvedPlacement?
+    public val currentStepIndex: Int
+    public val currentStepNumber: Int
+    public val totalSteps: Int
+    public val isFirstStep: Boolean
+    public val isLastStep: Boolean
+    public fun next()
+    public fun previous()
+    public fun skip()
+}
+```
+
+| Member | Description |
+|---|---|
+| `title`, `description` | The texts configured on the current step. |
+| `placement` | Resolved side of the target the tooltip sits on (`Top`, `Bottom`, `Start`, `End`), `null` for a step without a target. |
+| `currentStepIndex` | Index of the step in `WaypointState.steps` (0-based, includes hidden steps). |
+| `currentStepNumber` | 1-based position among currently-visible steps, for "X of Y" progress. |
+| `totalSteps` | Number of currently-visible steps (steps whose `showIf` passes). |
+| `isFirstStep`, `isLastStep` | Whether this is the first or last visible step. |
+| `next()` | Go to the next step, or complete the tour on the last one. |
+| `previous()` | Go to the previous step. |
+| `skip()` | Cancel the tour. |
+
+## `TooltipArrowBox`
+
+Lays out custom tooltip content with an arrow that points at the current target. Use it as the root of a custom tooltip.
+
+```kotlin
+@Composable
+public fun TooltipArrowBox(
+    arrowColor: Color,
+    modifier: Modifier = Modifier,
+    arrowSize: Dp = 10.dp,
+    content: @Composable () -> Unit,
+)
+```
+
+```kotlin
+WaypointHost(
+    state = tourState,
+    tooltipContent = { stepScope ->
+        TooltipArrowBox(arrowColor = Color.White) {
+            MyTooltipCard(stepScope)
+        }
+    },
+) { MyScreen() }
+```
+
+It renders the bare content for a step without a target. For fully custom arrow drawing, `TooltipArrow(placement, color, modifier, size)` and `LocalTooltipArrowGeometry` are public too. See [Custom Tooltips](../guides/custom-tooltips.md#arrows).
+
 ## `OverlayClickBehavior`
 
-Controls what happens when the user taps the darkened area outside the spotlight cutout.
+Controls what happens when the user taps the blocked area outside the spotlight cutout. Only `HighlightStyle.Spotlight` blocks touches, so it has no effect with the other highlight styles.
 
 | Value | Behavior |
 |---|---|
 | `OverlayClickBehavior.Nothing` | Absorb the click, do nothing (default). |
-| `OverlayClickBehavior.Dismiss` | Cancel the tour (`state.stop()` + `onTourCancel`). |
+| `OverlayClickBehavior.Dismiss` | Cancel the tour (`state.stop()`, then `onTourCancel` fires). |
 | `OverlayClickBehavior.NextStep` | Advance to the next step. |
 | `OverlayClickBehavior.Custom(action)` | Run a custom lambda. |
 
@@ -67,7 +129,7 @@ Example, tap anywhere to advance:
 WaypointHost(
     state = tourState,
     overlayClickBehavior = OverlayClickBehavior.NextStep,
-    tooltipContent = { s, p -> MyTooltip(s, p) },
+    tooltipContent = { stepScope -> MyTooltip(stepScope) },
 ) { MyScreen() }
 ```
 
@@ -80,7 +142,7 @@ WaypointHost(
         tourState.pause()
         showResumeBanner = true
     },
-    tooltipContent = { s, p -> MyTooltip(s, p) },
+    tooltipContent = { stepScope -> MyTooltip(stepScope) },
 ) { MyScreen() }
 ```
 
@@ -111,7 +173,7 @@ Disable keyboard navigation:
 WaypointHost(
     state = tourState,
     keyboardConfig = KeyboardConfig.Disabled,
-    tooltipContent = { s, p -> MyTooltip(s, p) },
+    tooltipContent = { stepScope -> MyTooltip(stepScope) },
 ) { MyScreen() }
 ```
 
@@ -124,6 +186,8 @@ keyboardConfig = KeyboardConfig(
     dismissKeys = setOf(Key.Escape, Key.Q),
 )
 ```
+
+While a step is shown the host takes keyboard focus so these keys work. During a `TargetInteraction.PassThrough` step it leaves focus to the app and only handles `dismissKeys`, because the user may be typing in the target. No key is handled while the tour is paused. See [Keyboard Navigation](../guides/keyboard.md).
 
 !!! note
     Keyboard handling is only owned by the primary `WaypointHost`. `WaypointOverlayHost` intentionally doesn't install key handlers, otherwise they'd fire twice when a modal is open.
@@ -141,20 +205,20 @@ public fun <K> WaypointOverlayHost(
     overlayClickBehavior: OverlayClickBehavior = WaypointDefaults.OverlayClickBehavior,
     tooltipSpacing: Dp = WaypointDefaults.TooltipSpacing,
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
-    tooltipContent: @Composable (StepScope, ResolvedPlacement) -> Unit,
+    tooltipContent: @Composable (StepScope) -> Unit,
     content: @Composable () -> Unit,
 )
 ```
 
-Both hosts share the same `WaypointState`. Targets register against whichever host is their nearest ancestor, and Waypoint renders the overlay + tooltip in the host that owns the current step's target. Tour-lifecycle callbacks (`onTourComplete`, `onTourCancel`, keyboard) stay on the primary host, and they fire for every way the tour ends, including tooltip buttons inside a `WaypointOverlayHost`.
+Both hosts share the same `WaypointState`. Targets register against whichever host is their nearest ancestor, and Waypoint renders the overlay + tooltip in the host that owns the current step's target. Tour-lifecycle callbacks (`onTourComplete`, `onTourCancel`) and keyboard handling stay on the primary host, and the callbacks fire for every way the tour ends, including tooltip buttons inside a `WaypointOverlayHost`. Steps without a target are always shown by the primary host.
 
 ```kotlin
-WaypointHost(state = state, tooltipContent = { s, p -> MyTooltip(s, p) }) {
+WaypointHost(state = state, tooltipContent = { MyTooltip(it) }) {
     MyScreen()
 
     if (showDialog) {
         Dialog(onDismissRequest = { showDialog = false }) {
-            WaypointOverlayHost(state = state, tooltipContent = { s, p -> MyTooltip(s, p) }) {
+            WaypointOverlayHost(state = state, tooltipContent = { MyTooltip(it) }) {
                 DialogContent() // contains waypointTarget modifiers
             }
         }
@@ -164,7 +228,7 @@ WaypointHost(state = state, tooltipContent = { s, p -> MyTooltip(s, p) }) {
 
 ## `LocalWaypointHostId`
 
-`LocalWaypointHostId` is an internal `CompositionLocal` that identifies the nearest host in the composition. `Modifier.waypointTarget` reads it to decide which host's coordinate space the target registers in. You don't need to interact with it directly, it's mentioned here so the mechanism is explicit if you're debugging target registration across Dialog / Sheet boundaries.
+`LocalWaypointHostId` is a `CompositionLocal` that identifies the nearest host in the composition. `Modifier.waypointTarget` reads it to decide which host's coordinate space the target registers in. You only need to read it yourself when registering bounds manually with the experimental `WaypointState.setTargetBounds`. Otherwise it's mentioned here so the mechanism is explicit if you're debugging target registration across Dialog / Sheet boundaries.
 
 ## Complete examples
 
@@ -173,9 +237,7 @@ WaypointHost(state = state, tooltipContent = { s, p -> MyTooltip(s, p) }) {
 ```kotlin
 WaypointHost(
     state = tourState,
-    tooltipContent = { stepScope, placement ->
-        MyTooltip(stepScope, placement)
-    },
+    tooltipContent = { stepScope -> MyTooltip(stepScope) },
 ) {
     MyScreen(tourState)
 }
@@ -188,9 +250,7 @@ WaypointHost(
     state = tourState,
     overlayClickBehavior = OverlayClickBehavior.NextStep,
     onTourComplete = { analytics.log("tour_finished") },
-    tooltipContent = { stepScope, placement ->
-        MyTooltip(stepScope, placement)
-    },
+    tooltipContent = { stepScope -> MyTooltip(stepScope) },
 ) {
     MyScreen(tourState)
 }
@@ -202,9 +262,7 @@ WaypointHost(
 WaypointHost(
     state = tourState,
     keyboardConfig = KeyboardConfig.Disabled,
-    tooltipContent = { stepScope, placement ->
-        MyTooltip(stepScope, placement)
-    },
+    tooltipContent = { stepScope -> MyTooltip(stepScope) },
 ) {
     MyScreen(tourState)
 }
@@ -216,3 +274,4 @@ WaypointHost(
 - [Material3 API](material3.md), pre-styled tooltip wrapper
 - [Highlight Styles](../guides/highlight-styles.md), configure the visual emphasis
 - [Custom Tooltips](../guides/custom-tooltips.md), build your own `tooltipContent`
+- [Interactive Tutorials](../guides/interactive-tutorials.md), steps the user works in

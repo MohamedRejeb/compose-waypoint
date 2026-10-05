@@ -1,6 +1,6 @@
 # Async Gates with `beforeShow`
 
-`beforeShow` is a suspend block attached to a step that runs on every entry to that step. When the step's target isn't laid out yet (for example, it lives in a dialog the gate is about to open), the highlight and tooltip are held back until the block completes. Use it to wait for data, open a modal, run an animation, or perform any asynchronous setup that needs to land before the user sees the spotlight.
+`beforeShow` is a suspend block attached to a step that runs on every entry to that step, before the step is shown. The highlight and tooltip stay hidden until the block returns. Use it to open a modal, wait for data, let an animation finish, or simply give the UI a moment to settle.
 
 ## Core API
 
@@ -22,16 +22,16 @@ The property on `WaypointStep` is:
 val beforeShow: (suspend () -> Unit)?
 ```
 
-When the step becomes active, `WaypointHost` launches an effect that:
+When the step becomes current, the primary `WaypointHost`:
 
-1. Snaps animated highlight bounds to `Rect.Zero` if the target isn't yet registered (avoids showing the previous step's spotlight on the wrong position).
-2. Awaits `beforeShow`.
-3. Marks the step as ready, which unblocks the highlight and tooltip.
-
-While `beforeShow` is running, the tooltip and highlight stay hidden only if the target wasn't laid out when the step was entered. A step whose target is already visible shows immediately while the gate runs in the background.
+1. Runs `beforeShow`. While it is suspended the step is hidden: no highlight, no tooltip, and no touch blocking.
+2. Shows the step once the block returns and the target is laid out.
+3. Starts the step's `advanceOn` block, if it has one.
 
 !!! note
-    The gate lambda itself runs on every step entry. The hold-back applies only when the step has a `beforeShow` **and** the target isn't already registered. When navigating between two steps inside an already-open modal, `isStepReady` stays true so the highlight animates smoothly to the new position instead of flickering through a hidden frame.
+    A gate that returns without suspending never hides a target that is already visible. `beforeShow { showDialog = true }` between two steps inside an open dialog does not make the highlight blink, it animates straight to the new target.
+
+Nothing blocks the screen while a gate is suspended. If the user should not interact with the app in the meantime, check `state.isStepVisible`, see [Block your own UI while a step is pending](interactive-tutorials.md#block-your-own-ui-while-a-step-is-pending).
 
 ## Common use cases
 
@@ -45,23 +45,19 @@ step(Targets.DialogButton) {
 }
 step(Targets.DialogOption) {
     title = "Configure notifications"
-    beforeShow {
-        showDialog = true
-        // Give Compose a frame to mount the dialog and register the target.
-        withFrameNanos { }
-    }
+    beforeShow { showDialog = true }
 }
 
 if (showDialog) {
     Dialog(onDismissRequest = { showDialog = false }) {
-        WaypointOverlayHost(state = state) {
+        WaypointMaterial3OverlayHost(state = state) {
             DialogContent() // contains Targets.DialogOption
         }
     }
 }
 ```
 
-The dialog mounts only after the previous step, the target inside registers against `WaypointOverlayHost`, and the step's tooltip renders inside the dialog.
+The gate opens the dialog, the target inside registers against the overlay host, and the step's highlight and tooltip render inside the dialog as soon as the target is laid out. There is no need to wait for the dialog to mount inside the gate.
 
 ### Waiting for data
 
@@ -86,19 +82,23 @@ beforeShow {
 
 The user is responsible for adding timeouts, Waypoint does not wrap the lambda.
 
-### Waiting for an animation to settle
+### Waiting for the UI to settle
 
 ```kotlin
 step(Targets.ChartLegend) {
-    beforeShow {
-        chartAnimation.animateTo(1f)
-    }
+    // Wait for a specific animation.
+    beforeShow { chartAnimation.animateTo(1f) }
+}
+
+step(Targets.SaveButton) {
+    // Or just give the previous action a moment.
+    beforeShow { delay(300) }
 }
 ```
 
 ## Cancellation
 
-The effect is launched as `LaunchedEffect(state.currentStepIndex)`. When the step changes (user clicks Next rapidly, `goTo()` fires, or the tour is stopped), the coroutine is cancelled and `beforeShow` stops awaiting. Waypoint handles this gracefully: on cancellation it does not call `setStepReady(true)`, so the transition to the next step isn't corrupted.
+The gate runs in a coroutine tied to the current step. When the step changes (the user presses a navigation key, `goTo()` fires, or the tour is stopped), the coroutine is cancelled and the next step starts with its own gate.
 
 ```kotlin
 beforeShow {
@@ -112,7 +112,7 @@ Respect cancellation inside your lambda: do not catch `CancellationException`, a
 
 ## Interaction with cross-hierarchy tours
 
-`beforeShow` pairs naturally with `WaypointOverlayHost` for dialogs, sheets, and popups. The gate opens the modal; the target inside registers against the secondary host; the primary host hands off ownership. Without `beforeShow`, the dialog target wouldn't exist when the step tries to render, and the tooltip would flicker or show on stale bounds.
+`beforeShow` pairs naturally with `WaypointOverlayHost` for dialogs, sheets, and popups. The gate opens the modal, the target inside registers against the secondary host, and that host renders the step. Without `beforeShow`, the dialog target would not exist and the step would never appear.
 
 Pattern for dialog-bound steps:
 
@@ -144,21 +144,16 @@ enum class CheckoutKeys { CartButton, CheckoutDialogSubmit, Confirmation }
 
 @Composable
 fun CheckoutScreen() {
-    val state = rememberWaypointState<CheckoutKeys> {
+    var showCheckoutDialog by remember { mutableStateOf(false) }
+
+    val state = rememberWaypointState {
         step(CheckoutKeys.CartButton) {
             title = "Review your cart"
         }
         step(CheckoutKeys.CheckoutDialogSubmit) {
             title = "Place the order"
             description = "We've filled in a test card for you"
-            beforeShow {
-                showCheckoutDialog = true
-                // Wait briefly for the dialog to mount and the target to register.
-                withTimeoutOrNull(1_000) {
-                    snapshotFlow { state.currentTargetBounds }
-                        .first { it != null }
-                }
-            }
+            beforeShow { showCheckoutDialog = true }
         }
         step(CheckoutKeys.Confirmation) {
             title = "Order confirmed"
@@ -177,7 +172,8 @@ fun CheckoutScreen() {
                 WaypointMaterial3OverlayHost(state = state) {
                     CheckoutDialogContent()
                 }
-            }}
+            }
+        }
     }
 }
 ```
@@ -185,16 +181,17 @@ fun CheckoutScreen() {
 ## FAQ
 
 **What if `beforeShow` throws?**
-The exception propagates out of the `LaunchedEffect` block. The step never marks ready, so the tooltip stays hidden. Handle errors explicitly inside the lambda, especially if you call into potentially failing network or IO code.
+The exception propagates out of the host's effect, like any exception thrown inside a `LaunchedEffect`. Handle errors inside the block, especially if you call into network or IO code that can fail.
 
 **Can I chain `beforeShow` with `advanceOn`?**
-Yes, a step can use both. A `Custom` trigger doesn't start awaiting until the gate completes and the tour is un-paused, so a pre-satisfied trigger can't skip a step that was never shown. See [Advance Triggers](advance-on.md).
+Yes, a step can use both. `advanceOn` does not start until the gate has completed and the step is on screen, so a condition that is already satisfied can't skip a step that was never shown. See [Event-Driven Progression](advance-on.md).
 
 **Does `beforeShow` block navigation?**
-No. The user can still hit Next, Previous, or Escape on the host. When they do, the running `beforeShow` is cancelled, and the next step takes over.
+No. The tooltip is hidden while the gate runs, but keyboard navigation and calls to `state.next()`, `previous()`, `goTo()` or `stop()` still work. When the step changes, the running `beforeShow` is cancelled and the next step takes over.
 
 ## See also
 
 - [Cross-Hierarchy Tours](multi-host.md), the dialog/sheet/popup pattern.
 - [WaypointState](../api/waypoint-state.md), the full state surface.
-- [Advance Triggers](advance-on.md), the post-step counterpart to `beforeShow`.
+- [Event-Driven Progression](advance-on.md), the post-step counterpart to `beforeShow`.
+- [Interactive Tutorials](interactive-tutorials.md), gates in a hands-on tutorial.

@@ -102,7 +102,7 @@ A brand-themed tour with a custom accent color and rounder tooltip:
 ```kotlin
 @Composable
 fun BrandedTour() {
-    val tourState = rememberWaypointState<Targets> {
+    val tourState = rememberWaypointState {
         step(Targets.Search) {
             title = "Lightning-fast search"
             description = "Find anything with Cmd+K."
@@ -141,20 +141,22 @@ fun BrandedTour() {
 
 ## Per-step style overrides
 
-Theming controls the tooltip's global appearance. For per-step tweaks, use `content = { stepScope -> ... }` on the step to render a completely different composable. That step bypasses the Material3 tooltip entirely, which means it also bypasses the theme, so decide whether you want to read `WaypointMaterial3Theme.colors` manually inside your custom content.
+Theming controls the tooltip's global appearance. For per-step tweaks, use `content { stepScope -> ... }` on the step to render a completely different composable. That step bypasses the Material3 tooltip entirely, which means it also bypasses the theme, so decide whether you want to read `WaypointMaterial3Theme.colors` manually inside your custom content.
 
 ```kotlin
 step(Targets.Special) {
     content { stepScope ->
         val colors = WaypointMaterial3Theme.colors
-        Box(
+        Column(
             modifier = Modifier
                 .clip(RoundedCornerShape(24.dp))
                 .background(colors.tooltipBackground)
                 .padding(24.dp),
         ) {
             Text("Special step", color = colors.title)
-            // ... use stepScope.onNext, etc.
+            TextButton(onClick = { stepScope.next() }) {
+                Text("Continue", color = colors.primaryButton)
+            }
         }
     }
 }

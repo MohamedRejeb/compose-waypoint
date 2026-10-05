@@ -11,6 +11,7 @@ Every public API in this module is a thin wrapper that delegates to a core equiv
 | [`WaypointMaterial3Host`](#waypointmaterial3host) | Primary host with the Material3 tooltip pre-wired. |
 | [`WaypointMaterial3OverlayHost`](#waypointmaterial3overlayhost) | Cross-hierarchy host (Dialog / Sheet / Popup). |
 | [`WaypointMaterial3Tooltip`](#waypointmaterial3tooltip) | The default tooltip composable, usable standalone for per-step overrides. |
+| [`WaypointMaterial3Labels`](#waypointmaterial3labels) | The button and progress texts of the tooltip. |
 | [`WaypointMaterial3Theme`](#waypointmaterial3theme) | CompositionLocal-based theming. See [Theming](../guides/theming.md). |
 | [`WaypointMaterial3Hint`](#waypointmaterial3hint) | Convenience wrapper for single-shot hints. |
 | [`WaypointMaterial3HintTooltip`](#waypointmaterial3hinttooltip) | Default Material3 hint tooltip. |
@@ -31,10 +32,7 @@ public fun <K> WaypointMaterial3Host(
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
     onTourComplete: (() -> Unit)? = null,
     onTourCancel: (() -> Unit)? = null,
-    skipText: String = "Skip",
-    nextText: String = "Next",
-    backText: String = "Back",
-    finishText: String = "Finish",
+    labels: WaypointMaterial3Labels = WaypointMaterial3Labels.Default,
     showProgress: Boolean = true,
     content: @Composable () -> Unit,
 )
@@ -42,14 +40,11 @@ public fun <K> WaypointMaterial3Host(
 
 ### Parameters
 
-Everything on `WaypointHost` plus the following tooltip text customization:
+Everything on `WaypointHost` except `tooltipContent`, plus:
 
 | Parameter | Type | Default | Purpose |
 |---|---|---|---|
-| `skipText` | `String` | `"Skip"` | Label for the bottom-left skip button. |
-| `nextText` | `String` | `"Next"` | Label for the next button on non-final steps. |
-| `backText` | `String` | `"Back"` | Label for the back button (hidden on the first step). |
-| `finishText` | `String` | `"Finish"` | Label for the next button on the last step. |
+| `labels` | `WaypointMaterial3Labels` | `WaypointMaterial3Labels.Default` | Button and progress texts. See [`WaypointMaterial3Labels`](#waypointmaterial3labels). |
 | `showProgress` | `Boolean` | `true` | Toggle the "N of M" progress indicator above the title. |
 
 For `highlightStyle`, `overlayClickBehavior`, `keyboardConfig`, `tooltipSpacing`, `screenMargin`, `onTourComplete`, and `onTourCancel`, see the [`WaypointHost` reference](waypoint-host.md).
@@ -61,7 +56,7 @@ enum class Targets { Search, Add, Profile }
 
 @Composable
 fun HomeScreen() {
-    val tourState = rememberWaypointState<Targets> {
+    val tourState = rememberWaypointState {
         step(Targets.Search) { title = "Search"; description = "Find anything fast." }
         step(Targets.Add) { title = "Create"; description = "Add new items anywhere." }
         step(Targets.Profile) { title = "Profile"; description = "Your account lives here." }
@@ -80,28 +75,63 @@ fun HomeScreen() {
 ```kotlin
 WaypointMaterial3Host(
     state = tourState,
-    skipText = "Maybe later",
-    nextText = "Got it",
-    backText = "Previous",
-    finishText = "Let's go",
+    labels = WaypointMaterial3Labels(
+        skip = "Maybe later",
+        next = "Got it",
+        back = "Previous",
+        finish = "Let's go",
+    ),
     showProgress = false,
 ) {
     MyScreen(tourState)
 }
 ```
 
-### Localization
+## `WaypointMaterial3Labels`
 
-`skipText`, `nextText`, `backText`, and `finishText` are plain `String` parameters, pass `stringResource(R.string.tour_next)` on Android or your own resource system on KMP.
+The texts shown by `WaypointMaterial3Tooltip`, passed as one `labels` parameter to `WaypointMaterial3Host`, `WaypointMaterial3OverlayHost` and `WaypointMaterial3Tooltip`.
 
 ```kotlin
-WaypointMaterial3Host(
-    state = tourState,
-    skipText = stringResource(Res.string.tour_skip),
-    nextText = stringResource(Res.string.tour_next),
-    backText = stringResource(Res.string.tour_back),
-    finishText = stringResource(Res.string.tour_finish),
-) { MyScreen() }
+@Immutable
+public class WaypointMaterial3Labels(
+    public val skip: String = "Skip",
+    public val next: String = "Next",
+    public val back: String = "Back",
+    public val finish: String = "Finish",
+    public val progress: (current: Int, total: Int) -> String = { current, total -> "$current of $total" },
+)
+```
+
+| Property | Default | Purpose |
+|---|---|---|
+| `skip` | `"Skip"` | Label of the button that cancels the tour. |
+| `next` | `"Next"` | Label of the button that advances to the next step. |
+| `back` | `"Back"` | Label of the back button (hidden on the first step). |
+| `finish` | `"Finish"` | Label that replaces `next` on the last step. |
+| `progress` | `"1 of 3"` | Formats the progress text from the 1-based number of the current step and the total number of visible steps. |
+
+`WaypointMaterial3Labels.Default` holds the English defaults.
+
+### Localization
+
+Build the labels from your string resources. `remember` the instance so the tooltip is not handed a new `progress` function on every recomposition:
+
+```kotlin
+val skip = stringResource(Res.string.tour_skip)
+val next = stringResource(Res.string.tour_next)
+val back = stringResource(Res.string.tour_back)
+val finish = stringResource(Res.string.tour_finish)
+val labels = remember(skip, next, back, finish) {
+    WaypointMaterial3Labels(
+        skip = skip,
+        next = next,
+        back = back,
+        finish = finish,
+        progress = { current, total -> "$current / $total" },
+    )
+}
+
+WaypointMaterial3Host(state = tourState, labels = labels) { MyScreen() }
 ```
 
 ## `WaypointMaterial3OverlayHost`
@@ -117,10 +147,7 @@ public fun <K> WaypointMaterial3OverlayHost(
     overlayClickBehavior: OverlayClickBehavior = WaypointDefaults.OverlayClickBehavior,
     tooltipSpacing: Dp = WaypointDefaults.TooltipSpacing,
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
-    skipText: String = "Skip",
-    nextText: String = "Next",
-    backText: String = "Back",
-    finishText: String = "Finish",
+    labels: WaypointMaterial3Labels = WaypointMaterial3Labels.Default,
     showProgress: Boolean = true,
     content: @Composable () -> Unit,
 )
@@ -150,32 +177,23 @@ The default tooltip composable. `WaypointMaterial3Host` calls this for every ste
 @Composable
 public fun WaypointMaterial3Tooltip(
     stepScope: StepScope,
-    resolvedPlacement: ResolvedPlacement,
-    title: String?,
-    description: String?,
     modifier: Modifier = Modifier,
-    skipText: String = "Skip",
-    nextText: String = "Next",
-    backText: String = "Back",
-    finishText: String = "Finish",
+    labels: WaypointMaterial3Labels = WaypointMaterial3Labels.Default,
     showProgress: Boolean = true,
     showArrow: Boolean = true,
 )
 ```
 
-Reads colors, typography, and dimensions from [`WaypointMaterial3Theme`](#waypointmaterial3theme). When composed inside a Waypoint tooltip popup, an arrow pointing at the target is drawn automatically; pass `showArrow = false` to disable it. The progress label shows `currentStepNumber of totalSteps`, counting only visible steps.
+The title, description and placement are read from `stepScope`. Colors, typography, and dimensions come from [`WaypointMaterial3Theme`](#waypointmaterial3theme). When the step has a target, an arrow pointing at it is drawn automatically; pass `showArrow = false` to disable it. A step without a target renders the same card with no arrow. The progress text is `labels.progress(currentStepNumber, totalSteps)`, counting only visible steps.
 
 ```kotlin
 step(Targets.Special) {
+    title = "Visual step"
+    description = "Extra content above the default tooltip body."
     content { stepScope ->
-        Column {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             AsyncImage(model = "https://...", contentDescription = null)
-            WaypointMaterial3Tooltip(
-                stepScope = stepScope,
-                resolvedPlacement = ResolvedPlacement.Bottom,
-                title = "Visual step",
-                description = "Extra content above the default tooltip body.",
-            )
+            WaypointMaterial3Tooltip(stepScope = stepScope, showArrow = false)
         }
     }
 }
@@ -245,7 +263,6 @@ The default Material3 hint tooltip. Renders an optional title, optional descript
 @Composable
 public fun WaypointMaterial3HintTooltip(
     hintScope: HintScope,
-    resolvedPlacement: ResolvedPlacement,
     modifier: Modifier = Modifier,
     gotItText: String = "Got it",
     showCloseButton: Boolean = false,

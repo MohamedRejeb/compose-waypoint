@@ -5,7 +5,7 @@ Dialogs, `ModalBottomSheet`s, and `Popup`s render in a separate composition tree
 ## The problem
 
 ```kotlin
-WaypointHost(state = state) {
+WaypointMaterial3Host(state = state) {
     MyScreen() // Primary targets register here.
 
     if (showDialog) {
@@ -17,25 +17,27 @@ WaypointHost(state = state) {
 }
 ```
 
-`Dialog` creates its own `Window` (on Desktop) or its own compose view (on Android). `Modifier.waypointTarget` inside the dialog tries to register, but there's no `WaypointHost` in scope, so the target is dropped.
+A `Dialog` is laid out in its own layer, outside the host's layout tree. `Modifier.waypointTarget` inside the dialog cannot express its position in the outer host's coordinate space, so the target is ignored.
 
 ## The solution
 
 Place a `WaypointOverlayHost` inside the modal, passing the same `WaypointState`:
 
 ```kotlin
-WaypointHost(state = state) {
+WaypointMaterial3Host(state = state) {
     MyScreen()
 
     if (showDialog) {
         Dialog(onDismissRequest = { showDialog = false }) {
-            WaypointOverlayHost(state = state) {
+            WaypointMaterial3OverlayHost(state = state) {
                 DialogContent() // Targets register here.
             }
         }
     }
 }
 ```
+
+With the core module, use `WaypointHost` and `WaypointOverlayHost` and pass your `tooltipContent` to both.
 
 Both hosts share state. Targets register against their nearest host. The overlay and tooltip render in the host that owns the current step's target.
 
@@ -50,7 +52,7 @@ public fun <K> WaypointOverlayHost(
     overlayClickBehavior: OverlayClickBehavior = WaypointDefaults.OverlayClickBehavior,
     tooltipSpacing: Dp = WaypointDefaults.TooltipSpacing,
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
-    tooltipContent: @Composable (StepScope, ResolvedPlacement) -> Unit,
+    tooltipContent: @Composable (StepScope) -> Unit,
     content: @Composable () -> Unit,
 )
 ```
@@ -59,20 +61,20 @@ It accepts the same styling parameters as `WaypointHost` so each host can use a 
 
 ## Architecture
 
-Each host gets a unique `hostId` (`remember { Any() }`) and registers its `LayoutCoordinates` into `state.hostCoordinatesMap`. Targets inside a host resolve their nearest host via `LocalWaypointHostId` and register their bounds in that host's local space.
+Each host gets a unique id and registers its layout coordinates with the state. Targets inside a host resolve their nearest host via `LocalWaypointHostId` and register their bounds in that host's local space.
 
-When the current step's target key resolves to host A, only host A renders the overlay and tooltip. Host B stays passive, its own animated bounds are snapped to `Rect.Zero` so ownership hand-offs don't flash stale positions.
+When the current step's target key resolves to host A, only host A renders the overlay and tooltip. Host B stays passive. A [step without a target](interactive-tutorials.md#intro-and-outro-cards) is always rendered by the primary host.
 
 A step's `additionalTargets` must live in the same host as its primary target. Additional keys registered against a different host are ignored for that step's highlight.
 
 Only the primary host (`WaypointHost`) runs these lifecycle effects:
 
 - `beforeShow` gating.
-- Step-transition animated-bounds reset.
+- `advanceOn`.
 - Keyboard handling.
 - `onTourComplete` / `onTourCancel` callbacks.
 
-Overlay hosts (`WaypointOverlayHost`) stay silent on lifecycle to avoid duplicating side effects. The primary host's `onTourComplete` / `onTourCancel` still fire for every way the tour ends, including tooltip buttons inside an overlay host, keyboard shortcuts, overlay clicks, custom triggers, and direct `state.stop()` calls.
+Overlay hosts (`WaypointOverlayHost`) stay silent on lifecycle to avoid duplicating side effects. The primary host's `onTourComplete` / `onTourCancel` still fire for every way the tour ends, including tooltip buttons inside an overlay host, keyboard shortcuts, overlay clicks, `advanceOn`, and direct `state.stop()` calls.
 
 ## Full example: tour that spans a dialog
 
@@ -83,7 +85,7 @@ enum class TourKeys { HomeButton, DialogField, DialogSubmit, Confirmation }
 fun CheckoutTour() {
     var showDialog by rememberSaveable { mutableStateOf(false) }
 
-    val state = rememberWaypointState<TourKeys> {
+    val state = rememberWaypointState {
         step(TourKeys.HomeButton) {
             title = "Start checkout"
             description = "Tap here to review your cart"
@@ -164,14 +166,14 @@ step(TourKeys.Confirmation) {
 
 - **Android**, `Dialog`, `ModalBottomSheet`, `Popup`.
 - **iOS**, Compose `Dialog` and `Popup` (iOS renders modals inside the same window, but the composition is still separate).
-- **Desktop**, `Dialog` opens a separate OS window; the overlay host spans just that window.
+- **Desktop**, `Dialog` and `Popup` render as layers in the same window; the overlay host spans the dialog content.
 - **Web (Wasm/JS)**, same composition-tree rules apply.
 
 The shared `WaypointState` is safe across hosts on every platform; there's nothing platform-specific in the host resolution logic.
 
 ## `LocalWaypointHostId`
 
-Internally, `LocalWaypointHostId` is a `staticCompositionLocalOf<Any?>` that each host provides. `Modifier.waypointTarget` reads this local to decide which host to register against. This local is `internal` to the core module, so you don't interact with it directly, but it's why placing a `WaypointOverlayHost` inside a modal is sufficient: the targets inside automatically pick up the inner host.
+`LocalWaypointHostId` is a composition local that each host provides. `Modifier.waypointTarget` reads it to decide which host to register against, which is why placing a `WaypointOverlayHost` inside a modal is sufficient: the targets inside automatically pick up the inner host. You only need to read it yourself when registering target bounds manually with the experimental `WaypointState.setTargetBounds`.
 
 !!! tip
     You can nest overlay hosts further (a popup inside a dialog, for example). Each host scopes its children, and the state layer tracks ownership per target.
@@ -181,15 +183,15 @@ Internally, `LocalWaypointHostId` is a `staticCompositionLocalOf<Any?>` that eac
 A single tour can span any number of hosts. For example, a tour that opens a dialog, then a popup inside that dialog:
 
 ```kotlin
-WaypointHost(state = state) {
+WaypointMaterial3Host(state = state) {
     Screen()
 
     if (showDialog) Dialog(onDismissRequest = { showDialog = false }) {
-        WaypointOverlayHost(state = state) {
+        WaypointMaterial3OverlayHost(state = state) {
             DialogContent()
 
             if (showPopup) Popup(onDismissRequest = { showPopup = false }) {
-                WaypointOverlayHost(state = state) {
+                WaypointMaterial3OverlayHost(state = state) {
                     PopupContent()
                 }
             }

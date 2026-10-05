@@ -142,7 +142,7 @@ class KeyboardNavigationUiTest {
     }
 
     @Test
-    fun `escape fires onTourCancel`() {
+    fun `escape fires onTourCancel`() = run {
         var cancelled = false
         runKeyboardTest(onTourCancel = { cancelled = true }) { _ ->
             onNodeWithTag("host").performKeyInput { pressKey(Key.Escape) }
@@ -155,7 +155,7 @@ class KeyboardNavigationUiTest {
     // -- Tour completion via keyboard --
 
     @Test
-    fun `right arrow on last step completes tour`() {
+    fun `right arrow on last step completes tour`() = run {
         var completed = false
         runKeyboardTest(onTourComplete = { completed = true }) { state ->
             // Advance to last step

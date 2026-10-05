@@ -39,17 +39,24 @@ class Material3TooltipArrowUiTest {
         }
     }
 
-    @Test
-    fun `tooltip renders with arrow for every placement`() {
-        for (placement in ResolvedPlacement.entries) {
-            runComposeUiTest {
-                setContent { TooltipWithGeometry(placement, arrowOffset = 80f) }
+    private fun runArrowPlacementTest(placement: ResolvedPlacement) = runComposeUiTest {
+        setContent { TooltipWithGeometry(placement, arrowOffset = 80f) }
 
-                onNodeWithText("Title").assertIsDisplayed()
-                onNodeWithText("Description").assertIsDisplayed()
-            }
-        }
+        onNodeWithText("Title").assertIsDisplayed()
+        onNodeWithText("Description").assertIsDisplayed()
     }
+
+    @Test
+    fun `tooltip renders with arrow for Top placement`() = runArrowPlacementTest(ResolvedPlacement.Top)
+
+    @Test
+    fun `tooltip renders with arrow for Bottom placement`() = runArrowPlacementTest(ResolvedPlacement.Bottom)
+
+    @Test
+    fun `tooltip renders with arrow for Start placement`() = runArrowPlacementTest(ResolvedPlacement.Start)
+
+    @Test
+    fun `tooltip renders with arrow for End placement`() = runArrowPlacementTest(ResolvedPlacement.End)
 
     @Test
     fun `tooltip renders with an edge-clamped arrow offset`() = runComposeUiTest {

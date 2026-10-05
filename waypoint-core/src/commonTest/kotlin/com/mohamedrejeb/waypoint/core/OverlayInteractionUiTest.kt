@@ -70,7 +70,7 @@ class OverlayInteractionUiTest {
     }
 
     @Test
-    fun `scrim tap with Dismiss cancels the tour and fires onTourCancel`() {
+    fun `scrim tap with Dismiss cancels the tour and fires onTourCancel`() = run {
         val state = twoStepState()
         var cancelled = 0
 
@@ -84,7 +84,7 @@ class OverlayInteractionUiTest {
     }
 
     @Test
-    fun `scrim tap with NextStep advances the tour`() {
+    fun `scrim tap with NextStep advances the tour`() = run {
         val state = twoStepState()
 
         runOverlayTest(state, OverlayClickBehavior.NextStep) {
@@ -97,7 +97,7 @@ class OverlayInteractionUiTest {
     }
 
     @Test
-    fun `scrim tap with Custom runs the action`() {
+    fun `scrim tap with Custom runs the action`() = run {
         val state = twoStepState()
         var custom = 0
 
@@ -112,7 +112,7 @@ class OverlayInteractionUiTest {
     }
 
     @Test
-    fun `scrim tap with Nothing absorbs the click`() {
+    fun `scrim tap with Nothing absorbs the click`() = run {
         val state = twoStepState()
 
         runOverlayTest(state, OverlayClickBehavior.Nothing) {
@@ -125,7 +125,7 @@ class OverlayInteractionUiTest {
     }
 
     @Test
-    fun `cutout tap with ClickToAdvance advances the tour`() {
+    fun `cutout tap with ClickToAdvance advances the tour`() = run {
         val state = twoStepState(interaction = TargetInteraction.ClickToAdvance)
 
         runOverlayTest(state, OverlayClickBehavior.Nothing) {
@@ -138,7 +138,7 @@ class OverlayInteractionUiTest {
     }
 
     @Test
-    fun `cutout tap with None interaction does nothing`() {
+    fun `cutout tap with None interaction does nothing`() = run {
         val state = twoStepState(interaction = TargetInteraction.None)
 
         runOverlayTest(state, OverlayClickBehavior.Nothing) {

@@ -61,7 +61,7 @@ public final class com/mohamedrejeb/waypoint/material3/WaypointMaterial3HintTool
 }
 
 public final class com/mohamedrejeb/waypoint/material3/WaypointMaterial3HostKt {
-	public static final fun WaypointMaterial3Host-9xOw6hg (Lcom/mohamedrejeb/waypoint/core/WaypointState;Landroidx/compose/ui/Modifier;Lcom/mohamedrejeb/waypoint/core/HighlightStyle;Lcom/mohamedrejeb/waypoint/core/OverlayClickBehavior;Lcom/mohamedrejeb/waypoint/core/KeyboardConfig;FFLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lcom/mohamedrejeb/waypoint/material3/WaypointMaterial3Labels;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;III)V
+	public static final fun WaypointMaterial3Host-PlcyrME (Lcom/mohamedrejeb/waypoint/core/WaypointState;Landroidx/compose/ui/Modifier;Lcom/mohamedrejeb/waypoint/core/HighlightStyle;ZLcom/mohamedrejeb/waypoint/core/OverlayClickBehavior;Lcom/mohamedrejeb/waypoint/core/KeyboardConfig;FFLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lcom/mohamedrejeb/waypoint/material3/WaypointMaterial3Labels;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class com/mohamedrejeb/waypoint/material3/WaypointMaterial3Labels {
@@ -86,7 +86,7 @@ public final class com/mohamedrejeb/waypoint/material3/WaypointMaterial3Labels$C
 }
 
 public final class com/mohamedrejeb/waypoint/material3/WaypointMaterial3OverlayHostKt {
-	public static final fun WaypointMaterial3OverlayHost-oKE7A98 (Lcom/mohamedrejeb/waypoint/core/WaypointState;Landroidx/compose/ui/Modifier;Lcom/mohamedrejeb/waypoint/core/HighlightStyle;Lcom/mohamedrejeb/waypoint/core/OverlayClickBehavior;FFLcom/mohamedrejeb/waypoint/material3/WaypointMaterial3Labels;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun WaypointMaterial3OverlayHost-_UtchM0 (Lcom/mohamedrejeb/waypoint/core/WaypointState;Landroidx/compose/ui/Modifier;Lcom/mohamedrejeb/waypoint/core/HighlightStyle;ZLcom/mohamedrejeb/waypoint/core/OverlayClickBehavior;FFLcom/mohamedrejeb/waypoint/material3/WaypointMaterial3Labels;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/mohamedrejeb/waypoint/material3/WaypointMaterial3Theme {

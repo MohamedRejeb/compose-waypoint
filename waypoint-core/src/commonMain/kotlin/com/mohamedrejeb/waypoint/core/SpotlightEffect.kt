@@ -21,12 +21,13 @@ public sealed interface SpotlightEffect {
     public data object None : SpotlightEffect
 
     /**
-     * Colored halo radiating outward from the cutout edge. Rendered on top
-     * of the scrim after cutouts are punched.
+     * Colored halo radiating outward from the cutout edge. It follows the
+     * cutout's shape and is drawn on top of the scrim only, never inside the
+     * cutout.
      *
      * @param color halo color
      * @param radius distance the halo extends beyond the cutout edge
-     * @param alpha peak alpha at the cutout edge (fades linearly to 0 at [radius])
+     * @param alpha peak alpha at the cutout edge (fades to 0 at [radius])
      */
     @Immutable
     public data class Glow(

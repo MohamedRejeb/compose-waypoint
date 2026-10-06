@@ -4,7 +4,7 @@ package com.mohamedrejeb.waypoint.core
  * Interface for persisting tour completion state.
  *
  * Implement this to remember which tours a user has completed.
- * All methods are synchronous — for async storage, cache the state locally.
+ * All methods are synchronous, for async storage, cache the state locally.
  *
  * ```kotlin
  * class SharedPrefsPersistence(prefs: SharedPreferences) : WaypointPersistence {

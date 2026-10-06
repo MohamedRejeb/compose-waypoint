@@ -59,7 +59,7 @@ class DialogTooltipOverlapTest {
                 Box(modifier = Modifier.padding(top = 300.dp)) {
                     WaypointHost(
                         state = state,
-                        tooltipContent = { _, _ ->
+                        tooltipContent = { _ ->
                             BasicText("Tooltip Content", Modifier.testTag("tooltip"))
                         },
                     ) {
@@ -120,7 +120,7 @@ class DialogTooltipOverlapTest {
                 Box(modifier = Modifier.padding(start = 200.dp, top = 100.dp)) {
                     WaypointHost(
                         state = state,
-                        tooltipContent = { _, _ ->
+                        tooltipContent = { _ ->
                             BasicText("Tooltip", Modifier.testTag("tooltip"))
                         },
                     ) {

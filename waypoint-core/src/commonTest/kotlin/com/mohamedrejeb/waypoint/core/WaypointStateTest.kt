@@ -168,7 +168,7 @@ class WaypointStateTest {
         val state = WaypointState(steps = threeSteps())
         state.start()
 
-        state.goTo(2)
+        state.goToStep(2)
 
         assertEquals(2, state.currentStepIndex)
         assertEquals("c", state.currentStep?.targetKey)
@@ -189,7 +189,7 @@ class WaypointStateTest {
         val state = WaypointState(steps = threeSteps())
         state.start()
 
-        state.goTo(5)
+        state.goToStep(5)
 
         assertEquals(0, state.currentStepIndex)
     }
@@ -199,7 +199,7 @@ class WaypointStateTest {
         val state = WaypointState(steps = threeSteps())
         state.start()
 
-        state.goTo(-1)
+        state.goToStep(-1)
 
         assertEquals(0, state.currentStepIndex)
     }
@@ -315,7 +315,7 @@ class WaypointStateTest {
         state.start()
         state.pause()
 
-        state.goTo(2)
+        state.goToStep(2)
 
         assertEquals(0, state.currentStepIndex)
     }
@@ -394,7 +394,7 @@ class WaypointStateTest {
         val state = WaypointState(steps = steps)
         state.start()
 
-        state.goTo(1) // step b is hidden
+        state.goToStep(1) // step b is hidden
 
         assertEquals(0, state.currentStepIndex)
     }
@@ -596,5 +596,124 @@ class WaypointStateTest {
         state.unregisterTarget("a") // should not crash
 
         assertNull(state.targetCoordinates["a"])
+    }
+
+    // -- End reason --
+
+    @Test
+    fun `lastEndReason is null before any tour run ends`() {
+        val state = WaypointState(steps = threeSteps())
+
+        assertNull(state.lastEndReason)
+
+        state.start()
+        assertNull(state.lastEndReason)
+    }
+
+    @Test
+    fun `lastEndReason is Completed after finishing all steps`() {
+        val state = WaypointState(steps = threeSteps())
+        state.start()
+        state.next()
+        state.next()
+        state.next()
+
+        assertFalse(state.isActive)
+        assertEquals(WaypointEndReason.Completed, state.lastEndReason)
+    }
+
+    @Test
+    fun `lastEndReason is Cancelled after stop`() {
+        val state = WaypointState(steps = threeSteps())
+        state.start()
+        state.stop()
+
+        assertEquals(WaypointEndReason.Cancelled, state.lastEndReason)
+    }
+
+    @Test
+    fun `lastEndReason updates across multiple runs`() {
+        val state = WaypointState(steps = threeSteps())
+        state.start()
+        state.stop()
+        assertEquals(WaypointEndReason.Cancelled, state.lastEndReason)
+
+        state.start()
+        state.next()
+        state.next()
+        state.next()
+        assertEquals(WaypointEndReason.Completed, state.lastEndReason)
+    }
+
+    // -- State restoration --
+
+    @Test
+    fun `restoreState restores an in-range active session`() {
+        val state = WaypointState(steps = threeSteps())
+
+        state.restoreState(savedStepIndex = 1, savedIsActive = true, savedIsPaused = false)
+
+        assertTrue(state.isActive)
+        assertEquals(1, state.currentStepIndex)
+    }
+
+    @Test
+    fun `restoreState drops an active session whose index is out of range`() {
+        // Simulates process death restoring a saved index from an older,
+        // longer step list. The stale session must not come back half-alive.
+        val state = WaypointState(steps = threeSteps())
+
+        state.restoreState(savedStepIndex = 7, savedIsActive = true, savedIsPaused = false)
+
+        assertFalse(state.isActive)
+        assertEquals(-1, state.currentStepIndex)
+        assertNull(state.currentStep)
+    }
+
+    @Test
+    fun `restoreState accepts the inactive sentinel index`() {
+        val state = WaypointState(steps = threeSteps())
+
+        state.restoreState(savedStepIndex = -1, savedIsActive = false, savedIsPaused = false)
+
+        assertFalse(state.isActive)
+        assertEquals(-1, state.currentStepIndex)
+    }
+
+    @Test
+    fun `goTo the current step does nothing`() {
+        val events = mutableListOf<String>()
+        val state = WaypointState(
+            steps = listOf(
+                WaypointStep(
+                    targetKey = "a",
+                    onEnter = { events += "enter" },
+                    onExit = { events += "exit" },
+                ),
+                WaypointStep(targetKey = "b"),
+            ),
+        )
+        state.start()
+
+        state.goToStep(0)
+        state.goTo("a")
+
+        assertEquals(listOf("enter"), events)
+        assertEquals(0, state.currentStepIndex)
+    }
+
+    @Test
+    fun `goTo by key ignores steps without a target`() {
+        val state = WaypointState(
+            steps = listOf(
+                WaypointStep(title = "Intro"),
+                WaypointStep(targetKey = "a"),
+            ),
+        )
+        state.start()
+
+        state.goTo("a")
+
+        assertEquals(1, state.currentStepIndex)
     }
 }

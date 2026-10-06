@@ -35,8 +35,8 @@ class TooltipPlacementScreenshotTest {
     private val containerSize = 500.dp
 
     /** Simple styled tooltip for consistent screenshots */
-    private val tooltipContent: @Composable (StepScope, ResolvedPlacement) -> Unit =
-        { _, _ ->
+    private val tooltipContent: @Composable (StepScope) -> Unit =
+        { _ ->
             val shape = RoundedCornerShape(8.dp)
             Column(
                 modifier = Modifier

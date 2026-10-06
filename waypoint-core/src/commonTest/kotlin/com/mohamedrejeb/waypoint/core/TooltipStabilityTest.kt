@@ -64,7 +64,7 @@ class TooltipStabilityTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -144,7 +144,7 @@ class TooltipStabilityTest {
             )
 
             val isNearStep1 = distToStep1 <= maxDriftToleranceDp
-            val isNearStep2 = distToStep2 <= maxDriftToleranceDp
+            val isNearStep2 = isSettlingAt(sample, step2Bounds)
 
             if (!isNearStep1 && !isNearStep2) {
                 driftingFrames.add(
@@ -164,7 +164,7 @@ class TooltipStabilityTest {
                 appendLine("${driftingFrames.size} frames had intermediate positions:")
                 driftingFrames.forEach { appendLine("  $it") }
                 appendLine()
-                appendLine("The tooltip should snap to its new position, not drift with the spotlight animation.")
+                appendLine("The tooltip should appear at its new position, not drift with the spotlight animation.")
             },
         )
     }
@@ -184,7 +184,7 @@ class TooltipStabilityTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText("Tooltip", Modifier.testTag("tooltip"))
                 },
             ) {
@@ -236,11 +236,7 @@ class TooltipStabilityTest {
                 abs(sample.left.value - step1Bounds.left.value),
                 abs(sample.top.value - step1Bounds.top.value),
             )
-            val distToStep2 = maxOf(
-                abs(sample.left.value - step2Bounds.left.value),
-                abs(sample.top.value - step2Bounds.top.value),
-            )
-            distToStep1 > maxDriftToleranceDp && distToStep2 > maxDriftToleranceDp
+            distToStep1 > maxDriftToleranceDp && !isSettlingAt(sample, step2Bounds)
         }
 
         assertTrue(
@@ -250,6 +246,21 @@ class TooltipStabilityTest {
                 "Step 1 at (${step1Bounds.left}, ${step1Bounds.top}), " +
                 "Step 2 at (${step2Bounds.left}, ${step2Bounds.top}).",
         )
+    }
+
+    /**
+     * Whether [sample] is the tooltip of the new step at its final place.
+     *
+     * Each step gets a fresh tooltip that plays its enter animation where it
+     * will rest: horizontally it is exactly in place from its first frame, and
+     * vertically it slides in over at most a quarter of its own height. That
+     * short settle is allowed; anything further away means the tooltip is
+     * travelling with the spotlight.
+     */
+    private fun isSettlingAt(sample: DpRect, rest: DpRect): Boolean {
+        val enterSlideDp = (rest.bottom.value - rest.top.value) / 4f
+        return abs(sample.left.value - rest.left.value) <= maxDriftToleranceDp &&
+            abs(sample.top.value - rest.top.value) <= enterSlideDp + maxDriftToleranceDp
     }
 
     private fun Float.format(): String {

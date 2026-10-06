@@ -1,0 +1,152 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.mohamedrejeb.waypoint:waypoint-material3>
+final class com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors { // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors|null[0]
+    constructor <init>(androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color) // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.<init>|<init>(androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color){}[0]
+
+    final val description // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.description|{}description[0]
+        final fun <get-description>(): androidx.compose.ui.graphics/Color // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.description.<get-description>|<get-description>(){}[0]
+    final val primaryButton // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.primaryButton|{}primaryButton[0]
+        final fun <get-primaryButton>(): androidx.compose.ui.graphics/Color // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.primaryButton.<get-primaryButton>|<get-primaryButton>(){}[0]
+    final val progress // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.progress|{}progress[0]
+        final fun <get-progress>(): androidx.compose.ui.graphics/Color // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.progress.<get-progress>|<get-progress>(){}[0]
+    final val secondaryButton // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.secondaryButton|{}secondaryButton[0]
+        final fun <get-secondaryButton>(): androidx.compose.ui.graphics/Color // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.secondaryButton.<get-secondaryButton>|<get-secondaryButton>(){}[0]
+    final val skipButton // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.skipButton|{}skipButton[0]
+        final fun <get-skipButton>(): androidx.compose.ui.graphics/Color // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.skipButton.<get-skipButton>|<get-skipButton>(){}[0]
+    final val title // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.title|{}title[0]
+        final fun <get-title>(): androidx.compose.ui.graphics/Color // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.title.<get-title>|<get-title>(){}[0]
+    final val tooltipBackground // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.tooltipBackground|{}tooltipBackground[0]
+        final fun <get-tooltipBackground>(): androidx.compose.ui.graphics/Color // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.tooltipBackground.<get-tooltipBackground>|<get-tooltipBackground>(){}[0]
+
+    final fun component1(): androidx.compose.ui.graphics/Color // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.component1|component1(){}[0]
+    final fun component2(): androidx.compose.ui.graphics/Color // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.component2|component2(){}[0]
+    final fun component3(): androidx.compose.ui.graphics/Color // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.component3|component3(){}[0]
+    final fun component4(): androidx.compose.ui.graphics/Color // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.component4|component4(){}[0]
+    final fun component5(): androidx.compose.ui.graphics/Color // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.component5|component5(){}[0]
+    final fun component6(): androidx.compose.ui.graphics/Color // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.component6|component6(){}[0]
+    final fun component7(): androidx.compose.ui.graphics/Color // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.component7|component7(){}[0]
+    final fun copy(androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ...): com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.copy|copy(androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.toString|toString(){}[0]
+
+    final object Companion // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors.Companion|null[0]
+}
+
+final class com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions { // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions|null[0]
+    constructor <init>(androidx.compose.ui.graphics/Shape, androidx.compose.ui.unit/Dp, androidx.compose.ui.unit/Dp, androidx.compose.ui.unit/Dp, androidx.compose.ui.unit/Dp, androidx.compose.ui.unit/Dp) // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.<init>|<init>(androidx.compose.ui.graphics.Shape;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp){}[0]
+
+    final val contentSpacing // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.contentSpacing|{}contentSpacing[0]
+        final fun <get-contentSpacing>(): androidx.compose.ui.unit/Dp // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.contentSpacing.<get-contentSpacing>|<get-contentSpacing>(){}[0]
+    final val tooltipElevation // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.tooltipElevation|{}tooltipElevation[0]
+        final fun <get-tooltipElevation>(): androidx.compose.ui.unit/Dp // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.tooltipElevation.<get-tooltipElevation>|<get-tooltipElevation>(){}[0]
+    final val tooltipMaxWidth // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.tooltipMaxWidth|{}tooltipMaxWidth[0]
+        final fun <get-tooltipMaxWidth>(): androidx.compose.ui.unit/Dp // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.tooltipMaxWidth.<get-tooltipMaxWidth>|<get-tooltipMaxWidth>(){}[0]
+    final val tooltipMinWidth // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.tooltipMinWidth|{}tooltipMinWidth[0]
+        final fun <get-tooltipMinWidth>(): androidx.compose.ui.unit/Dp // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.tooltipMinWidth.<get-tooltipMinWidth>|<get-tooltipMinWidth>(){}[0]
+    final val tooltipPadding // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.tooltipPadding|{}tooltipPadding[0]
+        final fun <get-tooltipPadding>(): androidx.compose.ui.unit/Dp // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.tooltipPadding.<get-tooltipPadding>|<get-tooltipPadding>(){}[0]
+    final val tooltipShape // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.tooltipShape|{}tooltipShape[0]
+        final fun <get-tooltipShape>(): androidx.compose.ui.graphics/Shape // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.tooltipShape.<get-tooltipShape>|<get-tooltipShape>(){}[0]
+
+    final fun component1(): androidx.compose.ui.graphics/Shape // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.component1|component1(){}[0]
+    final fun component2(): androidx.compose.ui.unit/Dp // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.component2|component2(){}[0]
+    final fun component3(): androidx.compose.ui.unit/Dp // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.component3|component3(){}[0]
+    final fun component4(): androidx.compose.ui.unit/Dp // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.component4|component4(){}[0]
+    final fun component5(): androidx.compose.ui.unit/Dp // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.component5|component5(){}[0]
+    final fun component6(): androidx.compose.ui.unit/Dp // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.component6|component6(){}[0]
+    final fun copy(androidx.compose.ui.graphics/Shape = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ...): com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.copy|copy(androidx.compose.ui.graphics.Shape;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.toString|toString(){}[0]
+
+    final object Companion // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions.Companion|null[0]
+}
+
+final class com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels { // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels|null[0]
+    constructor <init>(kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin/Function2<kotlin/Int, kotlin/Int, kotlin/String> = ...) // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;kotlin.String;kotlin.String;kotlin.String;kotlin.Function2<kotlin.Int,kotlin.Int,kotlin.String>){}[0]
+
+    final val back // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.back|{}back[0]
+        final fun <get-back>(): kotlin/String // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.back.<get-back>|<get-back>(){}[0]
+    final val close // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.close|{}close[0]
+        final fun <get-close>(): kotlin/String // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.close.<get-close>|<get-close>(){}[0]
+    final val finish // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.finish|{}finish[0]
+        final fun <get-finish>(): kotlin/String // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.finish.<get-finish>|<get-finish>(){}[0]
+    final val gotIt // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.gotIt|{}gotIt[0]
+        final fun <get-gotIt>(): kotlin/String // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.gotIt.<get-gotIt>|<get-gotIt>(){}[0]
+    final val next // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.next|{}next[0]
+        final fun <get-next>(): kotlin/String // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.next.<get-next>|<get-next>(){}[0]
+    final val progress // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.progress|{}progress[0]
+        final fun <get-progress>(): kotlin/Function2<kotlin/Int, kotlin/Int, kotlin/String> // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.progress.<get-progress>|<get-progress>(){}[0]
+    final val skip // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.skip|{}skip[0]
+        final fun <get-skip>(): kotlin/String // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.skip.<get-skip>|<get-skip>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.hashCode|hashCode(){}[0]
+
+    final object Companion { // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.Companion|null[0]
+        final val Default // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.Companion.Default|{}Default[0]
+            final fun <get-Default>(): com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels.Companion.Default.<get-Default>|<get-Default>(){}[0]
+    }
+}
+
+final class com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography { // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography|null[0]
+    constructor <init>(androidx.compose.ui.text/TextStyle, androidx.compose.ui.text/TextStyle, androidx.compose.ui.text/TextStyle, androidx.compose.ui.text/TextStyle) // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.<init>|<init>(androidx.compose.ui.text.TextStyle;androidx.compose.ui.text.TextStyle;androidx.compose.ui.text.TextStyle;androidx.compose.ui.text.TextStyle){}[0]
+
+    final val button // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.button|{}button[0]
+        final fun <get-button>(): androidx.compose.ui.text/TextStyle // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.button.<get-button>|<get-button>(){}[0]
+    final val description // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.description|{}description[0]
+        final fun <get-description>(): androidx.compose.ui.text/TextStyle // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.description.<get-description>|<get-description>(){}[0]
+    final val progress // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.progress|{}progress[0]
+        final fun <get-progress>(): androidx.compose.ui.text/TextStyle // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.progress.<get-progress>|<get-progress>(){}[0]
+    final val title // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.title|{}title[0]
+        final fun <get-title>(): androidx.compose.ui.text/TextStyle // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.title.<get-title>|<get-title>(){}[0]
+
+    final fun component1(): androidx.compose.ui.text/TextStyle // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.component1|component1(){}[0]
+    final fun component2(): androidx.compose.ui.text/TextStyle // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.component2|component2(){}[0]
+    final fun component3(): androidx.compose.ui.text/TextStyle // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.component3|component3(){}[0]
+    final fun component4(): androidx.compose.ui.text/TextStyle // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.component4|component4(){}[0]
+    final fun copy(androidx.compose.ui.text/TextStyle = ..., androidx.compose.ui.text/TextStyle = ..., androidx.compose.ui.text/TextStyle = ..., androidx.compose.ui.text/TextStyle = ...): com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.copy|copy(androidx.compose.ui.text.TextStyle;androidx.compose.ui.text.TextStyle;androidx.compose.ui.text.TextStyle;androidx.compose.ui.text.TextStyle){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.toString|toString(){}[0]
+
+    final object Companion // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography.Companion|null[0]
+}
+
+final object com.mohamedrejeb.waypoint.material3/WaypointMaterial3Theme { // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Theme|null[0]
+    final val colors // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Theme.colors|{}colors[0]
+        final fun <get-colors>(androidx.compose.runtime/Composer?, kotlin/Int): com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Theme.colors.<get-colors>|<get-colors>(androidx.compose.runtime.Composer?;kotlin.Int){}[0]
+    final val dimensions // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Theme.dimensions|{}dimensions[0]
+        final fun <get-dimensions>(androidx.compose.runtime/Composer?, kotlin/Int): com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Theme.dimensions.<get-dimensions>|<get-dimensions>(androidx.compose.runtime.Composer?;kotlin.Int){}[0]
+    final val typography // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Theme.typography|{}typography[0]
+        final fun <get-typography>(androidx.compose.runtime/Composer?, kotlin/Int): com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Theme.typography.<get-typography>|<get-typography>(androidx.compose.runtime.Composer?;kotlin.Int){}[0]
+
+    final fun colors(androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int): com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Theme.colors|colors(androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+    final fun dimensions(androidx.compose.ui.graphics/Shape = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ...): com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Theme.dimensions|dimensions(androidx.compose.ui.graphics.Shape;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp){}[0]
+    final fun typography(androidx.compose.ui.text/TextStyle?, androidx.compose.ui.text/TextStyle?, androidx.compose.ui.text/TextStyle?, androidx.compose.ui.text/TextStyle?, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int): com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Theme.typography|typography(androidx.compose.ui.text.TextStyle?;androidx.compose.ui.text.TextStyle?;androidx.compose.ui.text.TextStyle?;androidx.compose.ui.text.TextStyle?;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+}
+
+final val com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Colors$stableprop // com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Colors$stableprop|#static{}com_mohamedrejeb_waypoint_material3_WaypointMaterial3Colors$stableprop[0]
+final val com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Dimensions$stableprop // com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Dimensions$stableprop|#static{}com_mohamedrejeb_waypoint_material3_WaypointMaterial3Dimensions$stableprop[0]
+final val com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Labels$stableprop // com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Labels$stableprop|#static{}com_mohamedrejeb_waypoint_material3_WaypointMaterial3Labels$stableprop[0]
+final val com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Theme$stableprop // com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Theme$stableprop|#static{}com_mohamedrejeb_waypoint_material3_WaypointMaterial3Theme$stableprop[0]
+final val com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Typography$stableprop // com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Typography$stableprop|#static{}com_mohamedrejeb_waypoint_material3_WaypointMaterial3Typography$stableprop[0]
+
+final fun <#A: kotlin/Any?> com.mohamedrejeb.waypoint.material3/WaypointMaterial3Hint(com.mohamedrejeb.waypoint.core/WaypointHintState<#A>, #A, androidx.compose.ui/Modifier?, androidx.compose.ui.unit/Dp, androidx.compose.ui.unit/Dp, com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels?, kotlin/Boolean, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Hint|WaypointMaterial3Hint(com.mohamedrejeb.waypoint.core.WaypointHintState<0:0>;0:0;androidx.compose.ui.Modifier?;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;com.mohamedrejeb.waypoint.material3.WaypointMaterial3Labels?;kotlin.Boolean;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> com.mohamedrejeb.waypoint.material3/WaypointMaterial3Host(com.mohamedrejeb.waypoint.core/WaypointState<#A>, androidx.compose.ui/Modifier?, com.mohamedrejeb.waypoint.core/HighlightStyle?, kotlin/Boolean, com.mohamedrejeb.waypoint.core/OverlayClickBehavior?, com.mohamedrejeb.waypoint.core/KeyboardConfig?, androidx.compose.ui.unit/Dp, androidx.compose.ui.unit/Dp, kotlin/Function0<kotlin/Unit>?, kotlin/Function0<kotlin/Unit>?, com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels?, kotlin/Boolean, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int, kotlin/Int) // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Host|WaypointMaterial3Host(com.mohamedrejeb.waypoint.core.WaypointState<0:0>;androidx.compose.ui.Modifier?;com.mohamedrejeb.waypoint.core.HighlightStyle?;kotlin.Boolean;com.mohamedrejeb.waypoint.core.OverlayClickBehavior?;com.mohamedrejeb.waypoint.core.KeyboardConfig?;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;kotlin.Function0<kotlin.Unit>?;kotlin.Function0<kotlin.Unit>?;com.mohamedrejeb.waypoint.material3.WaypointMaterial3Labels?;kotlin.Boolean;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int;kotlin.Int){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> com.mohamedrejeb.waypoint.material3/WaypointMaterial3OverlayHost(com.mohamedrejeb.waypoint.core/WaypointState<#A>, androidx.compose.ui/Modifier?, com.mohamedrejeb.waypoint.core/HighlightStyle?, kotlin/Boolean, com.mohamedrejeb.waypoint.core/OverlayClickBehavior?, androidx.compose.ui.unit/Dp, androidx.compose.ui.unit/Dp, com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels?, kotlin/Boolean, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // com.mohamedrejeb.waypoint.material3/WaypointMaterial3OverlayHost|WaypointMaterial3OverlayHost(com.mohamedrejeb.waypoint.core.WaypointState<0:0>;androidx.compose.ui.Modifier?;com.mohamedrejeb.waypoint.core.HighlightStyle?;kotlin.Boolean;com.mohamedrejeb.waypoint.core.OverlayClickBehavior?;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;com.mohamedrejeb.waypoint.material3.WaypointMaterial3Labels?;kotlin.Boolean;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){0§<kotlin.Any?>}[0]
+final fun com.mohamedrejeb.waypoint.material3/WaypointMaterial3HintTooltip(com.mohamedrejeb.waypoint.core/HintScope, androidx.compose.ui/Modifier?, com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels?, kotlin/Boolean, kotlin/Boolean, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // com.mohamedrejeb.waypoint.material3/WaypointMaterial3HintTooltip|WaypointMaterial3HintTooltip(com.mohamedrejeb.waypoint.core.HintScope;androidx.compose.ui.Modifier?;com.mohamedrejeb.waypoint.material3.WaypointMaterial3Labels?;kotlin.Boolean;kotlin.Boolean;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+final fun com.mohamedrejeb.waypoint.material3/WaypointMaterial3Theme(com.mohamedrejeb.waypoint.material3/WaypointMaterial3Colors?, com.mohamedrejeb.waypoint.material3/WaypointMaterial3Typography?, com.mohamedrejeb.waypoint.material3/WaypointMaterial3Dimensions?, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Theme|WaypointMaterial3Theme(com.mohamedrejeb.waypoint.material3.WaypointMaterial3Colors?;com.mohamedrejeb.waypoint.material3.WaypointMaterial3Typography?;com.mohamedrejeb.waypoint.material3.WaypointMaterial3Dimensions?;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+final fun com.mohamedrejeb.waypoint.material3/WaypointMaterial3Tooltip(com.mohamedrejeb.waypoint.core/StepScope, androidx.compose.ui/Modifier?, com.mohamedrejeb.waypoint.material3/WaypointMaterial3Labels?, kotlin/Boolean, kotlin/Boolean, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // com.mohamedrejeb.waypoint.material3/WaypointMaterial3Tooltip|WaypointMaterial3Tooltip(com.mohamedrejeb.waypoint.core.StepScope;androidx.compose.ui.Modifier?;com.mohamedrejeb.waypoint.material3.WaypointMaterial3Labels?;kotlin.Boolean;kotlin.Boolean;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+final fun com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Colors$stableprop_getter(): kotlin/Int // com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Colors$stableprop_getter|com_mohamedrejeb_waypoint_material3_WaypointMaterial3Colors$stableprop_getter(){}[0]
+final fun com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Dimensions$stableprop_getter(): kotlin/Int // com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Dimensions$stableprop_getter|com_mohamedrejeb_waypoint_material3_WaypointMaterial3Dimensions$stableprop_getter(){}[0]
+final fun com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Labels$stableprop_getter(): kotlin/Int // com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Labels$stableprop_getter|com_mohamedrejeb_waypoint_material3_WaypointMaterial3Labels$stableprop_getter(){}[0]
+final fun com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Theme$stableprop_getter(): kotlin/Int // com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Theme$stableprop_getter|com_mohamedrejeb_waypoint_material3_WaypointMaterial3Theme$stableprop_getter(){}[0]
+final fun com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Typography$stableprop_getter(): kotlin/Int // com.mohamedrejeb.waypoint.material3/com_mohamedrejeb_waypoint_material3_WaypointMaterial3Typography$stableprop_getter|com_mohamedrejeb_waypoint_material3_WaypointMaterial3Typography$stableprop_getter(){}[0]

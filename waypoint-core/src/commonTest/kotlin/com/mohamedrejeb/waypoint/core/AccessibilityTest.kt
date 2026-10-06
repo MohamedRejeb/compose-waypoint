@@ -30,7 +30,7 @@ class AccessibilityTest {
         setContent {
             WaypointHost(
                 state = state,
-                tooltipContent = { _, _ ->
+                tooltipContent = { _ ->
                     BasicText(
                         text = "Step 1",
                         modifier = Modifier.testTag("tooltip-text"),

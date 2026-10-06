@@ -40,8 +40,7 @@ class HighlightStyleScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 BorderHighlight(
-                    targetBounds = targetBounds,
-                    additionalBounds = emptyList(),
+                    targetBounds = { listOf(targetBounds) },
                     style = HighlightStyle.Border(
                         color = Color.Red,
                         shape = SpotlightShape.Circle,
@@ -67,8 +66,7 @@ class HighlightStyleScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 BorderHighlight(
-                    targetBounds = targetBounds,
-                    additionalBounds = emptyList(),
+                    targetBounds = { listOf(targetBounds) },
                     style = HighlightStyle.Border(
                         color = Color(0xFFFF5722),
                         shape = SpotlightShape.RoundedRect(cornerRadius = 12.dp),
@@ -98,8 +96,7 @@ class HighlightStyleScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 PulseHighlight(
-                    targetBounds = targetBounds,
-                    additionalBounds = emptyList(),
+                    targetBounds = { listOf(targetBounds) },
                     style = HighlightStyle.Pulse(
                         color = Color(0xFF6200EE),
                         shape = SpotlightShape.Circle,
@@ -131,8 +128,7 @@ class HighlightStyleScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 PulseHighlight(
-                    targetBounds = targetBounds,
-                    additionalBounds = emptyList(),
+                    targetBounds = { listOf(targetBounds) },
                     style = HighlightStyle.Pulse(
                         color = Color(0xFF03DAC5),
                         shape = SpotlightShape.RoundedRect(cornerRadius = 12.dp),
@@ -163,8 +159,7 @@ class HighlightStyleScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 RippleHighlight(
-                    targetBounds = targetBounds,
-                    additionalBounds = emptyList(),
+                    targetBounds = { listOf(targetBounds) },
                     style = HighlightStyle.Ripple(
                         color = Color(0xFF03DAC5),
                         ringCount = 3,
@@ -195,8 +190,7 @@ class HighlightStyleScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 RippleHighlight(
-                    targetBounds = targetBounds,
-                    additionalBounds = emptyList(),
+                    targetBounds = { listOf(targetBounds) },
                     style = HighlightStyle.Ripple(
                         color = Color(0xFFFF5722),
                         ringCount = 4,
@@ -226,8 +220,7 @@ class HighlightStyleScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 BorderHighlight(
-                    targetBounds = targetBounds,
-                    additionalBounds = emptyList(),
+                    targetBounds = { listOf(targetBounds) },
                     style = HighlightStyle.Border(
                         color = Color(0x4D2196F3), // semi-transparent blue
                         shape = SpotlightShape.RoundedRect(cornerRadius = 12.dp),
@@ -255,8 +248,7 @@ class HighlightStyleScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 PulseHighlight(
-                    targetBounds = targetBounds,
-                    additionalBounds = emptyList(),
+                    targetBounds = { listOf(targetBounds) },
                     style = HighlightStyle.Pulse(
                         color = Color(0x4D6200EE),
                         shape = SpotlightShape.Circle,
@@ -285,8 +277,7 @@ class HighlightStyleScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 RippleHighlight(
-                    targetBounds = targetBounds,
-                    additionalBounds = emptyList(),
+                    targetBounds = { listOf(targetBounds) },
                     style = HighlightStyle.Ripple(
                         color = Color(0x4D03DAC5),
                         ringCount = 3,
@@ -318,8 +309,7 @@ class HighlightStyleScreenshotTest {
                     .testTag("screenshot"),
             ) {
                 PulseHighlight(
-                    targetBounds = targetBounds,
-                    additionalBounds = emptyList(),
+                    targetBounds = { listOf(targetBounds) },
                     style = HighlightStyle.Pulse(
                         color = Color(0xFF6200EE),
                         shape = SpotlightShape.Circle,

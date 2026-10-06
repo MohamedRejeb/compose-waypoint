@@ -1,76 +1,161 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Web, Desktop (JVM).
+# Waypoint
 
-* [/sample](./sample/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./sample/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./sample/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./sample/src/jvmMain/kotlin)
-    folder is the appropriate location.
+**Product tours and feature showcases for Compose Multiplatform.**
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+[![Kotlin](https://img.shields.io/badge/kotlin-2.3.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Compose](https://img.shields.io/badge/compose-1.10.3-blue.svg?logo=jetpackcompose)](https://www.jetbrains.com/lp/compose-multiplatform)
+[![MohamedRejeb](https://raw.githubusercontent.com/MohamedRejeb/MohamedRejeb/main/badges/mohamedrejeb.svg)](https://github.com/MohamedRejeb)
+[![Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Maven Central](https://img.shields.io/maven-central/v/com.mohamedrejeb.waypoint/waypoint-core)](https://search.maven.org/search?q=g:%22com.mohamedrejeb.waypoint%22)
 
-### Build and Run Android Application
+Waypoint is a Compose Multiplatform library for building guided product tours, onboarding flows, feature discovery, and persistent contextual hints. It ships a spotlight overlay, tooltip positioning with auto-flip, pluggable highlight styles, and a state machine for step navigation, all from a simple declarative DSL.
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :sample:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :sample:assembleDebug
-  ```
+Targets **Android**, **iOS**, **Desktop (JVM)**, and **Web (JS, Wasm)**.
 
-### Build and Run Desktop (JVM) Application
+## Artifacts
 
-To build and run the development version of the desktop app, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :sample:run
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :sample:run
-  ```
+| Artifact | Description | Platforms | Version |
+|----------|-------------|-----------|---------|
+| **waypoint-core** | State machine, overlay, tooltip positioning, target registration | Android, iOS, Desktop, Web (JS, Wasm) | [![Maven Central](https://img.shields.io/maven-central/v/com.mohamedrejeb.waypoint/waypoint-core)](https://search.maven.org/search?q=g:%22com.mohamedrejeb.waypoint%22%20AND%20a:%22waypoint-core%22) |
+| **waypoint-material3** | Material3-styled tooltip with navigation buttons and progress | Android, iOS, Desktop, Web (JS, Wasm) | [![Maven Central](https://img.shields.io/maven-central/v/com.mohamedrejeb.waypoint/waypoint-material3)](https://search.maven.org/search?q=g:%22com.mohamedrejeb.waypoint%22%20AND%20a:%22waypoint-material3%22) |
 
-### Build and Run Web Application
+Pick `waypoint-core` alone for full control over the tooltip UI, or `waypoint-material3` for a ready-to-use Material3 experience. `waypoint-material3` depends on `waypoint-core` transitively.
 
-To build and run the development version of the web app, use the run configuration from the run widget
-in your IDE's toolbar or run it directly from the terminal:
-- for the Wasm target (faster, modern browsers):
-  - on macOS/Linux
-    ```shell
-    ./gradlew :sample:wasmJsBrowserDevelopmentRun
-    ```
-  - on Windows
-    ```shell
-    .\gradlew.bat :sample:wasmJsBrowserDevelopmentRun
-    ```
-- for the JS target (slower, supports older browsers):
-  - on macOS/Linux
-    ```shell
-    ./gradlew :sample:jsBrowserDevelopmentRun
-    ```
-  - on Windows
-    ```shell
-    .\gradlew.bat :sample:jsBrowserDevelopmentRun
-    ```
+## Features
 
-### Build and Run iOS Application
+- **Spotlight overlay** with pluggable cutout shapes (Circle, Rect, RoundedRect, Pill)
+- **Highlight styles**: Spotlight, Pulse, Border, Ripple, None, or fully Custom, configurable per step
+- **Spotlight effects**: Glow, SoftEdge, and custom draw lambdas decorate the cutout
+- **Tooltip positioning** with auto-flip and screen-edge clamping
+- **Step navigation**: `next`, `previous`, `goTo`, `stop`, `pause`, `resume`
+- **Conditional steps** (`showIf`) and lifecycle callbacks (`onEnter`/`onExit`)
+- **Interactive tutorials**: the user types and taps inside the highlighted element (`PassThrough`) while the rest of the screen is blocked
+- **Event-driven progression** (`advanceOn`) and async gates (`beforeShow`)
+- **Steps without a target**, shown as a centered card for intros and outros
+- **Multi-element highlight**: one tooltip, multiple targets
+- **Cross-hierarchy tours**: targets inside Dialog, Sheet, and Popup via `WaypointOverlayHost`
+- **Persistent hints**: ambient beacons that live outside of tours
+- **Tour sequences**: chain multiple tours with shared persistence
+- **Beacons** (pulse or dot) as standalone attention indicators
+- **Auto-scroll** targets into view through nested scroll containers
+- **Keyboard navigation** (arrow keys, Enter, Escape) on Desktop and Web
+- **Analytics**, **persistence**, **theming**, **accessibility** (live-region + RTL) built in
+- Survives **configuration changes** via `rememberSaveable`
 
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+## Installation
 
----
+Add the dependency to your module `build.gradle.kts`:
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
+```kotlin
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            // Material3 tooltip (recommended)
+            implementation("com.mohamedrejeb.waypoint:waypoint-material3:0.1.0")
 
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+            // OR: core only, for custom tooltips
+            implementation("com.mohamedrejeb.waypoint:waypoint-core:0.1.0")
+        }
+    }
+}
+```
+
+See [installation](docs/installation.md) for the version compatibility table and snapshots.
+
+## Quick example
+
+```kotlin
+enum class OnboardingTarget { SearchBar, AddButton, Profile }
+
+@Composable
+fun HomeScreen() {
+    val tourState = rememberWaypointState {
+        step(OnboardingTarget.SearchBar) {
+            title = "Search"
+            description = "Find anything in your workspace."
+        }
+        step(OnboardingTarget.AddButton) {
+            title = "Create"
+            description = "Add a new item with one tap."
+        }
+        step(OnboardingTarget.Profile) {
+            title = "Your profile"
+            description = "View and edit your account."
+        }
+    }
+
+    WaypointMaterial3Host(state = tourState) {
+        Column {
+            SearchBar(
+                modifier = Modifier.waypointTarget(tourState, OnboardingTarget.SearchBar),
+            )
+            FloatingActionButton(
+                onClick = { /* ... */ },
+                modifier = Modifier.waypointTarget(tourState, OnboardingTarget.AddButton),
+            ) { Icon(Icons.Default.Add, "Add") }
+            IconButton(
+                onClick = { /* ... */ },
+                modifier = Modifier.waypointTarget(tourState, OnboardingTarget.Profile),
+            ) { Icon(Icons.Default.Person, "Profile") }
+        }
+    }
+
+    LaunchedEffect(Unit) { tourState.start() }
+}
+```
+
+## Documentation
+
+- [Overview](docs/index.md)
+- [Installation](docs/installation.md)
+- [Quick Start](docs/getting-started.md)
+- [Highlight Styles](docs/guides/highlight-styles.md)
+- [Custom Tooltips](docs/guides/custom-tooltips.md)
+- [Interactive Tutorials](docs/guides/interactive-tutorials.md)
+- [Tour Sequences](docs/guides/tour-sequences.md)
+- [Persistent Hints](docs/guides/hints.md)
+- [Theming](docs/guides/theming.md)
+- [Analytics](docs/guides/analytics.md)
+- [Persistence](docs/guides/persistence.md)
+- [API Reference](docs/api/waypoint-state.md)
+
+## Sample
+
+The `:sample` module contains seven focused demos, runnable on all targets:
+
+```bash
+# Desktop
+./gradlew :sample:run
+
+# Android
+./gradlew :sample:assembleDebug
+
+# Web (Wasm)
+./gradlew :sample:wasmJsBrowserDevelopmentRun
+
+# Web (JS)
+./gradlew :sample:jsBrowserDevelopmentRun
+```
+
+For iOS, open `iosApp/` in Xcode and run.
+
+## Contribution
+
+If you've found a bug or want a new feature, please [open an issue](https://github.com/MohamedRejeb/compose-waypoint/issues). Pull requests are welcome. :heart:
+
+## Find this library useful? :heart:
+
+Support it by joining [stargazers](https://github.com/MohamedRejeb/compose-waypoint/stargazers) for this repository. :star:
+Also, [follow me](https://github.com/MohamedRejeb) on GitHub for more libraries.
+
+## License
+
+```
+Copyright 2026 Mohamed Rejeb
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+```

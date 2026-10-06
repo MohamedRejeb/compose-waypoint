@@ -18,7 +18,8 @@ import androidx.compose.ui.layout.onGloballyPositioned
  * A [BringIntoViewRequester] is automatically attached so the tour can
  * scroll this target into view before showing the step.
  *
- * Bounds are recorded in the coordinate space of the nearest [WaypointHost]
+ * Bounds are the part of the composable that is visible through its clipping
+ * ancestors (scroll containers), recorded in the coordinate space of the nearest [WaypointHost]
  * (or [WaypointOverlayHost]) in the composition. For targets that live in a
  * different composition tree (e.g. inside a Dialog or Sheet), place a
  * [WaypointOverlayHost] that shares the same [WaypointState] inside that tree
@@ -27,6 +28,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
  * @param state the [WaypointState] managing the tour
  * @param key the target key identifying this composable in the step list
  */
+@OptIn(ExperimentalWaypointApi::class)
 public fun <K> Modifier.waypointTarget(
     state: WaypointState<K>,
     key: K,
@@ -35,7 +37,7 @@ public fun <K> Modifier.waypointTarget(
     val hostId = LocalWaypointHostId.current
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
 
-    DisposableEffect(currentKey) {
+    DisposableEffect(state, currentKey) {
         state.registerBringIntoViewRequester(currentKey, bringIntoViewRequester)
         onDispose {
             state.unregisterTarget(currentKey)
@@ -46,14 +48,16 @@ public fun <K> Modifier.waypointTarget(
         .bringIntoViewRequester(bringIntoViewRequester)
         .onGloballyPositioned { coordinates ->
             if (!coordinates.isAttached) return@onGloballyPositioned
-            // No host in scope — target can't be registered anywhere useful.
+            // No host in scope, target can't be registered anywhere useful.
             if (hostId == null) return@onGloballyPositioned
 
             val hostCoords = state.hostCoordinatesMap[hostId] ?: return@onGloballyPositioned
             if (!hostCoords.isAttached) return@onGloballyPositioned
 
+            // Clipped, so a target half scrolled under an app bar registers
+            // only its visible part instead of opening a hole over the bar.
             val bounds = try {
-                hostCoords.localBoundingBoxOf(coordinates)
+                hostCoords.localBoundingBoxOf(coordinates, clipBounds = true)
             } catch (_: IllegalArgumentException) {
                 // Target is in a different hierarchy than this host. Shouldn't
                 // happen with correct CompositionLocal wiring, but guard anyway.
@@ -73,7 +77,7 @@ public fun <K> Modifier.waypointTarget(
                 // Scrolled out of view (or not yet laid out): clear bounds but
                 // keep the host association so the tour still knows which host
                 // owns this step until the composable is actually disposed.
-                state.clearTargetBounds(currentKey)
+                state.clearTargetBoundsKeepingHost(currentKey)
             }
         }
 }

@@ -6,11 +6,11 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":waypoint-core"))
-            implementation(libs.compose.runtime)
+            api(project(":waypoint-core"))
+            api(libs.compose.runtime)
+            api(libs.compose.ui)
+            api(libs.compose.material3)
             implementation(libs.compose.foundation)
-            implementation(libs.compose.material3)
-            implementation(libs.compose.ui)
             implementation(libs.compose.animation)
         }
         commonTest.dependencies {

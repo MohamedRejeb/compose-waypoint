@@ -1,10 +1,8 @@
 package com.mohamedrejeb.waypoint.sample.demos.onboarding
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,184 +10,154 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Circle
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.mohamedrejeb.waypoint.core.HighlightStyle
-import com.mohamedrejeb.waypoint.core.SpotlightPadding
-import com.mohamedrejeb.waypoint.core.SpotlightShape
 import com.mohamedrejeb.waypoint.core.TargetInteraction
 import com.mohamedrejeb.waypoint.core.TooltipPlacement
+import com.mohamedrejeb.waypoint.core.WaypointAnalytics
+import com.mohamedrejeb.waypoint.core.WaypointState
 import com.mohamedrejeb.waypoint.core.rememberWaypointState
 import com.mohamedrejeb.waypoint.core.waypointTarget
 import com.mohamedrejeb.waypoint.material3.WaypointMaterial3Host
 import com.mohamedrejeb.waypoint.sample.components.DemoScaffold
+import com.mohamedrejeb.waypoint.sample.components.FlatCard
+import com.mohamedrejeb.waypoint.sample.components.ResetOnLeave
+import com.mohamedrejeb.waypoint.sample.components.ScreenPadding
+import com.mohamedrejeb.waypoint.sample.components.SectionLabel
 
-private enum class OnboardingTarget {
-    Search,
-    Bell,
-    Welcome,
-    Stats,
-    Fab,
-    TaskList,
-}
+private enum class OnboardingTarget { Search, Notifications, Stats, FirstTask }
 
+/**
+ * The core Waypoint experience: a spotlight tour over a small mock app, with
+ * every analytics callback echoed into the log card below.
+ */
 @Composable
 fun OnboardingDemo(onBack: () -> Unit) {
-    val state = rememberWaypointState {
+    val events = remember { mutableStateListOf<String>() }
+    val analytics = remember {
+        object : WaypointAnalytics {
+            private fun log(event: String) {
+                events.add(0, event)
+                if (events.size > 4) events.removeAt(events.lastIndex)
+            }
+
+            override fun onTourStarted(tourId: String?, totalSteps: Int) =
+                log("tour_started steps=$totalSteps")
+
+            override fun onStepViewed(tourId: String?, stepIndex: Int, targetKey: Any?) =
+                log("step_viewed $targetKey")
+
+            override fun onStepCompleted(tourId: String?, stepIndex: Int, targetKey: Any?) =
+                log("step_completed $targetKey")
+
+            override fun onTourCompleted(tourId: String?, totalSteps: Int) =
+                log("tour_completed")
+
+            override fun onTourCancelled(tourId: String?, stepIndex: Int, totalSteps: Int) =
+                log("tour_cancelled at=$stepIndex")
+        }
+    }
+
+    val state = rememberWaypointState(analytics = analytics) {
         step(OnboardingTarget.Search) {
             title = "Search"
-            description = "Find tasks, projects, and teammates"
+            description = "Find tasks, projects, and teammates from one place."
             placement = TooltipPlacement.Bottom
-            highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.Circle)
         }
-        step(OnboardingTarget.Bell) {
+        step(OnboardingTarget.Notifications) {
             title = "Notifications"
-            description = "Stay updated with alerts and mentions"
+            description = "Mentions and updates land here."
             placement = TooltipPlacement.Bottom
-            highlightStyle = HighlightStyle.Spotlight(
-                shape = SpotlightShape.RoundedRect(12.dp),
-                padding = SpotlightPadding(all = 8.dp),
-            )
-        }
-        step(OnboardingTarget.Welcome) {
-            title = "Your Dashboard"
-            description = "Quick overview of your day"
-            placement = TooltipPlacement.Bottom
-            highlightStyle = HighlightStyle.Spotlight(
-                shape = SpotlightShape.RoundedRect(16.dp),
-            )
         }
         step(OnboardingTarget.Stats) {
-            title = "Statistics"
-            description = "Track your productivity at a glance"
-            placement = TooltipPlacement.Top
-            highlightStyle = HighlightStyle.Spotlight(
-                shape = SpotlightShape.RoundedRect(8.dp),
-            )
+            title = "Your week at a glance"
+            description = "Progress across all projects, updated live."
         }
-        step(OnboardingTarget.Fab) {
-            title = "Create Task"
-            description = "Tap to add a new task"
-            placement = TooltipPlacement.Start
-            highlightStyle = HighlightStyle.Spotlight(shape = SpotlightShape.Circle)
+        step(OnboardingTarget.FirstTask) {
+            title = "Try it"
+            description = "Tap the highlighted task to finish the tour."
             interaction = TargetInteraction.ClickToAdvance
-        }
-        step(OnboardingTarget.TaskList) {
-            title = "Task List"
-            description = "Your pending tasks appear here"
             placement = TooltipPlacement.Top
-            highlightStyle = HighlightStyle.Spotlight(
-                shape = SpotlightShape.RoundedRect(12.dp),
-            )
         }
+    }
+
+    ResetOnLeave {
+        state.stop()
+        events.clear()
     }
 
     DemoScaffold(
-        title = "Onboarding Tour",
-        description = "A first-launch walkthrough showcasing spotlight, placements, and navigation",
+        title = "Onboarding tour",
+        description = "A first-launch walkthrough. Watch the analytics log at the bottom while you move through it.",
         onBack = onBack,
         onStartTour = { state.start() },
+        startTourVisible = !state.isActive,
     ) { padding ->
-        WaypointMaterial3Host(
-            state = state,
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .verticalScroll(rememberScrollState()),
-                ) {
-                    TopBar(state)
-                    WelcomeCard(state)
-                    StatsRow(state)
-                    TaskList(state)
-                    // Extra space so FAB doesn't overlap last task card
-                    Spacer(modifier = Modifier.height(80.dp))
-                }
-
-                FloatingActionButton(
-                    onClick = { /* no-op */ },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(end = 16.dp, bottom = 16.dp)
-                        .waypointTarget(state, OnboardingTarget.Fab),
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Add,
-                        contentDescription = "New Task",
-                    )
-                }
+        WaypointMaterial3Host(state = state) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(padding)
+                    .padding(horizontal = ScreenPadding),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                MockAppHeader(state = state)
+                MockStats(
+                    modifier = Modifier.waypointTarget(state, OnboardingTarget.Stats),
+                )
+                MockTasks(state = state)
+                Spacer(Modifier.height(4.dp))
+                AnalyticsLog(events = events)
+                Spacer(Modifier.height(80.dp))
             }
         }
     }
 }
 
 @Composable
-private fun TopBar(
-    state: com.mohamedrejeb.waypoint.core.WaypointState<OnboardingTarget>,
-) {
-    Surface(
-        tonalElevation = 2.dp,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-        ) {
-            // Profile avatar
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
+private fun MockAppHeader(state: WaypointState<OnboardingTarget>) {
+    FlatCard {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(36.dp),
             ) {
-                Text(
-                    text = "A",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontWeight = FontWeight.Bold,
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "A",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                }
             }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
             Text(
-                text = "Home",
+                text = "Good morning, Alex",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
             )
-
             IconButton(
-                onClick = { /* no-op */ },
+                onClick = {},
                 modifier = Modifier.waypointTarget(state, OnboardingTarget.Search),
             ) {
                 Icon(
@@ -197,10 +165,9 @@ private fun TopBar(
                     contentDescription = "Search",
                 )
             }
-
             IconButton(
-                onClick = { /* no-op */ },
-                modifier = Modifier.waypointTarget(state, OnboardingTarget.Bell),
+                onClick = {},
+                modifier = Modifier.waypointTarget(state, OnboardingTarget.Notifications),
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Notifications,
@@ -212,151 +179,105 @@ private fun TopBar(
 }
 
 @Composable
-private fun WelcomeCard(
-    state: com.mohamedrejeb.waypoint.core.WaypointState<OnboardingTarget>,
-) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .waypointTarget(state, OnboardingTarget.Welcome),
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-        ) {
-            Text(
-                text = "Welcome back, Alex!",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "You have 3 new tasks today",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
-            )
-        }
-    }
-}
-
-@Composable
-private fun StatsRow(
-    state: com.mohamedrejeb.waypoint.core.WaypointState<OnboardingTarget>,
-) {
+private fun MockStats(modifier: Modifier = Modifier) {
     Row(
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-            .waypointTarget(state, OnboardingTarget.Stats),
     ) {
-        StatCard(label = "Tasks", value = "12", modifier = Modifier.weight(1f))
-        StatCard(label = "Done", value = "8", modifier = Modifier.weight(1f))
-        StatCard(label = "Streak", value = "5 days", modifier = Modifier.weight(1f))
+        StatTile(value = "12", label = "Open", modifier = Modifier.weight(1f))
+        StatTile(value = "8", label = "Done", modifier = Modifier.weight(1f))
+        StatTile(value = "5d", label = "Streak", modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
-private fun StatCard(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
+private fun StatTile(value: String, label: String, modifier: Modifier = Modifier) {
+    FlatCard(
         modifier = modifier,
+        color = MaterialTheme.colorScheme.surfaceContainer,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 8.dp),
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-private data class TaskItem(
-    val title: String,
-    val description: String,
-    val done: Boolean,
-)
-
-private val tasks = listOf(
-    TaskItem("Review pull request", "Frontend refactor #142", done = true),
-    TaskItem("Write unit tests", "Cover auth module edge cases", done = true),
-    TaskItem("Design sync meeting", "Discuss new dashboard layout", done = false),
-    TaskItem("Update API docs", "Add v2 endpoint documentation", done = false),
-)
-
-@Composable
-private fun TaskList(
-    state: com.mohamedrejeb.waypoint.core.WaypointState<OnboardingTarget>,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .waypointTarget(state, OnboardingTarget.TaskList),
-    ) {
-        tasks.forEach { task ->
-            TaskCard(task)
-        }
+        Text(
+            text = value,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
 @Composable
-private fun TaskCard(task: TaskItem) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        ) {
-            Icon(
-                imageVector = if (task.done) Icons.Rounded.CheckCircle else Icons.Outlined.Circle,
-                contentDescription = null,
-                tint = if (task.done) {
-                    MaterialTheme.colorScheme.primary
+private fun MockTasks(state: WaypointState<OnboardingTarget>) {
+    val tasks = listOf(
+        Triple("Review pull request", "Frontend refactor #142", true),
+        Triple("Write release notes", "Version 1.4.0", false),
+        Triple("Design sync", "New dashboard layout", false),
+    )
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SectionLabel("Today")
+        tasks.forEachIndexed { index, (title, subtitle, done) ->
+            FlatCard(
+                modifier = if (index == 0) {
+                    Modifier
+                        .fillMaxWidth()
+                        .waypointTarget(state, OnboardingTarget.FirstTask)
                 } else {
-                    MaterialTheme.colorScheme.outline
+                    Modifier.fillMaxWidth()
                 },
-                modifier = Modifier.size(24.dp),
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = if (done) Icons.Rounded.CheckCircle else Icons.Outlined.Circle,
+                        contentDescription = null,
+                        tint = if (done) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.outline
+                        },
+                    )
+                    Column(modifier = Modifier.padding(start = 12.dp)) {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AnalyticsLog(events: List<String>) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SectionLabel("Analytics log")
+        FlatCard(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.surfaceContainer,
+        ) {
+            if (events.isEmpty()) {
                 Text(
-                    text = task.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                )
-                Text(
-                    text = task.description,
+                    text = "Start the tour to see WaypointAnalytics callbacks.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            } else {
+                events.forEach { event ->
+                    Text(
+                        text = event,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(vertical = 2.dp),
+                    )
+                }
             }
         }
     }

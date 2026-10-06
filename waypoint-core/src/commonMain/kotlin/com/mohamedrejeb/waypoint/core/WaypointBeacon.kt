@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 /**
  * Wraps [content] and draws an animated beacon indicator at the specified [alignment].
  *
- * Beacons are standalone visual indicators — they work independently from tours
+ * Beacons are standalone visual indicators, they work independently from tours
  * and can be used as persistent hints to draw attention to a UI element.
  *
  * ```kotlin
@@ -39,22 +39,22 @@ import androidx.compose.ui.unit.dp
  * }
  * ```
  *
+ * @param modifier modifier for the outer Box
  * @param visible whether the beacon is visible (animates in/out)
  * @param style visual style (Pulse or Dot)
  * @param alignment where the beacon is positioned relative to the content
  * @param offset additional offset from the alignment position
  * @param onClick optional click handler for the beacon
- * @param modifier modifier for the outer Box
  * @param content the UI element to decorate with the beacon
  */
 @Composable
 public fun WaypointBeacon(
+    modifier: Modifier = Modifier,
     visible: Boolean = true,
     style: BeaconStyle = BeaconStyle.Pulse(),
     alignment: Alignment = Alignment.TopEnd,
     offset: DpOffset = DpOffset.Zero,
     onClick: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     Box(modifier = modifier) {

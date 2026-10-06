@@ -1,0 +1,687 @@
+public abstract interface class com/mohamedrejeb/waypoint/core/BeaconStyle {
+}
+
+public final class com/mohamedrejeb/waypoint/core/BeaconStyle$Dot : com/mohamedrejeb/waypoint/core/BeaconStyle {
+	public static final field $stable I
+	public synthetic fun <init> (JFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JFLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-0d7_KjU ()J
+	public final fun component2-D9Ej5fM ()F
+	public final fun copy-l07J4OM (JF)Lcom/mohamedrejeb/waypoint/core/BeaconStyle$Dot;
+	public static synthetic fun copy-l07J4OM$default (Lcom/mohamedrejeb/waypoint/core/BeaconStyle$Dot;JFILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/BeaconStyle$Dot;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getColor-0d7_KjU ()J
+	public final fun getRadius-D9Ej5fM ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/BeaconStyle$Pulse : com/mohamedrejeb/waypoint/core/BeaconStyle {
+	public static final field $stable I
+	public synthetic fun <init> (JFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JFFLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-0d7_KjU ()J
+	public final fun component2-D9Ej5fM ()F
+	public final fun component3-D9Ej5fM ()F
+	public final fun copy-fUABb90 (JFF)Lcom/mohamedrejeb/waypoint/core/BeaconStyle$Pulse;
+	public static synthetic fun copy-fUABb90$default (Lcom/mohamedrejeb/waypoint/core/BeaconStyle$Pulse;JFFILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/BeaconStyle$Pulse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBeaconRadius-D9Ej5fM ()F
+	public final fun getColor-0d7_KjU ()J
+	public final fun getMaxPulseRadius-D9Ej5fM ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface annotation class com/mohamedrejeb/waypoint/core/ExperimentalWaypointApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface class com/mohamedrejeb/waypoint/core/HighlightStyle {
+}
+
+public final class com/mohamedrejeb/waypoint/core/HighlightStyle$Border : com/mohamedrejeb/waypoint/core/HighlightStyle {
+	public static final field $stable I
+	public synthetic fun <init> (JLcom/mohamedrejeb/waypoint/core/SpotlightShape;Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;FZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JLcom/mohamedrejeb/waypoint/core/SpotlightShape;Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;FZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-0d7_KjU ()J
+	public final fun component2 ()Lcom/mohamedrejeb/waypoint/core/SpotlightShape;
+	public final fun component3 ()Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;
+	public final fun component4-D9Ej5fM ()F
+	public final fun component5 ()Z
+	public final fun copy-Ma1NnfY (JLcom/mohamedrejeb/waypoint/core/SpotlightShape;Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;FZ)Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Border;
+	public static synthetic fun copy-Ma1NnfY$default (Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Border;JLcom/mohamedrejeb/waypoint/core/SpotlightShape;Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;FZILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Border;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBorderWidth-D9Ej5fM ()F
+	public final fun getColor-0d7_KjU ()J
+	public final fun getFilled ()Z
+	public final fun getPadding ()Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;
+	public final fun getShape ()Lcom/mohamedrejeb/waypoint/core/SpotlightShape;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/HighlightStyle$Custom : com/mohamedrejeb/waypoint/core/HighlightStyle {
+	public static final field $stable I
+	public fun <init> (Lkotlin/jvm/functions/Function5;)V
+	public final fun component1 ()Lkotlin/jvm/functions/Function5;
+	public final fun copy (Lkotlin/jvm/functions/Function5;)Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Custom;
+	public static synthetic fun copy$default (Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Custom;Lkotlin/jvm/functions/Function5;ILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Custom;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContent ()Lkotlin/jvm/functions/Function5;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/HighlightStyle$None : com/mohamedrejeb/waypoint/core/HighlightStyle {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/mohamedrejeb/waypoint/core/HighlightStyle$None;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/HighlightStyle$Pulse : com/mohamedrejeb/waypoint/core/HighlightStyle {
+	public static final field $stable I
+	public synthetic fun <init> (JLcom/mohamedrejeb/waypoint/core/SpotlightShape;Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;FZFIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JLcom/mohamedrejeb/waypoint/core/SpotlightShape;Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;FZFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-0d7_KjU ()J
+	public final fun component2 ()Lcom/mohamedrejeb/waypoint/core/SpotlightShape;
+	public final fun component3 ()Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;
+	public final fun component4-D9Ej5fM ()F
+	public final fun component5 ()Z
+	public final fun component6 ()F
+	public final fun component7 ()I
+	public final fun copy-CqoSGlc (JLcom/mohamedrejeb/waypoint/core/SpotlightShape;Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;FZFI)Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Pulse;
+	public static synthetic fun copy-CqoSGlc$default (Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Pulse;JLcom/mohamedrejeb/waypoint/core/SpotlightShape;Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;FZFIILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Pulse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBorderWidth-D9Ej5fM ()F
+	public final fun getColor-0d7_KjU ()J
+	public final fun getDurationMillis ()I
+	public final fun getFilled ()Z
+	public final fun getPadding ()Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;
+	public final fun getPulseScale ()F
+	public final fun getShape ()Lcom/mohamedrejeb/waypoint/core/SpotlightShape;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/HighlightStyle$Ripple : com/mohamedrejeb/waypoint/core/HighlightStyle {
+	public static final field $stable I
+	public synthetic fun <init> (JIIFZFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JIIFZFLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-0d7_KjU ()J
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4-D9Ej5fM ()F
+	public final fun component5 ()Z
+	public final fun component6-D9Ej5fM ()F
+	public final fun copy-EpuJW-g (JIIFZF)Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Ripple;
+	public static synthetic fun copy-EpuJW-g$default (Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Ripple;JIIFZFILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Ripple;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getColor-0d7_KjU ()J
+	public final fun getDurationMillis ()I
+	public final fun getFilled ()Z
+	public final fun getMaxRadius-D9Ej5fM ()F
+	public final fun getRingCount ()I
+	public final fun getStrokeWidth-D9Ej5fM ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/HighlightStyle$Spotlight : com/mohamedrejeb/waypoint/core/HighlightStyle {
+	public static final field $stable I
+	public synthetic fun <init> (Lcom/mohamedrejeb/waypoint/core/SpotlightShape;Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;JFLcom/mohamedrejeb/waypoint/core/SpotlightEffect;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/mohamedrejeb/waypoint/core/SpotlightShape;Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;JFLcom/mohamedrejeb/waypoint/core/SpotlightEffect;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/mohamedrejeb/waypoint/core/SpotlightShape;
+	public final fun component2 ()Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;
+	public final fun component3-0d7_KjU ()J
+	public final fun component4 ()F
+	public final fun component5 ()Lcom/mohamedrejeb/waypoint/core/SpotlightEffect;
+	public final fun component6 ()Z
+	public final fun copy-FNF3uiM (Lcom/mohamedrejeb/waypoint/core/SpotlightShape;Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;JFLcom/mohamedrejeb/waypoint/core/SpotlightEffect;Z)Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Spotlight;
+	public static synthetic fun copy-FNF3uiM$default (Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Spotlight;Lcom/mohamedrejeb/waypoint/core/SpotlightShape;Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;JFLcom/mohamedrejeb/waypoint/core/SpotlightEffect;ZILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/HighlightStyle$Spotlight;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCoverWhilePending ()Z
+	public final fun getEffect ()Lcom/mohamedrejeb/waypoint/core/SpotlightEffect;
+	public final fun getOverlayAlpha ()F
+	public final fun getOverlayColor-0d7_KjU ()J
+	public final fun getPadding ()Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;
+	public final fun getShape ()Lcom/mohamedrejeb/waypoint/core/SpotlightShape;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/mohamedrejeb/waypoint/core/HintScope {
+	public abstract fun close ()V
+	public abstract fun dismiss ()V
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun getPlacement ()Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;
+	public abstract fun getTitle ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/KeyboardConfig {
+	public static final field $stable I
+	public static final field Companion Lcom/mohamedrejeb/waypoint/core/KeyboardConfig$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;Z)V
+	public synthetic fun <init> (Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/Set;
+	public final fun component2 ()Ljava/util/Set;
+	public final fun component3 ()Ljava/util/Set;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;Z)Lcom/mohamedrejeb/waypoint/core/KeyboardConfig;
+	public static synthetic fun copy$default (Lcom/mohamedrejeb/waypoint/core/KeyboardConfig;Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;ZILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/KeyboardConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDismissKeys ()Ljava/util/Set;
+	public final fun getEnabled ()Z
+	public final fun getNextKeys ()Ljava/util/Set;
+	public final fun getPreviousKeys ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/KeyboardConfig$Companion {
+	public final fun getDefault ()Lcom/mohamedrejeb/waypoint/core/KeyboardConfig;
+	public final fun getDisabled ()Lcom/mohamedrejeb/waypoint/core/KeyboardConfig;
+}
+
+public final class com/mohamedrejeb/waypoint/core/LocalWaypointHostIdKt {
+	public static final fun getLocalWaypointHostId ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+}
+
+public abstract interface class com/mohamedrejeb/waypoint/core/OverlayClickBehavior {
+}
+
+public final class com/mohamedrejeb/waypoint/core/OverlayClickBehavior$Custom : com/mohamedrejeb/waypoint/core/OverlayClickBehavior {
+	public static final field $stable I
+	public fun <init> (Lkotlin/jvm/functions/Function0;)V
+	public final fun component1 ()Lkotlin/jvm/functions/Function0;
+	public final fun copy (Lkotlin/jvm/functions/Function0;)Lcom/mohamedrejeb/waypoint/core/OverlayClickBehavior$Custom;
+	public static synthetic fun copy$default (Lcom/mohamedrejeb/waypoint/core/OverlayClickBehavior$Custom;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/OverlayClickBehavior$Custom;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAction ()Lkotlin/jvm/functions/Function0;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/OverlayClickBehavior$Dismiss : com/mohamedrejeb/waypoint/core/OverlayClickBehavior {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/mohamedrejeb/waypoint/core/OverlayClickBehavior$Dismiss;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/OverlayClickBehavior$NextStep : com/mohamedrejeb/waypoint/core/OverlayClickBehavior {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/mohamedrejeb/waypoint/core/OverlayClickBehavior$NextStep;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/OverlayClickBehavior$Nothing : com/mohamedrejeb/waypoint/core/OverlayClickBehavior {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/mohamedrejeb/waypoint/core/OverlayClickBehavior$Nothing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/RememberWaypointHintStateKt {
+	public static final fun rememberWaypointHintState (Lcom/mohamedrejeb/waypoint/core/WaypointPersistence;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lcom/mohamedrejeb/waypoint/core/WaypointHintState;
+}
+
+public final class com/mohamedrejeb/waypoint/core/RememberWaypointSequenceStateKt {
+	public static final fun rememberWaypointSequenceState ([Lcom/mohamedrejeb/waypoint/core/WaypointState;Landroidx/compose/runtime/Composer;I)Lcom/mohamedrejeb/waypoint/core/WaypointSequenceState;
+}
+
+public final class com/mohamedrejeb/waypoint/core/RememberWaypointStateKt {
+	public static final fun rememberWaypointState (Ljava/util/List;Ljava/lang/String;Lcom/mohamedrejeb/waypoint/core/WaypointAnalytics;Lcom/mohamedrejeb/waypoint/core/WaypointPersistence;Landroidx/compose/runtime/Composer;II)Lcom/mohamedrejeb/waypoint/core/WaypointState;
+	public static final fun rememberWaypointState ([Ljava/lang/Object;Ljava/lang/String;Lcom/mohamedrejeb/waypoint/core/WaypointAnalytics;Lcom/mohamedrejeb/waypoint/core/WaypointPersistence;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lcom/mohamedrejeb/waypoint/core/WaypointState;
+}
+
+public final class com/mohamedrejeb/waypoint/core/ResolvedPlacement : java/lang/Enum {
+	public static final field Bottom Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;
+	public static final field End Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;
+	public static final field Start Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;
+	public static final field Top Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;
+	public static fun values ()[Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;
+}
+
+public abstract interface class com/mohamedrejeb/waypoint/core/SpotlightEffect {
+}
+
+public final class com/mohamedrejeb/waypoint/core/SpotlightEffect$Custom : com/mohamedrejeb/waypoint/core/SpotlightEffect {
+	public static final field $stable I
+	public fun <init> (Lkotlin/jvm/functions/Function2;)V
+	public final fun component1 ()Lkotlin/jvm/functions/Function2;
+	public final fun copy (Lkotlin/jvm/functions/Function2;)Lcom/mohamedrejeb/waypoint/core/SpotlightEffect$Custom;
+	public static synthetic fun copy$default (Lcom/mohamedrejeb/waypoint/core/SpotlightEffect$Custom;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/SpotlightEffect$Custom;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDraw ()Lkotlin/jvm/functions/Function2;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/SpotlightEffect$Glow : com/mohamedrejeb/waypoint/core/SpotlightEffect {
+	public static final field $stable I
+	public synthetic fun <init> (JFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JFFLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-0d7_KjU ()J
+	public final fun component2-D9Ej5fM ()F
+	public final fun component3 ()F
+	public final fun copy-5DgIosw (JFF)Lcom/mohamedrejeb/waypoint/core/SpotlightEffect$Glow;
+	public static synthetic fun copy-5DgIosw$default (Lcom/mohamedrejeb/waypoint/core/SpotlightEffect$Glow;JFFILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/SpotlightEffect$Glow;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlpha ()F
+	public final fun getColor-0d7_KjU ()J
+	public final fun getRadius-D9Ej5fM ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/SpotlightEffect$None : com/mohamedrejeb/waypoint/core/SpotlightEffect {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/mohamedrejeb/waypoint/core/SpotlightEffect$None;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/SpotlightEffect$SoftEdge : com/mohamedrejeb/waypoint/core/SpotlightEffect {
+	public static final field $stable I
+	public synthetic fun <init> (FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-D9Ej5fM ()F
+	public final fun copy-0680j_4 (F)Lcom/mohamedrejeb/waypoint/core/SpotlightEffect$SoftEdge;
+	public static synthetic fun copy-0680j_4$default (Lcom/mohamedrejeb/waypoint/core/SpotlightEffect$SoftEdge;FILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/SpotlightEffect$SoftEdge;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFadeWidth-D9Ej5fM ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/SpotlightPadding {
+	public static final field $stable I
+	public static final field Companion Lcom/mohamedrejeb/waypoint/core/SpotlightPadding$Companion;
+	public synthetic fun <init> (FFFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FFFFLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FFLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-D9Ej5fM ()F
+	public final fun component2-D9Ej5fM ()F
+	public final fun component3-D9Ej5fM ()F
+	public final fun component4-D9Ej5fM ()F
+	public final fun copy-a9UjIt4 (FFFF)Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;
+	public static synthetic fun copy-a9UjIt4$default (Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;FFFFILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBottom-D9Ej5fM ()F
+	public final fun getEnd-D9Ej5fM ()F
+	public final fun getStart-D9Ej5fM ()F
+	public final fun getTop-D9Ej5fM ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/SpotlightPadding$Companion {
+	public final fun getDefault ()Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;
+	public final fun getNone ()Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;
+}
+
+public abstract interface class com/mohamedrejeb/waypoint/core/SpotlightShape {
+	public static final field Companion Lcom/mohamedrejeb/waypoint/core/SpotlightShape$Companion;
+}
+
+public final class com/mohamedrejeb/waypoint/core/SpotlightShape$Circle : com/mohamedrejeb/waypoint/core/SpotlightShape {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/mohamedrejeb/waypoint/core/SpotlightShape$Circle;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/SpotlightShape$Companion {
+	public final fun getDefault ()Lcom/mohamedrejeb/waypoint/core/SpotlightShape;
+}
+
+public final class com/mohamedrejeb/waypoint/core/SpotlightShape$Pill : com/mohamedrejeb/waypoint/core/SpotlightShape {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/mohamedrejeb/waypoint/core/SpotlightShape$Pill;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/SpotlightShape$Rect : com/mohamedrejeb/waypoint/core/SpotlightShape {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/mohamedrejeb/waypoint/core/SpotlightShape$Rect;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/SpotlightShape$RoundedRect : com/mohamedrejeb/waypoint/core/SpotlightShape {
+	public static final field $stable I
+	public synthetic fun <init> (FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-D9Ej5fM ()F
+	public final fun copy-0680j_4 (F)Lcom/mohamedrejeb/waypoint/core/SpotlightShape$RoundedRect;
+	public static synthetic fun copy-0680j_4$default (Lcom/mohamedrejeb/waypoint/core/SpotlightShape$RoundedRect;FILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/SpotlightShape$RoundedRect;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCornerRadius-D9Ej5fM ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/StepBuilder {
+	public static final field $stable I
+	public final fun advanceOn (Lkotlin/jvm/functions/Function1;)V
+	public final fun beforeShow (Lkotlin/jvm/functions/Function1;)V
+	public final fun content (Lkotlin/jvm/functions/Function3;)V
+	public final fun getAdditionalTargets ()Ljava/util/List;
+	public final fun getBlockOutside ()Ljava/lang/Boolean;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getHighlightStyle ()Lcom/mohamedrejeb/waypoint/core/HighlightStyle;
+	public final fun getInteraction ()Lcom/mohamedrejeb/waypoint/core/TargetInteraction;
+	public final fun getPlacement ()Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun onEnter (Lkotlin/jvm/functions/Function0;)V
+	public final fun onExit (Lkotlin/jvm/functions/Function0;)V
+	public final fun setAdditionalTargets (Ljava/util/List;)V
+	public final fun setBlockOutside (Ljava/lang/Boolean;)V
+	public final fun setDescription (Ljava/lang/String;)V
+	public final fun setHighlightStyle (Lcom/mohamedrejeb/waypoint/core/HighlightStyle;)V
+	public final fun setInteraction (Lcom/mohamedrejeb/waypoint/core/TargetInteraction;)V
+	public final fun setPlacement (Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;)V
+	public final fun setTitle (Ljava/lang/String;)V
+	public final fun showIf (Lkotlin/jvm/functions/Function0;)V
+}
+
+public abstract interface class com/mohamedrejeb/waypoint/core/StepScope {
+	public abstract fun getAdvancesAutomatically ()Z
+	public abstract fun getCurrentStepIndex ()I
+	public abstract fun getCurrentStepNumber ()I
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun getPlacement ()Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;
+	public abstract fun getTitle ()Ljava/lang/String;
+	public abstract fun getTotalSteps ()I
+	public abstract fun isFirstStep ()Z
+	public abstract fun isLastStep ()Z
+	public abstract fun next ()V
+	public abstract fun previous ()V
+	public abstract fun skip ()V
+}
+
+public final class com/mohamedrejeb/waypoint/core/TargetInteraction : java/lang/Enum {
+	public static final field ClickToAdvance Lcom/mohamedrejeb/waypoint/core/TargetInteraction;
+	public static final field None Lcom/mohamedrejeb/waypoint/core/TargetInteraction;
+	public static final field PassThrough Lcom/mohamedrejeb/waypoint/core/TargetInteraction;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/mohamedrejeb/waypoint/core/TargetInteraction;
+	public static fun values ()[Lcom/mohamedrejeb/waypoint/core/TargetInteraction;
+}
+
+public final class com/mohamedrejeb/waypoint/core/TooltipArrowBoxKt {
+	public static final fun TooltipArrowBox-MJSPsJg (JLandroidx/compose/ui/Modifier;FFLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/mohamedrejeb/waypoint/core/TooltipArrowGeometry {
+	public static final field $stable I
+	public fun <init> (Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;F)V
+	public final fun component1 ()Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;
+	public final fun component2 ()F
+	public final fun copy (Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;F)Lcom/mohamedrejeb/waypoint/core/TooltipArrowGeometry;
+	public static synthetic fun copy$default (Lcom/mohamedrejeb/waypoint/core/TooltipArrowGeometry;Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;FILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/TooltipArrowGeometry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArrowOffset ()F
+	public final fun getPlacement ()Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/TooltipArrowGeometryKt {
+	public static final fun getLocalTooltipArrowGeometry ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+}
+
+public final class com/mohamedrejeb/waypoint/core/TooltipArrowKt {
+	public static final fun TooltipArrow-zpKGrMw (Lcom/mohamedrejeb/waypoint/core/ResolvedPlacement;JLandroidx/compose/ui/Modifier;FFLandroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/mohamedrejeb/waypoint/core/TooltipPlacement : java/lang/Enum {
+	public static final field Auto Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;
+	public static final field Bottom Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;
+	public static final field End Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;
+	public static final field Start Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;
+	public static final field Top Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;
+	public static fun values ()[Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;
+}
+
+public abstract interface class com/mohamedrejeb/waypoint/core/WaypointAnalytics {
+	public fun onStepCompleted (Ljava/lang/String;ILjava/lang/Object;)V
+	public fun onStepViewed (Ljava/lang/String;ILjava/lang/Object;)V
+	public fun onTourCancelled (Ljava/lang/String;II)V
+	public fun onTourCompleted (Ljava/lang/String;I)V
+	public fun onTourStarted (Ljava/lang/String;I)V
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointAnalytics$DefaultImpls {
+	public static fun onStepCompleted (Lcom/mohamedrejeb/waypoint/core/WaypointAnalytics;Ljava/lang/String;ILjava/lang/Object;)V
+	public static fun onStepViewed (Lcom/mohamedrejeb/waypoint/core/WaypointAnalytics;Ljava/lang/String;ILjava/lang/Object;)V
+	public static fun onTourCancelled (Lcom/mohamedrejeb/waypoint/core/WaypointAnalytics;Ljava/lang/String;II)V
+	public static fun onTourCompleted (Lcom/mohamedrejeb/waypoint/core/WaypointAnalytics;Ljava/lang/String;I)V
+	public static fun onTourStarted (Lcom/mohamedrejeb/waypoint/core/WaypointAnalytics;Ljava/lang/String;I)V
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointBeaconKt {
+	public static final fun WaypointBeacon-x0xb5LI (Landroidx/compose/ui/Modifier;ZLcom/mohamedrejeb/waypoint/core/BeaconStyle;Landroidx/compose/ui/Alignment;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointCanvasTargetKt {
+	public static final fun waypointCanvasTarget (Landroidx/compose/ui/Modifier;Lcom/mohamedrejeb/waypoint/core/WaypointState;Ljava/lang/Object;Lkotlin/jvm/functions/Function0;)Landroidx/compose/ui/Modifier;
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointDefaults {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/mohamedrejeb/waypoint/core/WaypointDefaults;
+	public final fun getHighlightStyle ()Lcom/mohamedrejeb/waypoint/core/HighlightStyle;
+	public final fun getKeyboardConfig ()Lcom/mohamedrejeb/waypoint/core/KeyboardConfig;
+	public final fun getOverlayClickBehavior ()Lcom/mohamedrejeb/waypoint/core/OverlayClickBehavior;
+	public final fun getScreenMargin-D9Ej5fM ()F
+	public final fun getTooltipSpacing-D9Ej5fM ()F
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointEndReason : java/lang/Enum {
+	public static final field Cancelled Lcom/mohamedrejeb/waypoint/core/WaypointEndReason;
+	public static final field Completed Lcom/mohamedrejeb/waypoint/core/WaypointEndReason;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/mohamedrejeb/waypoint/core/WaypointEndReason;
+	public static fun values ()[Lcom/mohamedrejeb/waypoint/core/WaypointEndReason;
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointHint {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;Lcom/mohamedrejeb/waypoint/core/BeaconStyle;Landroidx/compose/ui/Alignment;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;Lcom/mohamedrejeb/waypoint/core/BeaconStyle;Landroidx/compose/ui/Alignment;JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;
+	public final fun component5 ()Lcom/mohamedrejeb/waypoint/core/BeaconStyle;
+	public final fun component6 ()Landroidx/compose/ui/Alignment;
+	public final fun component7-RKDOV3M ()J
+	public final fun copy-OJcOPww (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;Lcom/mohamedrejeb/waypoint/core/BeaconStyle;Landroidx/compose/ui/Alignment;J)Lcom/mohamedrejeb/waypoint/core/WaypointHint;
+	public static synthetic fun copy-OJcOPww$default (Lcom/mohamedrejeb/waypoint/core/WaypointHint;Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;Lcom/mohamedrejeb/waypoint/core/BeaconStyle;Landroidx/compose/ui/Alignment;JILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/WaypointHint;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBeaconAlignment ()Landroidx/compose/ui/Alignment;
+	public final fun getBeaconOffset-RKDOV3M ()J
+	public final fun getBeaconStyle ()Lcom/mohamedrejeb/waypoint/core/BeaconStyle;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getKey ()Ljava/lang/Object;
+	public final fun getPlacement ()Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointHintBuilder {
+	public static final field $stable I
+	public final fun getBeaconAlignment ()Landroidx/compose/ui/Alignment;
+	public final fun getBeaconOffset-RKDOV3M ()J
+	public final fun getBeaconStyle ()Lcom/mohamedrejeb/waypoint/core/BeaconStyle;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getPlacement ()Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun setBeaconAlignment (Landroidx/compose/ui/Alignment;)V
+	public final fun setBeaconOffset-jo-Fl9I (J)V
+	public final fun setBeaconStyle (Lcom/mohamedrejeb/waypoint/core/BeaconStyle;)V
+	public final fun setDescription (Ljava/lang/String;)V
+	public final fun setPlacement (Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;)V
+	public final fun setTitle (Ljava/lang/String;)V
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointHintKt {
+	public static final fun WaypointHint-YlGCr2M (Lcom/mohamedrejeb/waypoint/core/WaypointHintState;Ljava/lang/Object;Landroidx/compose/ui/Modifier;FFLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointHintScope {
+	public static final field $stable I
+	public final fun hint (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun hint$default (Lcom/mohamedrejeb/waypoint/core/WaypointHintScope;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointHintState {
+	public static final field $stable I
+	public fun <init> (Ljava/util/List;Lcom/mohamedrejeb/waypoint/core/WaypointPersistence;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/util/List;Lcom/mohamedrejeb/waypoint/core/WaypointPersistence;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun close ()V
+	public final fun dismiss (Ljava/lang/Object;)V
+	public final fun find (Ljava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/WaypointHint;
+	public final fun getHints ()Ljava/util/List;
+	public final fun getOpenHintKey ()Ljava/lang/Object;
+	public final fun isDismissed (Ljava/lang/Object;)Z
+	public final fun open (Ljava/lang/Object;)V
+	public final fun reset (Ljava/lang/Object;)V
+	public final fun resetAll ()V
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointHostKt {
+	public static final fun WaypointHost-hW5Ac_0 (Lcom/mohamedrejeb/waypoint/core/WaypointState;Landroidx/compose/ui/Modifier;Lcom/mohamedrejeb/waypoint/core/HighlightStyle;ZLcom/mohamedrejeb/waypoint/core/OverlayClickBehavior;Lcom/mohamedrejeb/waypoint/core/KeyboardConfig;FFLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;III)V
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointOverlayHostKt {
+	public static final fun WaypointOverlayHost-qKj4JfE (Lcom/mohamedrejeb/waypoint/core/WaypointState;Landroidx/compose/ui/Modifier;Lcom/mohamedrejeb/waypoint/core/HighlightStyle;ZLcom/mohamedrejeb/waypoint/core/OverlayClickBehavior;FFLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+}
+
+public abstract interface class com/mohamedrejeb/waypoint/core/WaypointPersistence {
+	public abstract fun isCompleted (Ljava/lang/String;)Z
+	public abstract fun markCompleted (Ljava/lang/String;)V
+	public abstract fun reset (Ljava/lang/String;)V
+	public abstract fun resetAll ()V
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointSequenceEffectKt {
+	public static final fun WaypointSequenceEffect (Lcom/mohamedrejeb/waypoint/core/WaypointSequenceState;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointSequenceState {
+	public static final field $stable I
+	public fun <init> (Ljava/util/List;)V
+	public final fun advance ()V
+	public final fun getActiveIndex ()I
+	public final fun getCurrentTour ()Lcom/mohamedrejeb/waypoint/core/WaypointState;
+	public final fun getTours ()Ljava/util/List;
+	public final fun goTo (Lcom/mohamedrejeb/waypoint/core/WaypointState;)V
+	public final fun isActive ()Z
+	public final fun isCompleted ()Z
+	public final fun reset ()V
+	public final fun start ()V
+	public final fun stop ()V
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointState {
+	public static final field $stable I
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Lcom/mohamedrejeb/waypoint/core/WaypointAnalytics;Lcom/mohamedrejeb/waypoint/core/WaypointPersistence;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;Lcom/mohamedrejeb/waypoint/core/WaypointAnalytics;Lcom/mohamedrejeb/waypoint/core/WaypointPersistence;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun clearTargetBounds (Ljava/lang/Object;)V
+	public final fun getAnalytics ()Lcom/mohamedrejeb/waypoint/core/WaypointAnalytics;
+	public final fun getCurrentStep ()Lcom/mohamedrejeb/waypoint/core/WaypointStep;
+	public final fun getCurrentStepIndex ()I
+	public final fun getCurrentTargetBounds ()Landroidx/compose/ui/geometry/Rect;
+	public final fun getHasCompleted ()Z
+	public final fun getLastEndReason ()Lcom/mohamedrejeb/waypoint/core/WaypointEndReason;
+	public final fun getPersistence ()Lcom/mohamedrejeb/waypoint/core/WaypointPersistence;
+	public final fun getSteps ()Ljava/util/List;
+	public final fun getTourId ()Ljava/lang/String;
+	public final fun goTo (Ljava/lang/Object;)V
+	public final fun goToStep (I)V
+	public final fun isActive ()Z
+	public final fun isPaused ()Z
+	public final fun isStepVisible ()Z
+	public final fun markCompleted ()V
+	public final fun next ()V
+	public final fun pause ()V
+	public final fun previous ()V
+	public final fun resetCompletion ()V
+	public final fun resume ()V
+	public final fun setTargetBounds (Ljava/lang/Object;Ljava/lang/Object;Landroidx/compose/ui/geometry/Rect;)V
+	public final fun setTargetBoundsFromLocal (Ljava/lang/Object;Ljava/lang/Object;Landroidx/compose/ui/layout/LayoutCoordinates;Landroidx/compose/ui/geometry/Rect;)Z
+	public final fun start ()V
+	public final fun stop ()V
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointStep {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;Lcom/mohamedrejeb/waypoint/core/HighlightStyle;Lcom/mohamedrejeb/waypoint/core/TargetInteraction;Ljava/lang/Boolean;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;Lcom/mohamedrejeb/waypoint/core/HighlightStyle;Lcom/mohamedrejeb/waypoint/core/TargetInteraction;Ljava/lang/Boolean;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component10 ()Ljava/util/List;
+	public final fun component11 ()Lkotlin/jvm/functions/Function0;
+	public final fun component12 ()Lkotlin/jvm/functions/Function0;
+	public final fun component13 ()Lkotlin/jvm/functions/Function0;
+	public final fun component14 ()Lkotlin/jvm/functions/Function1;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lkotlin/jvm/functions/Function3;
+	public final fun component5 ()Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;
+	public final fun component6 ()Lcom/mohamedrejeb/waypoint/core/HighlightStyle;
+	public final fun component7 ()Lcom/mohamedrejeb/waypoint/core/TargetInteraction;
+	public final fun component8 ()Ljava/lang/Boolean;
+	public final fun component9 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;Lcom/mohamedrejeb/waypoint/core/HighlightStyle;Lcom/mohamedrejeb/waypoint/core/TargetInteraction;Ljava/lang/Boolean;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;)Lcom/mohamedrejeb/waypoint/core/WaypointStep;
+	public static synthetic fun copy$default (Lcom/mohamedrejeb/waypoint/core/WaypointStep;Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;Lcom/mohamedrejeb/waypoint/core/HighlightStyle;Lcom/mohamedrejeb/waypoint/core/TargetInteraction;Ljava/lang/Boolean;Lkotlin/jvm/functions/Function1;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lcom/mohamedrejeb/waypoint/core/WaypointStep;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAdditionalTargets ()Ljava/util/List;
+	public final fun getAdvanceOn ()Lkotlin/jvm/functions/Function1;
+	public final fun getBeforeShow ()Lkotlin/jvm/functions/Function1;
+	public final fun getBlockOutside ()Ljava/lang/Boolean;
+	public final fun getContent ()Lkotlin/jvm/functions/Function3;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getHighlightStyle ()Lcom/mohamedrejeb/waypoint/core/HighlightStyle;
+	public final fun getInteraction ()Lcom/mohamedrejeb/waypoint/core/TargetInteraction;
+	public final fun getOnEnter ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnExit ()Lkotlin/jvm/functions/Function0;
+	public final fun getPlacement ()Lcom/mohamedrejeb/waypoint/core/TooltipPlacement;
+	public final fun getShowIf ()Lkotlin/jvm/functions/Function0;
+	public final fun getTargetKey ()Ljava/lang/Object;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointStepBuilder {
+	public static final field $stable I
+	public final fun step (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
+	public final fun step (Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun step$default (Lcom/mohamedrejeb/waypoint/core/WaypointStepBuilder;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public final class com/mohamedrejeb/waypoint/core/WaypointTargetModifierKt {
+	public static final fun waypointTarget (Landroidx/compose/ui/Modifier;Lcom/mohamedrejeb/waypoint/core/WaypointState;Ljava/lang/Object;)Landroidx/compose/ui/Modifier;
+}
+

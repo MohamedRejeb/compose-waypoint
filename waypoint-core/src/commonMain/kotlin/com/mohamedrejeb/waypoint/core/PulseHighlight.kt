@@ -15,27 +15,24 @@ import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import kotlin.math.max
 
 /**
  * Renders an animated pulsing shape around the target elements.
- * No dimming overlay -- the shape breathes (scales) to draw attention.
- * Supports both stroke (border) and filled rendering, and multiple targets.
+ * No dimming overlay, the shape breathes (scales) to draw attention.
+ * Supports both stroke (border) and filled rendering, and multiple targets
+ * ([targetBounds] returns the primary target first, then additional ones).
  */
 @Composable
 internal fun PulseHighlight(
-    targetBounds: Rect,
-    additionalBounds: List<Rect>,
+    targetBounds: () -> List<Rect>,
     style: HighlightStyle.Pulse,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
     val borderWidthPx = with(density) { style.borderWidth.toPx() }
-
-    val allBounds = buildList {
-        add(padBounds(targetBounds, style.padding, density))
-        additionalBounds.forEach { add(padBounds(it, style.padding, density)) }
-    }
 
     val infiniteTransition = rememberInfiniteTransition()
 
@@ -60,6 +57,8 @@ internal fun PulseHighlight(
     val drawStyle: DrawStyle = if (style.filled) Fill else Stroke(width = borderWidthPx)
 
     Canvas(modifier = modifier) {
+        // Bounds are read while drawing, so animating them only redraws.
+        val allBounds = targetBounds().map { padBounds(it, style.padding, density, layoutDirection) }
         for (bounds in allBounds) {
             val center = bounds.center
             val halfWidth = bounds.width / 2f
@@ -91,16 +90,6 @@ internal fun PulseHighlight(
         }
     }
 }
-
-private fun padBounds(bounds: Rect, padding: SpotlightPadding, density: androidx.compose.ui.unit.Density): Rect =
-    with(density) {
-        Rect(
-            left = bounds.left - padding.start.toPx(),
-            top = bounds.top - padding.top.toPx(),
-            right = bounds.right + padding.end.toPx(),
-            bottom = bounds.bottom + padding.bottom.toPx(),
-        )
-    }
 
 /**
  * Draws a shape at the given bounds with the specified [DrawStyle] (Fill or Stroke).

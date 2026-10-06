@@ -1,29 +1,17 @@
 package com.mohamedrejeb.waypoint.sample
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.mohamedrejeb.waypoint.sample.catalog.CatalogScreen
-import com.mohamedrejeb.waypoint.sample.demos.discovery.FeatureDiscoveryDemo
 import com.mohamedrejeb.waypoint.sample.demos.highlights.HighlightGalleryDemo
-import com.mohamedrejeb.waypoint.sample.demos.multitarget.MultiTargetDemo
-import com.mohamedrejeb.waypoint.sample.demos.analytics.AnalyticsDashboardDemo
-import com.mohamedrejeb.waypoint.sample.demos.onboarding.OnboardingDemo
-import com.mohamedrejeb.waypoint.sample.demos.theming.ThemingPlaygroundDemo
+import com.mohamedrejeb.waypoint.sample.demos.hints.HintsAndBeaconsDemo
 import com.mohamedrejeb.waypoint.sample.demos.modals.ModalToursDemo
+import com.mohamedrejeb.waypoint.sample.demos.onboarding.OnboardingDemo
+import com.mohamedrejeb.waypoint.sample.demos.sequences.TourSequencesDemo
+import com.mohamedrejeb.waypoint.sample.demos.theming.ThemingDemo
 import com.mohamedrejeb.waypoint.sample.demos.tutorial.InteractiveTutorialDemo
 import com.mohamedrejeb.waypoint.sample.navigation.Route
 import com.mohamedrejeb.waypoint.sample.theme.SampleTheme
@@ -44,56 +32,25 @@ fun App() {
                 entry<Route.Onboarding> {
                     OnboardingDemo(onBack = { backStack.removeLastOrNull() })
                 }
-                entry<Route.FeatureDiscovery> {
-                    FeatureDiscoveryDemo(onBack = { backStack.removeLastOrNull() })
-                }
                 entry<Route.InteractiveTutorial> {
                     InteractiveTutorialDemo(onBack = { backStack.removeLastOrNull() })
-                }
-                entry<Route.MultiTarget> {
-                    MultiTargetDemo(onBack = { backStack.removeLastOrNull() })
-                }
-                entry<Route.HighlightGallery> {
-                    HighlightGalleryDemo(onBack = { backStack.removeLastOrNull() })
-                }
-                entry<Route.ThemingPlayground> {
-                    ThemingPlaygroundDemo(onBack = { backStack.removeLastOrNull() })
-                }
-                entry<Route.AnalyticsDashboard> {
-                    AnalyticsDashboardDemo(onBack = { backStack.removeLastOrNull() })
                 }
                 entry<Route.ModalTours> {
                     ModalToursDemo(onBack = { backStack.removeLastOrNull() })
                 }
+                entry<Route.HighlightGallery> {
+                    HighlightGalleryDemo(onBack = { backStack.removeLastOrNull() })
+                }
+                entry<Route.HintsAndBeacons> {
+                    HintsAndBeaconsDemo(onBack = { backStack.removeLastOrNull() })
+                }
+                entry<Route.TourSequences> {
+                    TourSequencesDemo(onBack = { backStack.removeLastOrNull() })
+                }
+                entry<Route.Theming> {
+                    ThemingDemo(onBack = { backStack.removeLastOrNull() })
+                }
             },
-        )
-    }
-}
-
-@Composable
-private fun DemoPlaceholder(title: String, onBack: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            TextButton(onClick = onBack) {
-                Text("← Back")
-            }
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(start = 8.dp),
-            )
-        }
-        Text(
-            text = "This demo will be implemented in a later task.",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

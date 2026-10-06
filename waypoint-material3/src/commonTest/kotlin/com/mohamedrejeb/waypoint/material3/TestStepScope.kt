@@ -1,5 +1,6 @@
 package com.mohamedrejeb.waypoint.material3
 
+import com.mohamedrejeb.waypoint.core.ResolvedPlacement
 import com.mohamedrejeb.waypoint.core.StepScope
 
 /**
@@ -13,8 +14,16 @@ internal data class TestStepScope(
     override val totalSteps: Int,
     override val isFirstStep: Boolean,
     override val isLastStep: Boolean,
-    override val onNext: () -> Unit = {},
-    override val onPrevious: () -> Unit = {},
-    override val onSkip: () -> Unit = {},
-    override val onClose: () -> Unit = {},
-) : StepScope
+    override val currentStepNumber: Int = currentStepIndex + 1,
+    override val title: String? = null,
+    override val description: String? = null,
+    override val placement: ResolvedPlacement? = ResolvedPlacement.Bottom,
+    override val advancesAutomatically: Boolean = false,
+    val onNext: () -> Unit = {},
+    val onPrevious: () -> Unit = {},
+    val onSkip: () -> Unit = {},
+) : StepScope {
+    override fun next() = onNext()
+    override fun previous() = onPrevious()
+    override fun skip() = onSkip()
+}

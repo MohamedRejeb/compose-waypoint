@@ -273,6 +273,84 @@ class PositionProviderTest {
         assertEquals(expectedX, offset.x)
     }
 
+    // -- Anchor translation --
+
+    @Test
+    fun `anchor bounds translate anchor-relative target bounds into window space`() {
+        // Target is expressed relative to the anchor at (100, 50): the same
+        // centered target as [centeredTarget] once translated.
+        val provider = createProvider(
+            targetBounds = Rect(300f, 300f, 500f, 400f),
+            placement = TooltipPlacement.Bottom,
+        )
+
+        val offset = provider.calculatePosition(
+            anchorBounds = IntRect(100, 50, 100, 50),
+            windowSize = windowSize,
+            layoutDirection = LayoutDirection.Ltr,
+            popupContentSize = tooltipSize,
+        )
+
+        assertEquals(ResolvedPlacement.Bottom, provider.resolvedPlacement)
+        assertEquals((450f + spacing).toInt(), offset.y, "y below translated target bottom")
+        assertEquals(400, offset.x, "x centered on translated target")
+    }
+
+    // -- Degenerate Windows --
+
+    @Test
+    fun `tooltip wider than window does not crash and centers the overflow`() {
+        // Window 300 wide, tooltip 280 wide, margin 16 each side: the tooltip
+        // cannot satisfy both margins. It must not crash and should center.
+        val smallWindow = IntSize(300, 800)
+        val provider = createProvider(
+            targetBounds = Rect(100f, 350f, 200f, 450f),
+            placement = TooltipPlacement.Bottom,
+        )
+
+        val offset = provider.calculatePosition(
+            anchorBounds = IntRect.Zero,
+            windowSize = smallWindow,
+            layoutDirection = LayoutDirection.Ltr,
+            popupContentSize = IntSize(280, 100),
+        )
+
+        // Midpoint of [margin, windowWidth - tooltipWidth - margin] = (16 + 4) / 2
+        assertEquals(10, offset.x)
+    }
+
+    @Test
+    fun `tooltip taller than window does not crash for side placement`() {
+        val smallWindow = IntSize(1000, 200)
+        val provider = createProvider(
+            targetBounds = Rect(400f, 50f, 600f, 150f),
+            placement = TooltipPlacement.End,
+        )
+
+        val offset = provider.calculatePosition(
+            anchorBounds = IntRect.Zero,
+            windowSize = smallWindow,
+            layoutDirection = LayoutDirection.Ltr,
+            popupContentSize = IntSize(200, 190),
+        )
+
+        // Midpoint of [16, 200 - 190 - 16] = (16 + -6) / 2 = 5
+        assertEquals(5, offset.y)
+    }
+
+    @Test
+    fun `zero size window does not crash`() {
+        val provider = createProvider(centeredTarget, TooltipPlacement.Auto)
+
+        provider.calculatePosition(
+            anchorBounds = IntRect.Zero,
+            windowSize = IntSize(0, 0),
+            layoutDirection = LayoutDirection.Ltr,
+            popupContentSize = tooltipSize,
+        )
+        // No assertion needed - just must not throw.
+    }
+
     // -- Arrow Offsets --
 
     @Test
@@ -295,5 +373,37 @@ class PositionProviderTest {
         // Arrow should point to the center of the target vertically
         val expectedArrowY = centeredTarget.center.y - offset.y.toFloat()
         assertEquals(expectedArrowY, provider.arrowVerticalOffset, 0.1f)
+    }
+
+    // -- Placement axis clamping --
+
+    @Test
+    fun `tooltip wider than the space at its end is clamped to the margin`() {
+        val provider = createProvider(centeredTarget, TooltipPlacement.End)
+
+        val offset = provider.calculatePosition(
+            anchorBounds = IntRect.Zero,
+            windowSize = windowSize,
+            layoutDirection = LayoutDirection.Ltr,
+            popupContentSize = IntSize(600, 100),
+        )
+
+        assertEquals(ResolvedPlacement.End, provider.resolvedPlacement)
+        assertEquals(windowSize.width - margin.toInt() - 600, offset.x)
+    }
+
+    @Test
+    fun `tooltip taller than any side stays inside the vertical margins`() {
+        val provider = createProvider(centeredTarget, TooltipPlacement.Bottom)
+
+        val offset = provider.calculatePosition(
+            anchorBounds = IntRect.Zero,
+            windowSize = windowSize,
+            layoutDirection = LayoutDirection.Ltr,
+            popupContentSize = IntSize(200, 700),
+        )
+
+        assertTrue(offset.y >= margin.toInt(), "top ran past the margin: ${offset.y}")
+        assertTrue(offset.y + 700 <= windowSize.height - margin.toInt(), "bottom ran past the margin: ${offset.y}")
     }
 }

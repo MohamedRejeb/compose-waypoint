@@ -14,16 +14,30 @@ import androidx.compose.ui.window.PopupPositionProvider
  * Custom [PopupPositionProvider] that positions the tooltip near the spotlight target.
  *
  * Handles auto-placement, flip logic, and screen edge clamping.
+ *
+ * [targetBounds] is expressed relative to the popup's anchor (the layout node
+ * where the popup is composed). It is translated by the anchor's window
+ * position inside [calculatePosition], using the `anchorBounds` the popup
+ * machinery itself computes. Deriving the window offset this way keeps the
+ * math consistent with the frame the popup is positioned in, which matters on
+ * Android where Dialog/BottomSheet windows have their own frames and
+ * `positionInWindow()` is not guaranteed to match them.
+ *
+ * The tooltip is clamped to the screen margin on both axes, so one that is
+ * larger than the space on its side slides over the target instead of
+ * running off screen.
  */
 internal class WaypointPositionProvider(
     private val targetBounds: Rect,
     private val requestedPlacement: TooltipPlacement,
     private val spacingPx: Float,
     private val screenMarginPx: Float,
+    initialPlacement: ResolvedPlacement = ResolvedPlacement.Bottom,
+    private val arrowEdgeInsetPx: Float = DEFAULT_ARROW_EDGE_INSET,
 ) : PopupPositionProvider {
 
     /** The resolved placement after layout, used to orient the arrow */
-    var resolvedPlacement: ResolvedPlacement by mutableStateOf(ResolvedPlacement.Bottom)
+    var resolvedPlacement: ResolvedPlacement by mutableStateOf(initialPlacement)
         private set
 
     /** Horizontal offset of the arrow center relative to the tooltip's left edge */
@@ -42,6 +56,12 @@ internal class WaypointPositionProvider(
     ): IntOffset {
         val tooltipWidth = popupContentSize.width.toFloat()
         val tooltipHeight = popupContentSize.height.toFloat()
+
+        // Anchor-relative -> popup-window coordinates.
+        val targetBounds = targetBounds.translate(
+            anchorBounds.left.toFloat(),
+            anchorBounds.top.toFloat(),
+        )
 
         val spaceTop = targetBounds.top
         val spaceBottom = windowSize.height - targetBounds.bottom
@@ -82,8 +102,8 @@ internal class WaypointPositionProvider(
         // Calculate arrow offset
         when (placement) {
             ResolvedPlacement.Top, ResolvedPlacement.Bottom -> {
-                val minOffset = ARROW_HALF_SIZE
-                val maxOffset = tooltipWidth - ARROW_HALF_SIZE
+                val minOffset = arrowEdgeInsetPx
+                val maxOffset = tooltipWidth - arrowEdgeInsetPx
                 arrowHorizontalOffset = if (maxOffset >= minOffset) {
                     (targetBounds.center.x - x).coerceIn(minOffset, maxOffset)
                 } else {
@@ -92,8 +112,8 @@ internal class WaypointPositionProvider(
             }
 
             ResolvedPlacement.Start, ResolvedPlacement.End -> {
-                val minOffset = ARROW_HALF_SIZE
-                val maxOffset = tooltipHeight - ARROW_HALF_SIZE
+                val minOffset = arrowEdgeInsetPx
+                val maxOffset = tooltipHeight - arrowEdgeInsetPx
                 arrowVerticalOffset = if (maxOffset >= minOffset) {
                     (targetBounds.center.y - y).coerceIn(minOffset, maxOffset)
                 } else {
@@ -179,46 +199,65 @@ internal class WaypointPositionProvider(
     ): Pair<Float, Float> {
         val margin = screenMarginPx
 
+        // The cross axis is clamped to the margins so the tooltip stays on
+        // screen; the placement axis is clamped too, so a tooltip larger than
+        // the space on its side slides over the target rather than off screen.
+        fun clampX(x: Float) = x.coerceInOrCenter(margin, windowWidth - tooltipWidth - margin)
+        fun clampY(y: Float) = y.coerceInOrCenter(margin, windowHeight - tooltipHeight - margin)
+
         return when (placement) {
             ResolvedPlacement.Bottom -> {
-                val x = (targetBounds.center.x - tooltipWidth / 2f)
-                    .coerceIn(margin, windowWidth - tooltipWidth - margin)
-                val y = targetBounds.bottom + spacingPx
+                val x = clampX(targetBounds.center.x - tooltipWidth / 2f)
+                val y = clampY(targetBounds.bottom + spacingPx)
                 x to y
             }
 
             ResolvedPlacement.Top -> {
-                val x = (targetBounds.center.x - tooltipWidth / 2f)
-                    .coerceIn(margin, windowWidth - tooltipWidth - margin)
-                val y = targetBounds.top - tooltipHeight - spacingPx
+                val x = clampX(targetBounds.center.x - tooltipWidth / 2f)
+                val y = clampY(targetBounds.top - tooltipHeight - spacingPx)
                 x to y
             }
 
             ResolvedPlacement.End -> {
-                val x = if (layoutDirection == LayoutDirection.Ltr) {
-                    targetBounds.right + spacingPx
-                } else {
-                    targetBounds.left - tooltipWidth - spacingPx
-                }
-                val y = (targetBounds.center.y - tooltipHeight / 2f)
-                    .coerceIn(margin, windowHeight - tooltipHeight - margin)
+                val x = clampX(
+                    if (layoutDirection == LayoutDirection.Ltr) {
+                        targetBounds.right + spacingPx
+                    } else {
+                        targetBounds.left - tooltipWidth - spacingPx
+                    },
+                )
+                val y = clampY(targetBounds.center.y - tooltipHeight / 2f)
                 x to y
             }
 
             ResolvedPlacement.Start -> {
-                val x = if (layoutDirection == LayoutDirection.Ltr) {
-                    targetBounds.left - tooltipWidth - spacingPx
-                } else {
-                    targetBounds.right + spacingPx
-                }
-                val y = (targetBounds.center.y - tooltipHeight / 2f)
-                    .coerceIn(margin, windowHeight - tooltipHeight - margin)
+                val x = clampX(
+                    if (layoutDirection == LayoutDirection.Ltr) {
+                        targetBounds.left - tooltipWidth - spacingPx
+                    } else {
+                        targetBounds.right + spacingPx
+                    },
+                )
+                val y = clampY(targetBounds.center.y - tooltipHeight / 2f)
                 x to y
             }
         }
     }
 
-    private companion object {
-        const val ARROW_HALF_SIZE = 24f
+    internal companion object {
+        /**
+         * Minimum distance in px between the arrow center and the tooltip's
+         * corners, so the arrow doesn't land on a rounded corner. Callers with
+         * density access should pass a dp-scaled value instead.
+         */
+        const val DEFAULT_ARROW_EDGE_INSET = 24f
+
+        /**
+         * Like coerceIn, but when the tooltip is too large to satisfy both
+         * margins (max < min, e.g. a tiny window), centers the overflow
+         * instead of throwing.
+         */
+        fun Float.coerceInOrCenter(min: Float, max: Float): Float =
+            if (max < min) (min + max) / 2f else coerceIn(min, max)
     }
 }

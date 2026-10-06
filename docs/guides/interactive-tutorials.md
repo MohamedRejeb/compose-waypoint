@@ -2,6 +2,10 @@
 
 A tour points at things. A tutorial makes the user do them: type in the field, tap the button, draw on the canvas, with the rest of the screen out of reach until the step is done. This guide shows the pieces Waypoint gives you for that, then puts them together.
 
+![The user types a trip name and a destination inside the highlighted fields, and the tour follows](../assets/hands-on.gif){ width="260" }
+
+In the recording the user fills in a form step by step. Each field is open to input while it is highlighted, and the tour moves on by itself once the field has a value.
+
 ## Let the user work inside the target
 
 `TargetInteraction.PassThrough` opens the highlighted area to real input. Every gesture inside it (taps, drags, text selection, typing) reaches your app, and everything outside stays blocked.

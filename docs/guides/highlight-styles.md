@@ -2,6 +2,14 @@
 
 A **highlight style** controls how the area around a tour target is visually emphasized. Waypoint ships with five built-in styles plus a fully custom escape hatch.
 
+| Spotlight | Pulse | Border | Ripple |
+|:-:|:-:|:-:|:-:|
+| ![Spotlight: dimmed screen with a cutout around the target](../assets/style-spotlight.png) | ![Pulse: a breathing ring around the target, no dimming](../assets/style-pulse.png) | ![Border: a static outline around the target](../assets/style-border.png) | ![Ripple: rings expanding from the target](../assets/style-ripple.png) |
+
+Pulse and Ripple are animated. The sample app's Lab screen switches between all of them on a running tour:
+
+![One tour restyled live in the sample app's Lab](../assets/styles.gif){ width="280" }
+
 ## Where it's applied
 
 Highlight styles can be set at two levels:

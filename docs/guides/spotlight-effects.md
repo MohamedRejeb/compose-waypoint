@@ -66,6 +66,8 @@ highlightStyle = HighlightStyle.Spotlight(
 | `radius` | `24.dp` | How far the halo extends beyond the cutout edge. |
 | `alpha` | `0.6f` | Peak alpha at the cutout edge, fades to 0 at `radius`. |
 
+![A circular cutout with a blue glow around it](../assets/effect-glow.png){ width="320" }
+
 Visually, the cutout stays hard-edged but gains a colored aura that makes the target pop against the dimmed scrim. The halo follows the cutout's shape, whether that is a circle, a pill or a wide rounded rectangle, and it is never drawn inside the cutout, so the target itself keeps its own colors.
 
 !!! tip

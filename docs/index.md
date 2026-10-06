@@ -2,14 +2,20 @@
 
 **Product tours and feature showcases for Compose Multiplatform.**
 
-[![Kotlin](https://img.shields.io/badge/kotlin-2.3.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
-[![Compose](https://img.shields.io/badge/compose-1.10.3-blue.svg?logo=jetpackcompose)](https://www.jetbrains.com/lp/compose-multiplatform)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.4.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Compose](https://img.shields.io/badge/compose-1.12.1-blue.svg?logo=jetpackcompose)](https://www.jetbrains.com/lp/compose-multiplatform)
 [![Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Maven Central](https://img.shields.io/maven-central/v/com.mohamedrejeb.waypoint/waypoint-core)](https://search.maven.org/search?q=g:%22com.mohamedrejeb.waypoint%22)
 
-Waypoint is a Compose Multiplatform library for building guided product tours, feature discovery flows, and persistent contextual hints. It ships a spotlight overlay, tooltip positioning with auto-flip, pluggable highlight styles, and a state machine for step navigation, all from a simple declarative DSL.
+<p align="center" markdown>
+![A spotlight tour moving between targets, then switching to dark theme](assets/tour.gif){ width="210" }
+![A hands-on step where the user types inside the highlighted field](assets/hands-on.gif){ width="210" }
+![A tour scrolling a list and following the user into a bottom sheet](assets/sheet.gif){ width="210" }
+</p>
 
-Targets **Android**, **iOS**, **Desktop (JVM)**, and **Web (JS, Wasm)**.
+Waypoint walks your users through your app: it dims the screen, cuts a hole around the thing you want them to look at, and puts a tooltip next to it. You describe the steps in a small DSL, tag your composables with a modifier, and the library handles positioning, animation, scrolling and input blocking.
+
+It runs on **Android**, **iOS**, **Desktop** and **Web** (JS and Wasm) from the same code.
 
 ## Artifacts
 
@@ -124,7 +130,7 @@ fun HomeScreen() {
 
 ## Four entry points
 
-The public API is intentionally minimal, most use cases only need these:
+Most apps only ever touch these:
 
 | API | Purpose |
 |-----|---------|

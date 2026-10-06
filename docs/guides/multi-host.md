@@ -2,6 +2,8 @@
 
 Dialogs, `ModalBottomSheet`s, and `Popup`s render in a separate composition tree from your screen. A single `WaypointHost` can only reach targets in its own tree, so targets inside a modal are invisible to the host. `WaypointOverlayHost` solves this by letting a secondary host live inside the modal and share state with the primary host.
 
+![A tour highlights the Add stop button, the user taps it, and the next step appears inside the bottom sheet](../assets/sheet.gif){ width="260" }
+
 ## The problem
 
 ```kotlin

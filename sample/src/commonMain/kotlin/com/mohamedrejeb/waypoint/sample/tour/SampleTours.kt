@@ -6,6 +6,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.mohamedrejeb.waypoint.core.TooltipPlacement
 import com.mohamedrejeb.waypoint.core.WaypointHintState
 import com.mohamedrejeb.waypoint.core.WaypointSequenceState
 import com.mohamedrejeb.waypoint.core.WaypointState
@@ -71,10 +72,14 @@ fun rememberSampleTours(
         hint(TripsHint.Search) {
             title = "Search trips"
             description = "Find a trip by name or by stop."
+            // Below the button. Auto would pick the side with the most room,
+            // which on a wide window is beside it, over the next action.
+            placement = TooltipPlacement.Bottom
         }
         hint(TripsHint.Filter) {
             title = "Filter"
             description = "Show only upcoming trips."
+            placement = TooltipPlacement.Bottom
         }
     }
     return remember(lookAround, planTrip, knowTrip, sequence, hints, persistence) {

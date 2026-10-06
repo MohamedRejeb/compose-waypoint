@@ -121,6 +121,51 @@ class PlanTripTourTest {
         assertShown("Where to?")
     }
 
+    /**
+     * Going back over steps that are already done and forward again shows
+     * each of them, with a Next button, instead of bouncing through.
+     */
+    @Test
+    fun revisitingFilledStepsDoesNotSkipThem() = runTourTest {
+        fillUpToStyle()
+        tap("Balanced")
+        assertShown("Your route")
+        tap("Back"); assertShown("Pick a pace")
+        tap("Back"); assertShown("Where to?")
+        tap("Back"); assertShown("Name your trip")
+
+        tap("Next")
+        assertShown("Where to?")
+        // Long enough for a typing pause to have fired if it were armed on the old text.
+        mainClock.advanceTimeBy(3_000)
+        assertShown("Where to?")
+        assertNotShown("Pick a pace")
+
+        tap("Next")
+        assertShown("Pick a pace")
+        mainClock.advanceTimeBy(3_000)
+        assertNotShown("Your route")
+        tap("Next")
+        assertShown("Your route")
+    }
+
+    /** Coming back to the route step does not load the route a second time. */
+    @Test
+    fun backToTheRouteStepShowsItAtOnce() = runTourTest {
+        fillUpToStyle()
+        tap("Balanced")
+        assertShown("Your route")
+        tap("Next")
+        assertShown("Create it")
+
+        mainClock.autoAdvance = false
+        tap("Back")
+        mainClock.advanceTimeBy(300)
+        assertEquals(1, onAllNodesWithText("Your route").fetchSemanticsNodes().size, "route step not shown at once")
+        assertEquals(0, onAllNodesWithText("Finding the best route").fetchSemanticsNodes().size)
+        mainClock.autoAdvance = true
+    }
+
     /** Navigating away mid-tour ends the tour, and the sequence with it. */
     @Test
     fun leavingScreenStopsTourAndSequence() = runComposeUiTest {

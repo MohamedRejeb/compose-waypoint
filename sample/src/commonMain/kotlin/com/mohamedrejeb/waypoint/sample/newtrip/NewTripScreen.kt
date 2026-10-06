@@ -86,16 +86,12 @@ private fun NewTripForm(
     form: NewTripFormState,
     tour: WaypointState<NewTripTarget>,
 ) {
-    // While a step is pending (the route gate is running) nothing is
-    // highlighted and nothing is blocked, so the form is disabled meanwhile.
-    val enabled = !tour.isActive || tour.isStepVisible
     val scope = rememberCoroutineScope()
 
     KitTextField(
         value = form.name,
         onValueChange = { form.name = it },
         label = "Trip name",
-        enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
             .waypointTarget(tour, NewTripTarget.Name),
@@ -104,7 +100,6 @@ private fun NewTripForm(
         value = form.destination,
         onValueChange = { form.destination = it },
         label = "Destination",
-        enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
             .waypointTarget(tour, NewTripTarget.Destination),
@@ -119,8 +114,7 @@ private fun NewTripForm(
             KitChip(
                 text = style.label,
                 selected = form.style == style,
-                enabled = enabled,
-                onClick = { form.style = style },
+                        onClick = { form.style = style },
             )
         }
     }
@@ -136,7 +130,7 @@ private fun NewTripForm(
         else -> KitButton(
             text = "Find route",
             style = KitButtonStyle.Soft,
-            enabled = enabled && form.isNameValid && form.isDestinationValid,
+            enabled = form.isNameValid && form.isDestinationValid,
             onClick = {
                 scope.launch {
                     form.routeLoading = true
@@ -150,7 +144,7 @@ private fun NewTripForm(
     }
     KitButton(
         text = if (form.created) "Trip created" else "Create trip",
-        enabled = enabled && !form.created,
+        enabled = !form.created,
         onClick = { form.created = true },
         modifier = Modifier
             .fillMaxWidth()

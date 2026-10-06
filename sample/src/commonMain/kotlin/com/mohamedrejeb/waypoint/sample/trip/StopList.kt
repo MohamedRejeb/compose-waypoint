@@ -27,8 +27,11 @@ import com.mohamedrejeb.waypoint.sample.tour.TripTarget
  * The trip's stops, followed by the ones added from the sheet. The featured
  * stop and a stop far down the list are tour targets.
  */
-/** Index of a stop that starts below the fold, for the auto-scroll step. */
-internal const val FarStopIndex = 8
+/**
+ * Index of the stop the auto-scroll step points at: far enough down a long
+ * trip to start below the fold. A shorter trip uses its last stop.
+ */
+private const val FarStopIndex = 8
 
 @Composable
 fun StopList(
@@ -41,13 +44,14 @@ fun StopList(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        val farStopIndex = minOf(FarStopIndex, stops.lastIndex)
         stops.forEachIndexed { index, stop ->
             StopRow(
                 number = index + 1,
                 stop = stop,
                 modifier = when (index) {
                     FeaturedStopIndex -> Modifier.waypointTarget(tour, TripTarget.StopRow)
-                    FarStopIndex -> Modifier.waypointTarget(tour, TripTarget.FarStop)
+                    farStopIndex -> Modifier.waypointTarget(tour, TripTarget.FarStop)
                     else -> Modifier
                 },
             )

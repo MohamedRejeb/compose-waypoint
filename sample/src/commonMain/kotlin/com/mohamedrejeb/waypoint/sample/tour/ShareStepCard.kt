@@ -59,10 +59,14 @@ internal fun ShareStepCard(scope: StepScope) {
             color = colors.tooltipContent.copy(alpha = 0.85f),
         )
         Spacer(Modifier.height(14.dp))
-        TooltipPill(
-            text = "Done",
-            onClick = scope::next,
+        // A step's own content still gets the step's navigation from the scope.
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.align(Alignment.End),
-        )
+        ) {
+            TooltipTextButton(text = "Back", onClick = scope::previous)
+            Spacer(Modifier.width(6.dp))
+            TooltipPill(text = "Done", onClick = scope::next)
+        }
     }
 }

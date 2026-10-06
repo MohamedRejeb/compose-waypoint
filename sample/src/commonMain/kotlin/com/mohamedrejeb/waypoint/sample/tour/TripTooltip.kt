@@ -45,11 +45,15 @@ private const val InactiveDotAlpha = 0.4f
 /**
  * The tooltip of every tour in the app, built on waypoint-core only:
  * title, description, progress dots and navigation.
+ *
+ * @param showNext whether Next (or Done) is offered. By default it is hidden
+ *   on a step that advances from the user's own action.
  */
 @Composable
 fun TripTooltip(
     scope: StepScope,
     modifier: Modifier = Modifier,
+    showNext: Boolean = !scope.advancesAutomatically,
 ) {
     TooltipCard(modifier = modifier) {
         TooltipTexts(title = scope.title, description = scope.description)
@@ -65,8 +69,7 @@ fun TripTooltip(
             if (!scope.isFirstStep) {
                 TooltipTextButton(text = "Back", onClick = scope::previous)
             }
-            // A step that advances from the user's own action has no Next.
-            if (!scope.advancesAutomatically) {
+            if (showNext) {
                 Spacer(Modifier.width(6.dp))
                 TooltipPill(
                     text = if (scope.isLastStep) "Done" else "Next",
@@ -96,7 +99,8 @@ fun TripHintTooltip(
 
 /**
  * Default highlight of the app's tours: a rounded spotlight whose scrim
- * follows the theme, with an accent glow around the cutout in the dark theme.
+ * follows the theme and stays up between steps, with an accent glow around
+ * the cutout in the dark theme.
  */
 @Composable
 fun tripHighlightStyle(): HighlightStyle {
@@ -106,6 +110,10 @@ fun tripHighlightStyle(): HighlightStyle {
             shape = SpotlightShape.RoundedRect(18.dp),
             overlayColor = colors.scrim,
             overlayAlpha = colors.scrimAlpha,
+            // Keeps the screen dimmed and blocked while a step is getting
+            // ready (a route loading, a sheet opening), so the dim does not
+            // drop out and come back between two steps.
+            coverWhilePending = true,
             effect = if (colors.isDark) {
                 SpotlightEffect.Glow(color = colors.accent, radius = GlowRadius)
             } else {
@@ -172,7 +180,7 @@ private fun ProgressDots(current: Int, total: Int) {
 }
 
 @Composable
-private fun TooltipTextButton(text: String, onClick: () -> Unit) {
+internal fun TooltipTextButton(text: String, onClick: () -> Unit) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelLarge,

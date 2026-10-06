@@ -2,6 +2,7 @@ package com.mohamedrejeb.waypoint.sample.tour
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshotFlow
+import com.mohamedrejeb.waypoint.core.StepBuilder
 import com.mohamedrejeb.waypoint.core.TargetInteraction
 import com.mohamedrejeb.waypoint.core.TooltipPlacement
 import com.mohamedrejeb.waypoint.core.WaypointPersistence
@@ -13,21 +14,38 @@ import com.mohamedrejeb.waypoint.sample.trip.TripUiState
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 
 private const val RouteLoadingMillis = 1200L
 private const val TypingPauseMillis = 900L
 
 /**
- * Returns once the text has stopped changing for a moment and is valid.
- * Advancing on the first valid character would pull the user out of the
- * field in the middle of a word.
+ * Returns once the user has edited the text, stopped typing for a moment,
+ * and left it valid. Advancing on the first valid character would pull the
+ * user out of the field in the middle of a word.
+ *
+ * The value the step starts with is skipped (drop), so coming back to a field
+ * that is already filled in does not bounce straight to the next step. For
+ * that case the tooltip offers Next instead, see [canContinue].
  */
 @OptIn(FlowPreview::class)
 private suspend fun awaitTypingPause(read: () -> String, isValid: () -> Boolean) {
     snapshotFlow(read)
+        .drop(1)
         .debounce(TypingPauseMillis)
         .first { isValid() }
+}
+
+/**
+ * The tooltip of a step the user completes by acting. Next stays hidden
+ * until the step's own condition holds, so the action cannot be skipped, and
+ * it is there when the user returns to a step that is already done.
+ */
+private fun <K> StepBuilder<K>.canContinue(isDone: () -> Boolean) {
+    content { scope ->
+        TripTooltip(scope, showNext = !scope.advancesAutomatically || isDone())
+    }
 }
 
 /** Chapter 1: a classic spotlight tour of the Trips screen. */
@@ -92,18 +110,22 @@ internal fun rememberPlanTripTour(
         description = "Type a name. The tour moves on when you stop typing."
         interaction = TargetInteraction.PassThrough
         advanceOn { awaitTypingPause(read = { form.name }, isValid = { form.isNameValid }) }
+        canContinue { form.isNameValid }
     }
     step(NewTripTarget.Destination) {
         title = "Where to?"
         description = "Type a destination, then pause."
         interaction = TargetInteraction.PassThrough
         advanceOn { awaitTypingPause(read = { form.destination }, isValid = { form.isDestinationValid }) }
+        canContinue { form.isDestinationValid }
     }
     step(NewTripTarget.Style) {
         title = "Pick a pace"
         description = "Choose any travel style."
         interaction = TargetInteraction.PassThrough
-        advanceOn { snapshotFlow { form.style }.first { it != null } }
+        // A new choice advances, the one already made when the step starts does not.
+        advanceOn { snapshotFlow { form.style }.drop(1).first { it != null } }
+        canContinue { form.style != null }
     }
     step(NewTripTarget.Route) {
         title = "Your route"
@@ -111,6 +133,8 @@ internal fun rememberPlanTripTour(
             "With the Relaxed pace, the next step is skipped."
         // The gate holds the step until the route card exists.
         beforeShow {
+            // Already loaded when the user comes back to this step.
+            if (form.routeVisible) return@beforeShow
             form.routeLoading = true
             delay(RouteLoadingMillis)
             form.routeLoading = false
@@ -122,7 +146,8 @@ internal fun rememberPlanTripTour(
         description = "Tap the highlighted button."
         interaction = TargetInteraction.PassThrough
         showIf { form.style != TravelStyle.Relaxed }
-        advanceOn { snapshotFlow { form.created }.first { it } }
+        advanceOn { snapshotFlow { form.created }.drop(1).first { it } }
+        canContinue { form.created }
     }
     step {
         title = "That's a trip"
@@ -149,8 +174,8 @@ internal fun rememberKnowTripTour(
         additionalTargets = listOf(TripTarget.StopRow)
     }
     step(TripTarget.FarStop) {
-        title = "The whole route"
-        description = "This stop was off screen, so the tour scrolled it to the middle."
+        title = "Further down the route"
+        description = "When a stop is off screen, the tour scrolls it to the middle."
         placement = TooltipPlacement.Top
     }
     step(TripTarget.AddStop) {

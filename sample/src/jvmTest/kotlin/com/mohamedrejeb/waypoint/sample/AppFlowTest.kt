@@ -1,16 +1,22 @@
 package com.mohamedrejeb.waypoint.sample
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.runDesktopComposeUiTest
 import com.mohamedrejeb.waypoint.sample.trips.MapBeaconTag
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 /** Drives the whole app: the checklist, the sequence across screens, the theme and the beacon. */
 @OptIn(ExperimentalTestApi::class)
@@ -109,5 +115,30 @@ class AppFlowTest {
 
         onNodeWithContentDescription("Play Look around").performClick()
         assertShown("Welcome to Trips")
+    }
+
+    /**
+     * A hint opens below its button, clear of the other app bar actions, also
+     * on a wide window where there is more room beside the button than below.
+     */
+    @Test
+    fun hintOpensBelowItsButton() = runDesktopComposeUiTest(width = 800, height = 450) {
+        setContent { App(autoStartTour = false) }
+        // The hint beacons are the clickables with no label: Search, then Filter.
+        val beacon = SemanticsMatcher("unlabelled clickable") {
+            it.config.getOrNull(SemanticsProperties.ContentDescription) == null &&
+                it.config.getOrNull(SemanticsProperties.Text) == null
+        }
+        onAllNodes(hasClickAction() and beacon)[1].performClick()
+        assertShown("Show only upcoming trips.")
+
+        val button = onNodeWithContentDescription("Filter").fetchSemanticsNode().boundsInWindow
+        val tooltip = onNodeWithText("Show only upcoming trips.").fetchSemanticsNode().boundsInWindow
+        assertTrue(tooltip.top >= button.bottom, "tooltip $tooltip should be below button $button")
+        // Under the button, not off to its side.
+        assertTrue(
+            tooltip.left < button.center.x && tooltip.right > button.center.x,
+            "tooltip $tooltip should sit under button $button",
+        )
     }
 }

@@ -67,23 +67,29 @@ Use Spotlight when you want to completely block distractions and focus attention
 
 #### Touch blocking
 
-Spotlight is the only style that blocks pointer input. Touches outside the cutouts never reach your app, a tap there follows the host's `overlayClickBehavior`. What happens inside the cutouts is decided by the step's `interaction`:
+Touch blocking is independent of the highlight style. The host's `blockOutside` (default `true`) blocks pointer input outside the highlighted areas while a step is shown, with every style, `None` included. Touches there never reach your app, a tap follows the host's `overlayClickBehavior`. What happens inside the highlighted areas is decided by the step's `interaction`:
 
-| `TargetInteraction` | Inside the cutout |
+| `TargetInteraction` | Inside the highlighted areas |
 |---|---|
 | `None` (default) | Touches are swallowed. |
 | `ClickToAdvance` | A tap advances the tour. The target does not receive it. |
 | `PassThrough` | Every gesture reaches the app, in the target and in each of the step's `additionalTargets`. |
 
-Every other style leaves the whole screen interactive.
+The interactive area is the drawn shape's bounding box for the styles that draw a shape around the target (`Spotlight`, `Pulse`, `Border`, padding included) and the target's own bounds for the others.
 
-To block touches without dimming the screen, make the scrim transparent:
+| Host / step setting | Effect |
+|---|---|
+| `WaypointHost(blockOutside = true)` (default) | Every step blocks outside the highlighted areas, whatever its style. |
+| `WaypointHost(blockOutside = false)` | Nothing is blocked, even with a dimmed `Spotlight`. The tour is purely visual. |
+| `step { blockOutside = false }` / `true` | Per-step override of the host value. |
+
+So a blocking tour without dimming can use any undimmed style, for example `HighlightStyle.None` for a tooltip-only tour that still keeps the user on the step, or a transparent spotlight if you want its padding and shape to define the interactive area:
 
 ```kotlin
 highlightStyle = HighlightStyle.Spotlight(overlayAlpha = 0f)
 ```
 
-A [step without a target](interactive-tutorials.md#intro-and-outro-cards) draws the scrim with no cutout, which blocks the whole host. The other styles draw nothing for such a step.
+A [step without a target](interactive-tutorials.md#intro-and-outro-cards) blocks the whole host while blocking is on; `Spotlight` also draws the scrim with no cutout, the other styles draw nothing for such a step.
 
 For `SpotlightShape.Circle` the drawn circle reaches beyond a wide or tall target (its radius is half the longer side), and the interactive area follows what is drawn: taps and pass-through use the circle's bounding square.
 
@@ -95,7 +101,7 @@ Between two steps the scrim can be gone for a moment: the next step's `beforeSho
 highlightStyle = HighlightStyle.Spotlight(coverWhilePending = true)
 ```
 
-The host's `overlayClickBehavior` and the dismiss keys still apply, so `Dismiss` or Escape end the tour from under the cover. A target that scrolls out of view after its step was shown does not count as pending, a `PassThrough` user who scrolls the target away is never trapped. The alternative is to leave the screen uncovered and block your own UI from `WaypointState.isStepVisible`, see [Interactive Tutorials](interactive-tutorials.md#block-your-own-ui-while-a-step-is-pending).
+The cover blocks input only while `blockOutside` resolves to `true`. The host's `overlayClickBehavior` and the dismiss keys still apply, so `Dismiss` or Escape end the tour from under the cover. A target that scrolls out of view after its step was shown does not count as pending, a `PassThrough` user who scrolls the target away is never trapped. The alternative is to leave the screen uncovered and block your own UI from `WaypointState.isStepVisible`, see [Interactive Tutorials](interactive-tutorials.md#block-your-own-ui-while-a-step-is-pending).
 
 ### `Pulse`
 

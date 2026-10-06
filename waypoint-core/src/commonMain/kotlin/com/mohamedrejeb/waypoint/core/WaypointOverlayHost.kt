@@ -35,7 +35,8 @@ import androidx.compose.ui.unit.Dp
  *
  * @param state the [WaypointState] shared with the primary [WaypointHost]
  * @param highlightStyle default highlight style for steps rendered in this host
- * @param overlayClickBehavior what happens when the overlay is clicked
+ * @param blockOutside whether pointer input outside the highlighted areas is blocked (overridable per-step)
+ * @param overlayClickBehavior what happens when a blocked area is tapped
  * @param tooltipSpacing spacing between tooltip and target
  * @param screenMargin minimum margin from screen edges for the tooltip
  * @param tooltipContent composable to render the tooltip; receives a [StepScope]
@@ -46,6 +47,7 @@ public fun <K> WaypointOverlayHost(
     state: WaypointState<K>,
     modifier: Modifier = Modifier,
     highlightStyle: HighlightStyle = WaypointDefaults.HighlightStyle,
+    blockOutside: Boolean = true,
     overlayClickBehavior: OverlayClickBehavior = WaypointDefaults.OverlayClickBehavior,
     tooltipSpacing: Dp = WaypointDefaults.TooltipSpacing,
     screenMargin: Dp = WaypointDefaults.ScreenMargin,
@@ -60,6 +62,7 @@ public fun <K> WaypointOverlayHost(
         isPrimary = false,
         modifier = modifier,
         highlightStyle = highlightStyle,
+        blockOutside = blockOutside,
         overlayClickBehavior = overlayClickBehavior,
         tooltipSpacing = tooltipSpacing,
         screenMargin = screenMargin,

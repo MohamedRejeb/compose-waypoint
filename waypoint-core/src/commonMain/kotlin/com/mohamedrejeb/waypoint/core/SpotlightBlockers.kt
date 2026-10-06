@@ -21,8 +21,9 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.roundToIntRect
 
 /**
- * The touch-blocking half of the spotlight: invisible boxes that swallow
- * pointer input so the content underneath cannot be used during a step.
+ * The touch-blocking layer of a step: invisible boxes that swallow pointer
+ * input so the content underneath cannot be used during a step. Independent
+ * of the highlight style, the host adds it when `blockOutside` resolves true.
  *
  * Without [passThrough] a single blocker covers everything and a tap is
  * reported as [onTargetClick] or [onOverlayClick] depending on whether it

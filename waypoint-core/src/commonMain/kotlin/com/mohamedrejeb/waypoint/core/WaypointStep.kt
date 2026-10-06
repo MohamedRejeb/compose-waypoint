@@ -27,6 +27,12 @@ public data class WaypointStep<K>(
     /** How the target responds to interaction during this step; ignored without a target */
     val interaction: TargetInteraction = TargetInteraction.None,
     /**
+     * Whether pointer input outside the highlighted areas is blocked during
+     * this step, with any highlight style. Null inherits the host's
+     * `blockOutside`. See [TargetInteraction] for what happens inside.
+     */
+    val blockOutside: Boolean? = null,
+    /**
      * Event-driven progression: once the step is shown (and the tour is not
      * paused) this is awaited, and the tour advances when it returns. It is
      * cancelled if the step is exited first. The Next button and keyboard

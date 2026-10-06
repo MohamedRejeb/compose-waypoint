@@ -52,9 +52,6 @@ class SpotlightEffectScreenshotTest {
                         overlayAlpha = 0.6f,
                         effect = effect,
                     ),
-                    passThrough = false,
-                    onOverlayClick = {},
-                    onTargetClick = {},
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -125,9 +122,6 @@ class SpotlightEffectScreenshotTest {
                         overlayAlpha = 0.6f,
                         effect = SpotlightEffect.SoftEdge(fadeWidth = fadeWidthDp),
                     ),
-                    passThrough = false,
-                    onOverlayClick = {},
-                    onTargetClick = {},
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -205,9 +199,6 @@ class SpotlightEffectScreenshotTest {
                         overlayAlpha = 0.6f,
                         effect = SpotlightEffect.SoftEdge(fadeWidth = fadeWidthDp),
                     ),
-                    passThrough = false,
-                    onOverlayClick = {},
-                    onTargetClick = {},
                     modifier = Modifier.fillMaxSize(),
                 )
             }

@@ -51,9 +51,6 @@ class MultiElementScreenshotTest {
                         overlayColor = Color.Black,
                         overlayAlpha = 0.6f,
                     ),
-                    passThrough = false,
-                    onOverlayClick = {},
-                    onTargetClick = {},
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -80,9 +77,6 @@ class MultiElementScreenshotTest {
                         overlayColor = Color.Black,
                         overlayAlpha = 0.6f,
                     ),
-                    passThrough = false,
-                    onOverlayClick = {},
-                    onTargetClick = {},
                     modifier = Modifier.fillMaxSize(),
                 )
             }

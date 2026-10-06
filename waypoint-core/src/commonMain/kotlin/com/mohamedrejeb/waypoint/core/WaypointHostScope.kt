@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.coroutineScope
@@ -54,6 +55,7 @@ internal fun <K> WaypointHostScope(
     isPrimary: Boolean,
     modifier: Modifier,
     highlightStyle: HighlightStyle,
+    blockOutside: Boolean,
     overlayClickBehavior: OverlayClickBehavior,
     tooltipSpacing: Dp,
     screenMargin: Dp,
@@ -145,6 +147,7 @@ internal fun <K> WaypointHostScope(
     val isPending = isRunning && step != null &&
         (state.isStepHeld || (step.targetKey != null && targetBounds == null && !state.hasShownCurrentStep))
     val resolvedStyle = step?.highlightStyle ?: highlightStyle
+    val blocksOutside = step?.blockOutside ?: blockOutside
     val coversPending = isPending && isResponsibleHost &&
         resolvedStyle is HighlightStyle.Spotlight && resolvedStyle.coverWhilePending
 
@@ -169,16 +172,23 @@ internal fun <K> WaypointHostScope(
             }
 
             // 2. Cover while the step is pending (opt-in): scrim with no
-            // cutout, everything blocked, overlay clicks still handled.
+            // cutout and, when blocking is on, everything blocked with
+            // overlay clicks still handled.
             if (coversPending && resolvedStyle is HighlightStyle.Spotlight) {
                 SpotlightOverlay(
                     targetBounds = { emptyList() },
                     style = resolvedStyle,
-                    passThrough = false,
-                    onOverlayClick = onOverlayClick,
-                    onTargetClick = {},
                     modifier = Modifier.matchParentSize(),
                 )
+                if (blocksOutside) {
+                    SpotlightBlockers(
+                        holes = { emptyList() },
+                        passThrough = false,
+                        onOverlayClick = onOverlayClick,
+                        onTargetClick = {},
+                        modifier = Modifier.matchParentSize(),
+                    )
+                }
             }
 
             // 3. Highlight + tooltip of the current step
@@ -190,6 +200,7 @@ internal fun <K> WaypointHostScope(
                     targetBounds = targetBounds,
                     animatedBounds = readAnimatedBounds,
                     highlightStyle = resolvedStyle,
+                    blockOutside = blocksOutside,
                     onOverlayClick = onOverlayClick,
                     tooltipSpacing = tooltipSpacing,
                     screenMargin = screenMargin,
@@ -332,6 +343,7 @@ private fun <K> BoxScope.StepLayers(
     targetBounds: Rect?,
     animatedBounds: () -> Rect,
     highlightStyle: HighlightStyle,
+    blockOutside: Boolean,
     onOverlayClick: () -> Unit,
     tooltipSpacing: Dp,
     screenMargin: Dp,
@@ -341,12 +353,19 @@ private fun <K> BoxScope.StepLayers(
     SideEffect { state.noteStepShown() }
 
     if (step.targetKey == null) {
-        // A spotlight still dims and blocks the screen, with nothing cut out.
-        // Every other style has nothing to draw without a target.
+        // A spotlight still dims the screen, with nothing cut out. Every other
+        // style has nothing to draw without a target. Blocking covers the
+        // whole host either way.
         if (highlightStyle is HighlightStyle.Spotlight) {
             SpotlightOverlay(
                 targetBounds = { emptyList() },
                 style = highlightStyle,
+                modifier = Modifier.matchParentSize(),
+            )
+        }
+        if (blockOutside) {
+            SpotlightBlockers(
+                holes = { emptyList() },
                 passThrough = false,
                 onOverlayClick = onOverlayClick,
                 onTargetClick = {},
@@ -370,17 +389,28 @@ private fun <K> BoxScope.StepLayers(
         val additionalBounds = step.additionalTargets.mapNotNull { key ->
             if (state.targetHostIds[key] == hostId) state.targetCoordinates[key] else null
         }
+        // Until the bounds animation has caught up with a freshly shown
+        // target (animated bounds still Zero), draw at the target itself.
+        val allBounds: () -> List<Rect> = {
+            listOf(animatedBounds().takeUnless { it == Rect.Zero } ?: targetBounds) + additionalBounds
+        }
         TargetHighlight(
             style = highlightStyle,
             targetBounds = targetBounds,
-            // Until the bounds animation has caught up with a freshly shown
-            // target (animated bounds still Zero), draw at the target itself.
-            highlightBounds = { animatedBounds().takeUnless { it == Rect.Zero } ?: targetBounds },
+            allBounds = allBounds,
             additionalBounds = additionalBounds,
-            interaction = step.interaction,
-            onOverlayClick = onOverlayClick,
-            onTargetClick = { if (step.interaction == TargetInteraction.ClickToAdvance) state.next() },
         )
+        if (blockOutside) {
+            val density = LocalDensity.current
+            val layoutDirection = LocalLayoutDirection.current
+            SpotlightBlockers(
+                holes = { highlightStyle.interactiveBounds(allBounds(), density, layoutDirection) },
+                passThrough = step.interaction == TargetInteraction.PassThrough,
+                onOverlayClick = onOverlayClick,
+                onTargetClick = { if (step.interaction == TargetInteraction.ClickToAdvance) state.next() },
+                modifier = Modifier.matchParentSize(),
+            )
+        }
     }
 
     // The tooltip stays up while the tour has bounds to render at, even when
@@ -430,30 +460,25 @@ private fun <K> WaypointState<K>.stepScope(
 )
 
 /**
- * The highlight layer for a step with a target, sized to the host.
+ * The highlight layer for a step with a target, sized to the host. Drawing
+ * only, blocking is a separate layer.
  *
- * [highlightBounds] is the animated position of the primary target. The
- * built-in styles read it while drawing or laying out; only a custom style,
- * whose content takes the bounds as a parameter, recomposes with it.
+ * [allBounds] returns the animated position of the primary target followed by
+ * the additional targets. The built-in styles read it while drawing; only a
+ * custom style, whose content takes the bounds as a parameter, recomposes
+ * with it.
  */
 @Composable
 private fun BoxScope.TargetHighlight(
     style: HighlightStyle,
     targetBounds: Rect,
-    highlightBounds: () -> Rect,
+    allBounds: () -> List<Rect>,
     additionalBounds: List<Rect>,
-    interaction: TargetInteraction,
-    onOverlayClick: () -> Unit,
-    onTargetClick: () -> Unit,
 ) {
-    val allBounds: () -> List<Rect> = { listOf(highlightBounds()) + additionalBounds }
     when (style) {
         is HighlightStyle.Spotlight -> SpotlightOverlay(
             targetBounds = allBounds,
             style = style,
-            passThrough = interaction == TargetInteraction.PassThrough,
-            onOverlayClick = onOverlayClick,
-            onTargetClick = onTargetClick,
             modifier = Modifier.matchParentSize(),
         )
 
@@ -477,6 +502,6 @@ private fun BoxScope.TargetHighlight(
 
         is HighlightStyle.None -> {}
 
-        is HighlightStyle.Custom -> style.content(targetBounds, highlightBounds(), additionalBounds)
+        is HighlightStyle.Custom -> style.content(targetBounds, allBounds().first(), additionalBounds)
     }
 }

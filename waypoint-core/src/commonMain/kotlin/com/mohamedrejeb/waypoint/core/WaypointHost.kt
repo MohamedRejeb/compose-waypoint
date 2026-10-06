@@ -36,7 +36,11 @@ import kotlinx.coroutines.flow.first
  *
  * @param state the [WaypointState] managing the tour
  * @param highlightStyle default highlight style for all steps (overridable per-step)
- * @param overlayClickBehavior what happens when the overlay is clicked (only applies to Spotlight)
+ * @param blockOutside whether pointer input outside the highlighted areas is
+ *   blocked while a step is shown, with any highlight style (overridable
+ *   per-step through [WaypointStep.blockOutside]). Inside the highlighted
+ *   areas [WaypointStep.interaction] applies.
+ * @param overlayClickBehavior what happens when a blocked area is tapped
  * @param keyboardConfig keyboard navigation settings (arrow keys, Escape)
  * @param tooltipSpacing spacing between tooltip and target
  * @param screenMargin minimum margin from screen edges for the tooltip
@@ -52,6 +56,7 @@ public fun <K> WaypointHost(
     state: WaypointState<K>,
     modifier: Modifier = Modifier,
     highlightStyle: HighlightStyle = WaypointDefaults.HighlightStyle,
+    blockOutside: Boolean = true,
     overlayClickBehavior: OverlayClickBehavior = WaypointDefaults.OverlayClickBehavior,
     keyboardConfig: KeyboardConfig = WaypointDefaults.KeyboardConfig,
     tooltipSpacing: Dp = WaypointDefaults.TooltipSpacing,
@@ -91,6 +96,7 @@ public fun <K> WaypointHost(
         isPrimary = true,
         modifier = modifier.then(keyboardModifier),
         highlightStyle = highlightStyle,
+        blockOutside = blockOutside,
         overlayClickBehavior = overlayClickBehavior,
         tooltipSpacing = tooltipSpacing,
         screenMargin = screenMargin,

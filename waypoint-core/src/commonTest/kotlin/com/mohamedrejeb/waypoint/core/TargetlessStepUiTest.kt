@@ -176,7 +176,7 @@ class TargetlessStepUiTest {
     }
 
     @Test
-    fun `non-spotlight style draws nothing and leaves the app usable`() = run {
+    fun `non-spotlight style draws nothing but still blocks the app by default`() = run {
         val state = WaypointState(steps = listOf(intro()))
 
         runTargetlessTest(state, highlightStyle = HighlightStyle.Border(color = Color.Red)) { observed ->
@@ -186,7 +186,7 @@ class TargetlessStepUiTest {
             onNodeWithTag("app").performClick()
             waitForIdle()
 
-            assertEquals(1, observed.appClicks)
+            assertEquals(0, observed.appClicks)
         }
     }
 

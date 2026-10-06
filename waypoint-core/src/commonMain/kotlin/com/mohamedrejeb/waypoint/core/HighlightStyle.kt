@@ -19,11 +19,9 @@ public sealed interface HighlightStyle {
      * Dimmed overlay with a transparent cutout around the target.
      * This is the classic product-tour look and the default.
      *
-     * It is also the only style that blocks pointer input: touches outside
-     * the cutouts never reach the app (see [OverlayClickBehavior] for what a
-     * tap there does), and [TargetInteraction] decides what happens inside
-     * them. Every other style leaves the whole screen interactive. For
-     * blocking without dimming use `Spotlight(overlayAlpha = 0f)`.
+     * Touch blocking is independent of the style: the host's `blockOutside`
+     * (on by default) blocks touches outside the highlighted areas with every
+     * style, and [TargetInteraction] decides what happens inside them.
      *
      * @param effect optional decoration applied around or instead of the
      *   hard-edge cutout (glow, soft edge, or custom draw). Defaults to
@@ -32,9 +30,10 @@ public sealed interface HighlightStyle {
      *   and all input is blocked while the current step is pending: its
      *   beforeShow gate is still running, or its target has not been laid out
      *   yet. The overlay click behavior and the dismiss keys still apply, so
-     *   the tour can be cancelled. A target that scrolls out of view after
-     *   the step was shown is not "pending", the user is never trapped. The
-     *   default leaves the app uncovered between steps, apps can also read
+     *   the tour can be cancelled. The cover blocks input only when the host's
+     *   `blockOutside` resolves to true. A target that scrolls out of view
+     *   after the step was shown is not "pending", the user is never trapped.
+     *   The default leaves the app uncovered between steps, apps can also read
      *   [WaypointState.isStepVisible] and block their own UI.
      */
     public data class Spotlight(

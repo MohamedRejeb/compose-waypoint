@@ -30,7 +30,8 @@ public fun <K> WaypointHost(
 | `state` | `WaypointState<K>` | required | The tour state holder created via [`rememberWaypointState`](waypoint-state.md). |
 | `modifier` | `Modifier` | `Modifier` | Applied to the host's outer `Box`. |
 | `highlightStyle` | `HighlightStyle` | `HighlightStyle.Spotlight()` | Default highlight for every step. Steps override via `step { highlightStyle = ... }`. |
-| `overlayClickBehavior` | `OverlayClickBehavior` | `Nothing` | What happens when the user clicks outside the highlighted target. Only applies to the `Spotlight` highlight style. |
+| `blockOutside` | `Boolean` | `true` | Block pointer input outside the highlighted areas while a step is shown, with any highlight style. Steps override via `step { blockOutside = ... }`. See [Touch blocking](../guides/highlight-styles.md#touch-blocking). |
+| `overlayClickBehavior` | `OverlayClickBehavior` | `Nothing` | What happens when the user taps a blocked area. |
 | `keyboardConfig` | `KeyboardConfig` | `KeyboardConfig.Default` | Keyboard navigation config (arrow keys, Enter, Escape). See [`KeyboardConfig`](#keyboardconfig). |
 | `tooltipSpacing` | `Dp` | `12.dp` | Gap between the tooltip and the target. |
 | `screenMargin` | `Dp` | `16.dp` | Minimum margin from screen edges before the tooltip flips or shifts. |

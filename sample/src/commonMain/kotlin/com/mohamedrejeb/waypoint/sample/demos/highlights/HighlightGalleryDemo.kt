@@ -60,6 +60,8 @@ private data class GalleryEntry(
     val note: String,
     val icon: ImageVector,
     val style: HighlightStyle,
+    /** Undimmed styles are shown as purely visual tours, so the screen stays usable. */
+    val blockOutside: Boolean? = null,
 )
 
 /**
@@ -110,27 +112,31 @@ fun HighlightGalleryDemo(onBack: () -> Unit) {
             ),
             GalleryEntry(
                 label = "Pulse",
-                note = "Breathing shape, no dimmed overlay.",
+                note = "Breathing shape, no dimmed overlay, nothing blocked.",
                 icon = Icons.Rounded.AutoAwesome,
                 style = HighlightStyle.Pulse(color = scheme.primary),
+                blockOutside = false,
             ),
             GalleryEntry(
                 label = "Border",
-                note = "Static outline, no dimmed overlay.",
+                note = "Static outline, no dimmed overlay, nothing blocked.",
                 icon = Icons.Rounded.RadioButtonUnchecked,
                 style = HighlightStyle.Border(color = scheme.tertiary, borderWidth = 3.dp),
+                blockOutside = false,
             ),
             GalleryEntry(
                 label = "Ripple",
-                note = "Expanding rings from the center.",
+                note = "Expanding rings from the center, nothing blocked.",
                 icon = Icons.Rounded.Waves,
                 style = HighlightStyle.Ripple(color = scheme.secondary),
+                blockOutside = false,
             ),
             GalleryEntry(
                 label = "None (tooltip only)",
-                note = "No highlight, just the tooltip.",
+                note = "No highlight, just the tooltip, nothing blocked.",
                 icon = Icons.Rounded.VisibilityOff,
                 style = HighlightStyle.None,
+                blockOutside = false,
             ),
         )
     }
@@ -141,6 +147,7 @@ fun HighlightGalleryDemo(onBack: () -> Unit) {
                 title = entry.label
                 description = entry.note
                 highlightStyle = entry.style
+                blockOutside = entry.blockOutside
                 showIf { activeEntry == index }
             }
         }

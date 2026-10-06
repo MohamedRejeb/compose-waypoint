@@ -54,6 +54,9 @@ public class StepBuilder<K> internal constructor(private val targetKey: K?) {
     /** How the target responds to interaction; ignored for a step without a target */
     public var interaction: TargetInteraction = TargetInteraction.None
 
+    /** Whether input outside the highlighted areas is blocked; null inherits the host's `blockOutside` */
+    public var blockOutside: Boolean? = null
+
     /** Additional targets to highlight alongside the primary target; ignored for a step without a target */
     public var additionalTargets: List<K> = emptyList()
 
@@ -125,6 +128,7 @@ public class StepBuilder<K> internal constructor(private val targetKey: K?) {
         placement = placement,
         highlightStyle = highlightStyle,
         interaction = interaction,
+        blockOutside = blockOutside,
         advanceOn = advanceOn,
         additionalTargets = additionalTargets,
         showIf = showIf,

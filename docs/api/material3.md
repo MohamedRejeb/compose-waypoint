@@ -47,7 +47,7 @@ Everything on `WaypointHost` except `tooltipContent`, plus:
 | `labels` | `WaypointMaterial3Labels` | `WaypointMaterial3Labels.Default` | Button and progress texts. See [`WaypointMaterial3Labels`](#waypointmaterial3labels). |
 | `showProgress` | `Boolean` | `true` | Toggle the "N of M" progress indicator above the title. |
 
-For `highlightStyle`, `overlayClickBehavior`, `keyboardConfig`, `tooltipSpacing`, `screenMargin`, `onTourComplete`, and `onTourCancel`, see the [`WaypointHost` reference](waypoint-host.md).
+For `highlightStyle`, `blockOutside`, `overlayClickBehavior`, `keyboardConfig`, `tooltipSpacing`, `screenMargin`, `onTourComplete`, and `onTourCancel`, see the [`WaypointHost` reference](waypoint-host.md).
 
 ### Minimal setup
 

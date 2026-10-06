@@ -1,7 +1,6 @@
 package com.mohamedrejeb.waypoint.core
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -22,24 +21,19 @@ import kotlin.math.max
 import kotlin.math.pow
 
 /**
- * Renders a semi-transparent overlay with transparent cutouts (spotlights)
- * around the target elements, and blocks pointer input outside of them.
+ * Draws a semi-transparent overlay with transparent cutouts (spotlights)
+ * around the target elements. Drawing only, touch blocking is a separate
+ * layer ([SpotlightBlockers]) owned by the host.
  *
  * [targetBounds] returns the primary target first, then any additional
  * targets. It is empty for a step without a target, which draws the scrim
- * with no cutout and blocks the whole area. It is only read while drawing and
- * laying out, so animating bounds do not recompose anything.
- *
- * The canvas only draws. Pointer input is handled by [SpotlightBlockers]
- * layered on top of it, see there for what [passThrough] does.
+ * with no cutout. It is only read while drawing, so animating bounds do not
+ * recompose anything.
  */
 @Composable
 internal fun SpotlightOverlay(
     targetBounds: () -> List<Rect>,
     style: HighlightStyle.Spotlight,
-    passThrough: Boolean,
-    onOverlayClick: () -> Unit,
-    onTargetClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
@@ -49,60 +43,72 @@ internal fun SpotlightOverlay(
         targetBounds().map { padBounds(it, style.padding, density, layoutDirection) }
     }
 
-    Box(modifier = modifier) {
-        Canvas(
-            modifier = Modifier
-                .matchParentSize()
-                .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen),
-        ) {
-            val allPaddedBounds = paddedBounds()
+    Canvas(
+        modifier = modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen),
+    ) {
+        val allPaddedBounds = paddedBounds()
 
-            // 1. Draw the scrim
-            drawRect(color = style.overlayColor.copy(alpha = style.overlayAlpha))
+        // 1. Draw the scrim
+        drawRect(color = style.overlayColor.copy(alpha = style.overlayAlpha))
 
-            // 2. Punch hard cutouts for all targets
+        // 2. Punch hard cutouts for all targets
+        for (bounds in allPaddedBounds) {
+            drawCutout(bounds, style.shape, density)
+        }
+
+        // 3. Apply SoftEdge feather on top of the hard cutouts (still clearing)
+        val effect = style.effect
+        if (effect is SpotlightEffect.SoftEdge) {
+            val fadeWidthPx = with(density) { effect.fadeWidth.toPx() }
             for (bounds in allPaddedBounds) {
-                drawCutout(bounds, style.shape, density)
-            }
-
-            // 3. Apply SoftEdge feather on top of the hard cutouts (still clearing)
-            val effect = style.effect
-            if (effect is SpotlightEffect.SoftEdge) {
-                val fadeWidthPx = with(density) { effect.fadeWidth.toPx() }
-                for (bounds in allPaddedBounds) {
-                    drawSoftEdge(bounds, style.shape, fadeWidthPx, density)
-                }
-            }
-
-            // 4. Draw on-top effects (Glow / Custom) after cutouts.
-            when (effect) {
-                is SpotlightEffect.None,
-                is SpotlightEffect.SoftEdge -> Unit
-
-                is SpotlightEffect.Glow -> {
-                    val radiusPx = with(density) { effect.radius.toPx() }
-                    for (bounds in allPaddedBounds) {
-                        drawGlow(bounds, effect.color, effect.alpha, radiusPx)
-                    }
-                }
-
-                is SpotlightEffect.Custom -> {
-                    for (bounds in allPaddedBounds) {
-                        effect.draw(this, bounds)
-                    }
-                }
+                drawSoftEdge(bounds, style.shape, fadeWidthPx, density)
             }
         }
 
-        SpotlightBlockers(
-            // Hit decisions follow what is drawn, see cutoutBounds.
-            holes = { paddedBounds().map { cutoutBounds(it, style.shape) } },
-            passThrough = passThrough,
-            onOverlayClick = onOverlayClick,
-            onTargetClick = onTargetClick,
-            modifier = Modifier.matchParentSize(),
-        )
+        // 4. Draw on-top effects (Glow / Custom) after cutouts.
+        when (effect) {
+            is SpotlightEffect.None,
+            is SpotlightEffect.SoftEdge -> Unit
+
+            is SpotlightEffect.Glow -> {
+                val radiusPx = with(density) { effect.radius.toPx() }
+                for (bounds in allPaddedBounds) {
+                    drawGlow(bounds, effect.color, effect.alpha, radiusPx)
+                }
+            }
+
+            is SpotlightEffect.Custom -> {
+                for (bounds in allPaddedBounds) {
+                    effect.draw(this, bounds)
+                }
+            }
+        }
     }
+}
+
+/**
+ * The areas that stay interactive for [targetBounds] (primary target first,
+ * then additional targets) under this style, in the host's coordinates: the
+ * padded, shape-aware cutouts for styles that draw a shape around the target
+ * (see [cutoutBounds]), the plain target bounds for the others.
+ */
+internal fun HighlightStyle.interactiveBounds(
+    targetBounds: List<Rect>,
+    density: Density,
+    layoutDirection: LayoutDirection,
+): List<Rect> = when (this) {
+    is HighlightStyle.Spotlight ->
+        targetBounds.map { cutoutBounds(padBounds(it, padding, density, layoutDirection), shape) }
+
+    is HighlightStyle.Pulse ->
+        targetBounds.map { cutoutBounds(padBounds(it, padding, density, layoutDirection), shape) }
+
+    is HighlightStyle.Border ->
+        targetBounds.map { cutoutBounds(padBounds(it, padding, density, layoutDirection), shape) }
+
+    is HighlightStyle.Ripple,
+    is HighlightStyle.None,
+    is HighlightStyle.Custom -> targetBounds
 }
 
 /**

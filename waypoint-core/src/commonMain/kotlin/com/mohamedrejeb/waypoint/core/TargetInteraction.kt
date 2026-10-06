@@ -3,9 +3,11 @@ package com.mohamedrejeb.waypoint.core
 /**
  * Controls how the highlighted target responds to pointer input during a tour step.
  *
- * Touch blocking only exists for [HighlightStyle.Spotlight]: every other
- * highlight style leaves the whole screen interactive. A tour that wants
- * blocking without dimming uses `HighlightStyle.Spotlight(overlayAlpha = 0f)`.
+ * Applies while the host blocks input outside the highlighted areas
+ * (`blockOutside`, on by default, overridable per step), with any highlight
+ * style: a dimmed spotlight, a border, or [HighlightStyle.None] all block the
+ * same way. With `blockOutside = false` nothing is blocked and this setting
+ * has no effect.
  *
  * Ignored for steps without a target.
  */

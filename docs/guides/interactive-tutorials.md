@@ -17,7 +17,7 @@ step(NoteTarget.Title) {
 A tap outside the highlighted area follows the host's `overlayClickBehavior` (nothing by default).
 
 !!! note
-    Touch blocking only exists for `HighlightStyle.Spotlight`, which is the default. `Pulse`, `Border`, `Ripple`, `None` and `Custom` leave the whole screen interactive, whatever the step's `interaction` is.
+    Blocking is the host's `blockOutside` (on by default) and works with every highlight style. With `blockOutside = false` nothing is blocked and `interaction` has no effect. See [Touch blocking](highlight-styles.md#touch-blocking).
 
 ## Advance when the user has done it
 
@@ -122,19 +122,19 @@ TextField(
 
 ## Block without dimming
 
-Dimming the screen can get in the way when the user needs to see what they are working on. A spotlight with a transparent scrim keeps the blocking and drops the dimming:
+Dimming the screen can get in the way when the user needs to see what they are working on. Blocking does not depend on the dimming, so pick any undimmed style and keep the host's default `blockOutside = true`:
 
 ```kotlin
 WaypointHost(
     state = state,
-    highlightStyle = HighlightStyle.Spotlight(overlayAlpha = 0f),
+    highlightStyle = HighlightStyle.None,
     tooltipContent = { scope -> TutorialTooltip(scope) },
 ) {
     NoteEditor()
 }
 ```
 
-It can also be set on a single step with `highlightStyle = HighlightStyle.Spotlight(overlayAlpha = 0f)`.
+`HighlightStyle.None` blocks everything outside the target's own bounds; `HighlightStyle.Border` or `Pulse` add a visible frame and use its padded shape as the interactive area; `HighlightStyle.Spotlight(overlayAlpha = 0f)` keeps the spotlight's shape and padding with an invisible scrim. All of them can be set per step with `highlightStyle = ...`, and a step that should not block at all sets `blockOutside = false`.
 
 With nothing dimmed the target no longer stands out. A custom spotlight effect can outline it instead:
 

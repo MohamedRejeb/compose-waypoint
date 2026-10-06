@@ -6,6 +6,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import org.jetbrains.compose.resources.Font
 import com.mohamedrejeb.waypoint.sample.generated.resources.PlusJakartaSans_Bold
+import com.mohamedrejeb.waypoint.sample.generated.resources.PlusJakartaSans_ExtraBold
 import com.mohamedrejeb.waypoint.sample.generated.resources.PlusJakartaSans_Medium
 import com.mohamedrejeb.waypoint.sample.generated.resources.PlusJakartaSans_Regular
 import com.mohamedrejeb.waypoint.sample.generated.resources.PlusJakartaSans_SemiBold
@@ -18,6 +19,7 @@ fun SampleTypography(): Typography {
         Font(Res.font.PlusJakartaSans_Medium, FontWeight.Medium),
         Font(Res.font.PlusJakartaSans_SemiBold, FontWeight.SemiBold),
         Font(Res.font.PlusJakartaSans_Bold, FontWeight.Bold),
+        Font(Res.font.PlusJakartaSans_ExtraBold, FontWeight.ExtraBold),
     )
 
     val defaults = Typography()
@@ -25,9 +27,9 @@ fun SampleTypography(): Typography {
     return Typography(
         displayLarge = defaults.displayLarge.copy(fontFamily = plusJakartaSans, fontWeight = FontWeight.Bold),
         displayMedium = defaults.displayMedium.copy(fontFamily = plusJakartaSans, fontWeight = FontWeight.Bold),
-        displaySmall = defaults.displaySmall.copy(fontFamily = plusJakartaSans, fontWeight = FontWeight.Bold),
-        headlineLarge = defaults.headlineLarge.copy(fontFamily = plusJakartaSans, fontWeight = FontWeight.SemiBold),
-        headlineMedium = defaults.headlineMedium.copy(fontFamily = plusJakartaSans, fontWeight = FontWeight.SemiBold),
+        displaySmall = defaults.displaySmall.copy(fontFamily = plusJakartaSans, fontWeight = FontWeight.ExtraBold),
+        headlineLarge = defaults.headlineLarge.copy(fontFamily = plusJakartaSans, fontWeight = FontWeight.ExtraBold),
+        headlineMedium = defaults.headlineMedium.copy(fontFamily = plusJakartaSans, fontWeight = FontWeight.ExtraBold),
         headlineSmall = defaults.headlineSmall.copy(fontFamily = plusJakartaSans, fontWeight = FontWeight.SemiBold),
         titleLarge = defaults.titleLarge.copy(fontFamily = plusJakartaSans, fontWeight = FontWeight.SemiBold),
         titleMedium = defaults.titleMedium.copy(fontFamily = plusJakartaSans, fontWeight = FontWeight.SemiBold),

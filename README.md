@@ -121,7 +121,7 @@ fun HomeScreen() {
 
 ## Sample
 
-The `:sample` module contains seven focused demos, runnable on all targets:
+The `:sample` module is a small trip planner app whose onboarding is three chained tours (a classic spotlight tour, a hands-on tutorial, and a tour that crosses into a bottom sheet), plus a Lab screen for trying every highlight and tooltip option live. It runs on all targets:
 
 ```bash
 # Desktop

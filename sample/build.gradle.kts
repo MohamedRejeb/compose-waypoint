@@ -79,8 +79,7 @@ kotlin {
             implementation(libs.kotlinx.coroutinesSwing)
         }
         jvmTest.dependencies {
-            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-            implementation(compose.uiTest)
+            implementation(libs.compose.uiTest)
         }
     }
 }

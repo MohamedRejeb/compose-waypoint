@@ -3,6 +3,7 @@ public abstract interface class com/mohamedrejeb/waypoint/core/BeaconStyle {
 
 public final class com/mohamedrejeb/waypoint/core/BeaconStyle$Dot : com/mohamedrejeb/waypoint/core/BeaconStyle {
 	public static final field $stable I
+	public fun <init> ()V
 	public synthetic fun <init> (JFILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (JFLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-0d7_KjU ()J
@@ -18,6 +19,7 @@ public final class com/mohamedrejeb/waypoint/core/BeaconStyle$Dot : com/mohamedr
 
 public final class com/mohamedrejeb/waypoint/core/BeaconStyle$Pulse : com/mohamedrejeb/waypoint/core/BeaconStyle {
 	public static final field $stable I
+	public fun <init> ()V
 	public synthetic fun <init> (JFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (JFFLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-0d7_KjU ()J
@@ -130,6 +132,7 @@ public final class com/mohamedrejeb/waypoint/core/HighlightStyle$Ripple : com/mo
 
 public final class com/mohamedrejeb/waypoint/core/HighlightStyle$Spotlight : com/mohamedrejeb/waypoint/core/HighlightStyle {
 	public static final field $stable I
+	public fun <init> ()V
 	public synthetic fun <init> (Lcom/mohamedrejeb/waypoint/core/SpotlightShape;Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;JFLcom/mohamedrejeb/waypoint/core/SpotlightEffect;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Lcom/mohamedrejeb/waypoint/core/SpotlightShape;Lcom/mohamedrejeb/waypoint/core/SpotlightPadding;JFLcom/mohamedrejeb/waypoint/core/SpotlightEffect;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/mohamedrejeb/waypoint/core/SpotlightShape;
@@ -268,6 +271,7 @@ public final class com/mohamedrejeb/waypoint/core/SpotlightEffect$Custom : com/m
 
 public final class com/mohamedrejeb/waypoint/core/SpotlightEffect$Glow : com/mohamedrejeb/waypoint/core/SpotlightEffect {
 	public static final field $stable I
+	public fun <init> ()V
 	public synthetic fun <init> (JFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (JFFLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-0d7_KjU ()J
@@ -293,6 +297,7 @@ public final class com/mohamedrejeb/waypoint/core/SpotlightEffect$None : com/moh
 
 public final class com/mohamedrejeb/waypoint/core/SpotlightEffect$SoftEdge : com/mohamedrejeb/waypoint/core/SpotlightEffect {
 	public static final field $stable I
+	public fun <init> ()V
 	public synthetic fun <init> (FILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (FLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-D9Ej5fM ()F
@@ -307,6 +312,7 @@ public final class com/mohamedrejeb/waypoint/core/SpotlightEffect$SoftEdge : com
 public final class com/mohamedrejeb/waypoint/core/SpotlightPadding {
 	public static final field $stable I
 	public static final field Companion Lcom/mohamedrejeb/waypoint/core/SpotlightPadding$Companion;
+	public fun <init> ()V
 	public synthetic fun <init> (FFFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (FFFFLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (FFLkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -365,6 +371,7 @@ public final class com/mohamedrejeb/waypoint/core/SpotlightShape$Rect : com/moha
 
 public final class com/mohamedrejeb/waypoint/core/SpotlightShape$RoundedRect : com/mohamedrejeb/waypoint/core/SpotlightShape {
 	public static final field $stable I
+	public fun <init> ()V
 	public synthetic fun <init> (FILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (FLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-D9Ej5fM ()F

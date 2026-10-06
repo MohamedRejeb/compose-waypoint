@@ -83,7 +83,7 @@ class CanvasTargetAutoScrollUiTest {
     }
 
     @Test
-    fun `the targeted rect is centered, not the canvas`() = runCanvasScrollTest { state ->
+    fun `the targeted rect is centered and not the canvas`() = runCanvasScrollTest { state ->
         runOnIdle { state.next() }
         awaitTooltip("marker")
 

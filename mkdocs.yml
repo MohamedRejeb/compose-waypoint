@@ -41,7 +41,7 @@ theme:
 # Social
 extra:
   waypoint_version: '0.1.0'
-  waypoint_snapshot_version: '0.1.0-SNAPSHOT'
+  waypoint_snapshot_version: '0.1.1-SNAPSHOT'
   social:
     - icon: fontawesome/brands/github-alt
       link: https://github.com/MohamedRejeb

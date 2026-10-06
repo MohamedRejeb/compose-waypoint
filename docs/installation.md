@@ -153,10 +153,10 @@ Add the snapshots repository:
     }
     ```
 
-Then depend on the snapshot version:
+Then depend on the snapshot version. Snapshots carry the next patch version after the latest release (after `0.1.0` is out they are `0.1.1-SNAPSHOT`), so they always sort after it:
 
 ```kotlin
-implementation("com.mohamedrejeb.waypoint:waypoint-material3:{{ waypoint_version }}-SNAPSHOT")
+implementation("com.mohamedrejeb.waypoint:waypoint-material3:{{ waypoint_snapshot_version }}")
 ```
 
 ## Next steps

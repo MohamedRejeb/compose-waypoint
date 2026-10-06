@@ -57,20 +57,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Update version in libs.versions.toml
-        run: sed -i "s/^waypoint = \".*\"/waypoint = \"${{ github.event.inputs.version }}\"/" gradle/libs.versions.toml
+      # The catalog version is what snapshots are built from (`<catalog>-SNAPSHOT`),
+      # so after releasing X.Y.Z it moves to the next patch, X.Y.(Z+1), and the
+      # following snapshots sort after the release. The docs keep showing the
+      # released version.
+      - name: Compute the next patch version
+        id: next
+        run: |
+          released="${{ github.event.inputs.version }}"
+          IFS=. read -r major minor patch <<< "$released"
+          next="$major.$minor.$((patch + 1))"
+          echo "version=$next" >> "$GITHUB_OUTPUT"
 
-      - name: Update version in mkdocs.yml
+      - name: Update the development version in libs.versions.toml
+        run: sed -i "s/^waypoint = \".*\"/waypoint = \"${{ steps.next.outputs.version }}\"/" gradle/libs.versions.toml
+
+      - name: Update versions in mkdocs.yml
         run: |
           if [ -f mkdocs.yml ]; then
             sed -i "s/^  waypoint_version: .*/  waypoint_version: '${{ github.event.inputs.version }}'/" mkdocs.yml
+            sed -i "s/^  waypoint_snapshot_version: .*/  waypoint_snapshot_version: '${{ steps.next.outputs.version }}-SNAPSHOT'/" mkdocs.yml
           fi
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
-          commit-message: "chore: bump version to ${{ github.event.inputs.version }}"
-          title: "chore: bump version to ${{ github.event.inputs.version }}"
-          branch: chore/bump-version-${{ github.event.inputs.version }}
+          commit-message: "chore: bump version to ${{ steps.next.outputs.version }} after releasing ${{ github.event.inputs.version }}"
+          title: "chore: bump version to ${{ steps.next.outputs.version }} after releasing ${{ github.event.inputs.version }}"
+          branch: chore/bump-version-${{ steps.next.outputs.version }}
           body: |
-            Automated version bump to `${{ github.event.inputs.version }}` after successful release deploy.
+            Automated bump after releasing `${{ github.event.inputs.version }}`: the catalog moves to `${{ steps.next.outputs.version }}` so snapshots become `${{ steps.next.outputs.version }}-SNAPSHOT`, and the docs show `${{ github.event.inputs.version }}`.

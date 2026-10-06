@@ -27,8 +27,7 @@ import androidx.compose.ui.layout.LayoutCoordinates
  */
 @Stable
 public class WaypointState<K>(
-    /** Immutable list of steps in this tour */
-    public val steps: List<WaypointStep<K>>,
+    steps: List<WaypointStep<K>>,
     /** Optional tour identifier for analytics */
     public val tourId: String? = null,
     /** Optional analytics tracker */
@@ -36,6 +35,13 @@ public class WaypointState<K>(
     /** Optional persistence for remembering tour completion */
     public val persistence: WaypointPersistence? = null,
 ) {
+    /**
+     * The steps of this tour. Replaced as a whole when a keyed
+     * [rememberWaypointState] rebuilds them; never mutated in place.
+     */
+    public var steps: List<WaypointStep<K>> by mutableStateOf(steps)
+        private set
+
     /** Index of the current step, or -1 if the tour is not active */
     public var currentStepIndex: Int by mutableStateOf(-1)
         private set
@@ -169,6 +175,24 @@ public class WaypointState<K>(
     /** Records that the current step's highlight or tooltip has been composed. */
     internal fun noteStepShown() {
         hasShownCurrentStep = true
+    }
+
+    /**
+     * Swaps in a rebuilt step list (a keyed [rememberWaypointState]). A running
+     * tour keeps its index, active and paused flags; the index is clamped when
+     * the new list is shorter and the tour stops when it is empty. The current
+     * step is entered again so its lifecycle (gate, advanceOn) restarts with
+     * the new lambdas and work from the old ones is ignored.
+     */
+    internal fun replaceSteps(newSteps: List<WaypointStep<K>>) {
+        steps = newSteps
+        if (!isActive) return
+        if (newSteps.isEmpty()) {
+            stop()
+            return
+        }
+        currentStepIndex = currentStepIndex.coerceIn(newSteps.indices)
+        enterStep()
     }
 
     private fun boundsOf(key: K?): Rect? = if (key == null) null else targetCoordinates[key]

@@ -54,6 +54,17 @@ val tourState = rememberWaypointState {
 
 Each `step` block maps a target key to tooltip content. Steps are shown in the order they are declared.
 
+The builder runs once. If the texts come from string resources, pass the locale (or any value the steps depend on) as a key so they are rebuilt when it changes, while a running tour keeps its place:
+
+```kotlin
+val locale = Locale.current
+val tourState = rememberWaypointState(locale) {
+    step(OnboardingTarget.SearchBar) {
+        title = stringResource(Res.string.tour_search_title)
+    }
+}
+```
+
 ## 4. Mark targets with `Modifier.waypointTarget()`
 
 Attach `Modifier.waypointTarget()` to the composables you want to highlight:
@@ -229,7 +240,7 @@ See [Interactive Tutorials](guides/interactive-tutorials.md) for the full patter
 
 | API | Purpose |
 |-----|---------|
-| `rememberWaypointState { }` | DSL builder that creates a `WaypointState` with typed step definitions |
+| `rememberWaypointState(keys...) { }` | DSL builder that creates a `WaypointState` with typed step definitions, rebuilt when a key (for example the locale) changes |
 | `Modifier.waypointTarget(state, key)` | Marks a composable as a tour target and registers its bounds |
 | `WaypointHost(state) { content() }` | Host composable that renders spotlight overlay and tooltip popup |
 | `WaypointState` | State holder with navigation: `start()`, `next()`, `previous()`, `goToStep()`, `goTo(key)`, `stop()`, `pause()`, `resume()` |

@@ -1,6 +1,7 @@
 package com.mohamedrejeb.waypoint.core
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -25,9 +26,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
  * }
  * ```
  *
- * **The steps are built once.** [builder] runs a single time, when the state
- * is first remembered, and is not run again on recomposition. Everything it
- * captures is frozen at that moment:
+ * **The steps are built once per set of [keys].** [builder] runs when the
+ * state is first remembered and again whenever one of the [keys] changes; it
+ * is not run on ordinary recomposition. Everything it captures is frozen until
+ * the next rebuild:
  *
  * - `title` and `description` are plain strings. A value resolved in
  *   composition (for example with `stringResource`) does not follow a later
@@ -40,9 +42,21 @@ import androidx.compose.runtime.saveable.rememberSaveable
  *   callbacks with `rememberUpdatedState`, rather than capturing a value that
  *   was read in composition.
  *
- * If the steps themselves must change, key the call site
- * (`key(locale) { rememberWaypointState { ... } }`). That creates a new state,
- * so a running tour does not carry over.
+ * To have the steps follow such a value, pass it as a key:
+ *
+ * ```kotlin
+ * val locale = Locale.current
+ * val state = rememberWaypointState(locale) {
+ *     step(Targets.Search) { title = stringResource(Res.string.tour_search) }
+ * }
+ * ```
+ *
+ * When a key changes the steps are rebuilt and swapped into the same state:
+ * a running tour keeps its step index and its active and paused flags, the
+ * index is clamped if the new list is shorter and the tour stops if it is
+ * empty, and the current step is entered again so a running `beforeShow` or
+ * `advanceOn` from the old lambdas is cancelled and the new one takes over.
+ * The step's `onEnter`/`onExit` do not fire for the swap.
  *
  * **Saved state.** The state is kept with `rememberSaveable`: the current step
  * index and the active and paused flags survive configuration changes and
@@ -54,24 +68,31 @@ import androidx.compose.runtime.saveable.rememberSaveable
  * and call [WaypointState.stop] when they are gone, otherwise the restored tour
  * waits on a step whose target will never appear.
  *
+ * @param keys values whose change rebuilds the steps; none means build once
  * @param tourId optional identifier for analytics tracking and persistence
  * @param analytics optional analytics tracker for tour events
  * @param persistence optional persistence for remembering tour completion
- * @param builder DSL block to configure steps, run once
+ * @param builder DSL block to configure steps, run once per set of [keys]
  */
 @Composable
 public fun <K> rememberWaypointState(
+    vararg keys: Any?,
     tourId: String? = null,
     analytics: WaypointAnalytics? = null,
     persistence: WaypointPersistence? = null,
     builder: WaypointStepBuilder<K>.() -> Unit,
 ): WaypointState<K> {
-    val steps = remember { WaypointStepBuilder<K>().apply(builder).build() }
-    return rememberSaveable(
+    val steps = remember(*keys) { WaypointStepBuilder<K>().apply(builder).build() }
+    val state = rememberSaveable(
         saver = waypointStateSaver(steps, tourId, analytics, persistence),
     ) {
         WaypointState(steps, tourId = tourId, analytics = analytics, persistence = persistence)
     }
+    // A key change produced a new list: swap it into the existing state.
+    SideEffect {
+        if (state.steps !== steps) state.replaceSteps(steps)
+    }
+    return state
 }
 
 /**
@@ -83,9 +104,8 @@ public fun <K> rememberWaypointState(
  *
  * **The first [steps] list is the one that is used.** A different list passed
  * on a later recomposition is ignored, so texts and lambdas in it do not
- * update. See the other overload for how to keep step texts and lambdas
- * current; to really swap the steps, key the call site, which creates a new
- * state.
+ * update. Use the keyed builder overload to have steps follow a value, or key
+ * the call site, which creates a new state.
  *
  * @param steps the steps of the tour, read once
  * @param tourId optional identifier for analytics tracking and persistence

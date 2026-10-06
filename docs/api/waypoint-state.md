@@ -117,6 +117,7 @@ Two overloads exist. Both survive configuration changes (Android rotation, theme
 ```kotlin
 @Composable
 public fun <K> rememberWaypointState(
+    vararg keys: Any?,
     tourId: String? = null,
     analytics: WaypointAnalytics? = null,
     persistence: WaypointPersistence? = null,
@@ -141,13 +142,24 @@ val tourState = rememberWaypointState(
 }
 ```
 
-!!! note "The steps are built once"
-    The builder runs a single time, when the state is first remembered, and the first `steps` list passed to the other overload is the one that is used. Everything captured in there is frozen at that moment:
+!!! note "The steps are built once per set of keys"
+    The builder runs when the state is first remembered and again whenever one of the `keys` changes, never on ordinary recomposition. The first `steps` list passed to the other overload is the one that is used. Everything captured in the builder is frozen until the next rebuild:
 
-    - `title` and `description` are plain strings. A value resolved in composition (for example with `stringResource`) does not follow a later locale change. Resolve such strings where they are shown instead, inside the step's `content { }` or the host's `tooltipContent`.
+    - `title` and `description` are plain strings. A value resolved in composition (for example with `stringResource`) does not follow a later locale change unless the locale is a key. Alternatively resolve such strings where they are shown, inside the step's `content { }` or the host's `tooltipContent`.
     - Lambdas (`showIf`, `onEnter`, `onExit`, `beforeShow`, `advanceOn`) keep the variables they captured. Capture state holders and read them inside the lambda (`showIf { viewModel.isPremium }`, `advanceOn { snapshotFlow { query }.first { it.isNotEmpty() } }`) rather than a value read in composition.
 
-    If the steps themselves must change, key the call site (`key(locale) { rememberWaypointState { ... } }`). That creates a new state, so a running tour does not carry over.
+### Keys
+
+Pass the values the steps depend on as `keys`. When one changes, the steps are rebuilt and swapped into the same state:
+
+```kotlin
+val locale = Locale.current
+val tourState = rememberWaypointState(locale) {
+    step(Targets.Search) { title = stringResource(Res.string.tour_search) }
+}
+```
+
+A running tour keeps its step index and its active and paused flags. If the new list is shorter the index is clamped to its last step, if it is empty the tour stops. The current step is entered again, so a running `beforeShow` or `advanceOn` from the old lambdas is cancelled and the new step's trigger is armed; `onEnter`/`onExit` do not fire for the swap. The saved state (`rememberSaveable`) is unaffected. Without keys the steps are built once.
 
 ### Pre-built list overload
 
@@ -203,6 +215,7 @@ step {
 | `placement` | `TooltipPlacement` | `Auto` | Desired side. Waypoint auto-flips if space is tight. Ignored without a target. |
 | `highlightStyle` | `HighlightStyle?` | `null` (inherits host) | Per-step highlight. See [Highlight Styles](../guides/highlight-styles.md). |
 | `interaction` | `TargetInteraction` | `None` | What touches on the highlighted target do. Ignored without a target. |
+| `blockOutside` | `Boolean?` | `null` (inherits host) | Whether input outside the highlighted areas is blocked during this step, with any highlight style. |
 | `additionalTargets` | `List<K>` | `emptyList()` | Extra keys to highlight alongside the primary target. Must live in the same host as the primary target; keys registered against a different host are ignored for that step. Ignored without a target. |
 
 ### StepBuilder methods

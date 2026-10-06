@@ -1,6 +1,12 @@
 # Quick Start
 
-This guide walks you through building a 3-step onboarding tour from scratch.
+This guide builds a 3-step onboarding tour from scratch. The result behaves like the tour below, recorded from the [sample app](https://github.com/MohamedRejeb/compose-waypoint/tree/main/sample): a dimmed screen, a cutout that moves from target to target, and a tooltip with Back and Next.
+
+<p align="center" markdown>
+![A spotlight tour moving between targets](assets/tour.gif){ width="240" }
+</p>
+
+There are three things to do: describe the steps, tag the targets, and wrap the screen in a host.
 
 ## 1. Add the dependency
 

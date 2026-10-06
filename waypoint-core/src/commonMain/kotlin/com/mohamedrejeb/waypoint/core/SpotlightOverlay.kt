@@ -4,14 +4,12 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -73,7 +71,7 @@ internal fun SpotlightOverlay(
             is SpotlightEffect.Glow -> {
                 val radiusPx = with(density) { effect.radius.toPx() }
                 for (bounds in allPaddedBounds) {
-                    drawGlow(bounds, effect.color, effect.alpha, radiusPx)
+                    drawGlow(bounds, style.shape, effect.color, effect.alpha, radiusPx, density)
                 }
             }
 
@@ -268,36 +266,86 @@ private fun DrawScope.drawExpandedCutoutDstOut(
 }
 
 /**
- * Draws a radial halo centered on [bounds], peaking at [alpha] near the
- * cutout edge and fading linearly to 0 at `edge + radiusPx`.
+ * Draws a halo around the cutout at [bounds] that follows the cutout's
+ * [shape]: strongest at the cutout's edge, fading to nothing at
+ * `edge + radiusPx`, and never drawn inside the cutout.
+ *
+ * It is built from concentric outlines of the shape, each one a little larger
+ * and a little fainter than the last. A single radial gradient would be a
+ * circle whatever the shape, and would tint a wide target itself.
  */
 private fun DrawScope.drawGlow(
     bounds: Rect,
+    shape: SpotlightShape,
     color: Color,
     alpha: Float,
     radiusPx: Float,
+    density: Density,
 ) {
-    val innerRadius = max(bounds.width, bounds.height) / 2f
-    val outerRadius = innerRadius + radiusPx
-    if (outerRadius <= 0f) return
+    if (radiusPx <= 0f || alpha <= 0f) return
 
-    val innerStop = (innerRadius / outerRadius).coerceIn(0f, 1f)
-    val brush = Brush.radialGradient(
-        colorStops = arrayOf(
-            0f to Color.Transparent,
-            innerStop to color.copy(alpha = alpha),
-            1f to Color.Transparent,
-        ),
-        center = bounds.center,
-        radius = outerRadius,
-    )
-    drawRect(
-        brush = brush,
-        topLeft = Offset(
-            x = bounds.center.x - outerRadius,
-            y = bounds.center.y - outerRadius,
-        ),
-        size = Size(outerRadius * 2f, outerRadius * 2f),
-        blendMode = BlendMode.SrcOver,
-    )
+    val bandWidth = radiusPx / GlowSteps
+    // Bands overlap slightly so no gap shows between them.
+    val stroke = Stroke(width = bandWidth + GlowBandOverlapPx)
+    for (i in 0 until GlowSteps) {
+        val bandCenter = (i + 0.5f) * bandWidth
+        val fade = 1f - bandCenter / radiusPx
+        drawCutoutOutline(
+            bounds = bounds,
+            shape = shape,
+            density = density,
+            // Keeps the first band's inner side on the cutout's edge.
+            expansion = bandCenter + GlowBandOverlapPx / 2f,
+            color = color.copy(alpha = alpha * fade * fade),
+            stroke = stroke,
+        )
+    }
+}
+
+private const val GlowSteps = 24
+private const val GlowBandOverlapPx = 0.5f
+
+/** Strokes the outline of the cutout at [bounds], grown outwards by [expansion]. */
+private fun DrawScope.drawCutoutOutline(
+    bounds: Rect,
+    shape: SpotlightShape,
+    density: Density,
+    expansion: Float,
+    color: Color,
+    stroke: Stroke,
+) {
+    val expanded = bounds.inflate(expansion)
+    when (shape) {
+        is SpotlightShape.Circle -> drawCircle(
+            color = color,
+            center = bounds.center,
+            radius = max(bounds.width, bounds.height) / 2f + expansion,
+            style = stroke,
+        )
+
+        is SpotlightShape.Rect -> drawRoundRect(
+            color = color,
+            topLeft = expanded.topLeft,
+            size = expanded.size,
+            // Rounds the halo around a square corner, as light spreads.
+            cornerRadius = CornerRadius(expansion),
+            style = stroke,
+        )
+
+        is SpotlightShape.RoundedRect -> drawRoundRect(
+            color = color,
+            topLeft = expanded.topLeft,
+            size = expanded.size,
+            cornerRadius = CornerRadius(with(density) { shape.cornerRadius.toPx() } + expansion),
+            style = stroke,
+        )
+
+        is SpotlightShape.Pill -> drawRoundRect(
+            color = color,
+            topLeft = expanded.topLeft,
+            size = expanded.size,
+            cornerRadius = CornerRadius(expanded.height / 2f),
+            style = stroke,
+        )
+    }
 }

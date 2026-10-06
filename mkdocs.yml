@@ -83,6 +83,9 @@ nav:
     - 'WaypointHost': api/waypoint-host.md
     - 'Material3': api/material3.md
 
+extra_css:
+  - stylesheets/extra.css
+
 # Extensions
 markdown_extensions:
   - toc:

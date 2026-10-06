@@ -6,7 +6,7 @@
 
 | Kotlin | Compose Multiplatform | Waypoint |
 |--------|-----------------------|----------|
-| 2.3.20 | 1.10.3                | 0.1.0    |
+| 2.4.20 | 1.12.1                | 0.1.0    |
 
 Waypoint is built with these versions. If you need a release for an older Compose or Kotlin, please open an issue and we will consider publishing one.
 
@@ -84,15 +84,15 @@ Both modules expose the Compose artifacts that appear in their public API (`runt
 
 | Requirement | Minimum |
 |---|---|
-| Compose Multiplatform | 1.10.3 |
-| Kotlin | 2.3.20 |
+| Compose Multiplatform | 1.12.1 |
+| Kotlin | 2.4.20 |
 | Android `minSdk` | 24 |
 | iOS deployment target | 14.0 |
 | JVM target (Android and Desktop) | 11 |
 
 Published targets: Android, JVM (Desktop), iOS (`iosArm64`, `iosSimulatorArm64`), JS and Wasm (browser). There is no `iosX64` artifact, so the iOS simulator is supported on Apple silicon Macs only.
 
-The iOS minimum is the one Kotlin/Native 2.3 itself targets. Waypoint does not add a requirement of its own.
+The iOS minimum is the one Kotlin/Native 2.4 itself targets. Waypoint does not add a requirement of its own.
 
 ## iOS framework export
 

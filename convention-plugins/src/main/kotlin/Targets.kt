@@ -2,10 +2,6 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 @Suppress("OPT_IN_USAGE")
 fun KotlinMultiplatformExtension.applyTargets() {
-    androidTarget {
-        publishLibraryVariants("release")
-    }
-
     jvm()
 
     js {
@@ -18,11 +14,15 @@ fun KotlinMultiplatformExtension.applyTargets() {
                 enabled = false
             }
         }
+        // Compose UI tests need the webpack bundle to load Skiko, and the
+        // Compose plugin fails the build without a declared executable.
+        binaries.executable()
     }
 
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
         browser()
+        binaries.executable()
     }
 
     iosArm64()

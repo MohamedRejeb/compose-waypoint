@@ -148,6 +148,12 @@ public class WaypointState<K>(
     internal val bringIntoViewRequesters = mutableStateMapOf<K, BringIntoViewRequester>()
 
     /**
+     * Where each target that carries a target modifier is laid out, used to
+     * work out how far to scroll it. Read once per auto-scroll, never observed.
+     */
+    internal val targetLayouts = mutableMapOf<K, TargetLayout>()
+
+    /**
      * LayoutCoordinates for each registered host, keyed by the host's unique id.
      * A single tour can span multiple hosts (main screen + Dialog + Sheet); each
      * host resolves its own targets against its own coordinates.
@@ -358,6 +364,7 @@ public class WaypointState<K>(
         targetCoordinates.remove(key)
         targetHostIds.remove(key)
         bringIntoViewRequesters.remove(key)
+        targetLayouts.remove(key)
     }
 
     /**

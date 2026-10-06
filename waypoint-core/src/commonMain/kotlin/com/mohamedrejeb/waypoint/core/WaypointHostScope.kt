@@ -286,8 +286,9 @@ private fun <K> StepLifecycleEffect(
 
 
 /**
- * Brings the current step's target into view once the step is showable: its
- * gate has completed and the target is in the composition. That also covers a
+ * Brings the current step's target into view, to the middle of its scroll
+ * container, once the step is showable: its gate has completed and the target
+ * is in the composition. That also covers a
  * target mounted by beforeShow, or one that registers some time after the step
  * was entered.
  *
@@ -298,7 +299,7 @@ private fun <K> StepLifecycleEffect(
 @Composable
 private fun <K> AutoScrollEffect(state: WaypointState<K>) {
     LaunchedEffect(state, state.stepGeneration) {
-        if (state.currentStep?.targetKey == null) return@LaunchedEffect
+        val targetKey = state.currentStep?.targetKey ?: return@LaunchedEffect
         snapshotFlow { state.isActive && state.isStepReady && !state.isPaused }.first { it }
 
         val registered = state.currentBringIntoViewRequester
@@ -307,7 +308,7 @@ private fun <K> AutoScrollEffect(state: WaypointState<K>) {
         // A target that only just entered the composition has not been laid
         // out yet, give it a frame so there is a position to scroll to.
         if (registered == null) withFrameNanos { }
-        requester.bringIntoView()
+        requester.bringTargetIntoView(state.targetLayouts[targetKey])
     }
 }
 

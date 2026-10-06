@@ -48,6 +48,7 @@ public fun <K> Modifier.waypointTarget(
         .bringIntoViewRequester(bringIntoViewRequester)
         .onGloballyPositioned { coordinates ->
             if (!coordinates.isAttached) return@onGloballyPositioned
+            state.targetLayouts[currentKey] = TargetLayout(coordinates)
             // No host in scope, target can't be registered anywhere useful.
             if (hostId == null) return@onGloballyPositioned
 

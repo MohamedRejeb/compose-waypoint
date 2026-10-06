@@ -67,8 +67,6 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(libs.compose.components.resources)
             implementation(libs.compose.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.androidx.navigation3.runtime)
             implementation(libs.androidx.navigation3.ui)
             implementation(libs.kotlinx.serialization.core)
@@ -81,8 +79,7 @@ kotlin {
             implementation(libs.kotlinx.coroutinesSwing)
         }
         jvmTest.dependencies {
-            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-            implementation(compose.uiTest)
+            implementation(libs.compose.uiTest)
         }
     }
 }

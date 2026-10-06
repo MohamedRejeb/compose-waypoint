@@ -1,0 +1,5 @@
+/* Screen recordings and screenshots of the sample app */
+.md-typeset img[src*="assets/"] {
+  border-radius: 14px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+}

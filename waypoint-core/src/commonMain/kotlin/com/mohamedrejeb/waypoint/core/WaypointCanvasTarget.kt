@@ -1,5 +1,7 @@
 package com.mohamedrejeb.waypoint.core
 
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +32,10 @@ import androidx.compose.ui.layout.onGloballyPositioned
  * Any Compose state read inside [boundsInCanvas] will drive re-registration,
  * so animated offsets, pan/zoom transforms, and drag state all work.
  *
+ * When this composable sits in a scroll container and the target is out of
+ * view as its step starts, the tour scrolls the target to the middle of the
+ * container, as it does for [waypointTarget].
+ *
  * For full manual control (for example to register a target from inside a
  * [androidx.compose.runtime.SideEffect] where no modifier can be applied),
  * use [WaypointState.setTargetBounds] directly.
@@ -56,7 +62,12 @@ public fun <K> Modifier.waypointCanvasTarget(
     // inside snapshotFlow forces re-evaluation on every layout pass.
     var tick by remember { mutableIntStateOf(0) }
 
-    DisposableEffect(currentKey) {
+    // Lets the tour scroll the canvas until the target is in view, as
+    // Modifier.waypointTarget does for a composable.
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+
+    DisposableEffect(state, currentKey) {
+        state.registerBringIntoViewRequester(currentKey, bringIntoViewRequester)
         onDispose {
             state.unregisterTarget(currentKey)
         }
@@ -110,10 +121,13 @@ public fun <K> Modifier.waypointCanvasTarget(
         }
     }
 
-    this.onGloballyPositioned { coords ->
-        canvasCoords = coords
-        tick++
-    }
+    this
+        .bringIntoViewRequester(bringIntoViewRequester)
+        .onGloballyPositioned { coords ->
+            canvasCoords = coords
+            state.targetLayouts[currentKey] = TargetLayout(coords) { currentBoundsInCanvas() }
+            tick++
+        }
 }
 
 private data class CanvasTargetSnapshot(

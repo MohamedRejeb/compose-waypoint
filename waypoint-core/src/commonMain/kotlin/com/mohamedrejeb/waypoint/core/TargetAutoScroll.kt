@@ -1,6 +1,7 @@
 package com.mohamedrejeb.waypoint.core
 
 import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -8,8 +9,22 @@ import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.unit.toSize
 import kotlin.math.max
 
-/** Slack for comparing laid out sizes, which are rounded to whole pixels. */
+/** Slack for comparing laid out positions, which are rounded to whole pixels. */
 private const val VisibilityTolerancePx = 1f
+
+/**
+ * Where a target is laid out, for working out how far to scroll it.
+ *
+ * @param coordinates the layout that carries the target modifier
+ * @param localBounds the target's rectangle inside that layout when it is
+ *   only a part of it (a shape on a canvas), null when it is the whole layout
+ */
+internal class TargetLayout(
+    val coordinates: LayoutCoordinates,
+    val localBounds: (() -> Rect)? = null,
+) {
+    fun bounds(): Rect = localBounds?.invoke() ?: Rect(Offset.Zero, coordinates.size.toSize())
+}
 
 /**
  * Scrolls the target laid out at [target] into view, to the middle of the
@@ -21,31 +36,33 @@ private const val VisibilityTolerancePx = 1f
  * containers that disagree, for instance), this falls back to the plain
  * "nearest edge" scroll.
  */
-internal suspend fun BringIntoViewRequester.bringTargetIntoView(target: LayoutCoordinates?) {
-    if (target == null || !target.isAttached) {
+internal suspend fun BringIntoViewRequester.bringTargetIntoView(target: TargetLayout?) {
+    val layout = target?.coordinates
+    if (layout == null || !layout.isAttached) {
         bringIntoView()
         return
     }
-    if (target.isFullyVisible()) return
+    val bounds = target.bounds()
+    if (layout.isFullyVisible(bounds)) return
 
-    bringIntoView(centeringRect(target.size.toSize(), target.scrollViewportSize()))
-    if (target.isAttached && !target.isFullyVisible()) bringIntoView()
+    bringIntoView(centeringRect(bounds, layout.scrollViewportSize()))
+    if (layout.isAttached && !layout.isFullyVisible(bounds)) bringIntoView(bounds)
 }
 
 /**
- * The rectangle to bring into view, in the target's own coordinates, so that
- * a target of size [target] ends up in the middle of a [viewport]: the target
- * grown equally on both sides until it is as large as the viewport. On an
- * axis where the target is larger than the viewport it is left as is.
+ * The rectangle to bring into view so that [target] ends up in the middle of
+ * a [viewport]: the target grown equally on both sides until it is as large
+ * as the viewport. On an axis where the target is larger than the viewport it
+ * is left as is.
  */
-internal fun centeringRect(target: Size, viewport: Size): Rect {
+internal fun centeringRect(target: Rect, viewport: Size): Rect {
     val extraX = max(0f, (viewport.width - target.width) / 2f)
     val extraY = max(0f, (viewport.height - target.height) / 2f)
     return Rect(
-        left = -extraX,
-        top = -extraY,
-        right = target.width + extraX,
-        bottom = target.height + extraY,
+        left = target.left - extraX,
+        top = target.top - extraY,
+        right = target.right + extraX,
+        bottom = target.bottom + extraY,
     )
 }
 
@@ -72,9 +89,17 @@ private fun LayoutCoordinates.scrollViewportSize(): Size {
     )
 }
 
-/** Whether no part of this layout is clipped away by its ancestors or the window. */
-private fun LayoutCoordinates.isFullyVisible(): Boolean {
-    val visible = findRootCoordinates().localBoundingBoxOf(this, clipBounds = true)
-    return visible.width >= size.width - VisibilityTolerancePx &&
-        visible.height >= size.height - VisibilityTolerancePx
+/**
+ * Whether no part of [bounds], a rectangle inside this layout, is clipped
+ * away by the layout's ancestors or the window.
+ */
+private fun LayoutCoordinates.isFullyVisible(bounds: Rect): Boolean {
+    val root = findRootCoordinates()
+    val visible = root.localBoundingBoxOf(this, clipBounds = true)
+    val topLeft = root.localPositionOf(this, bounds.topLeft)
+    val bottomRight = root.localPositionOf(this, bounds.bottomRight)
+    return topLeft.x >= visible.left - VisibilityTolerancePx &&
+        topLeft.y >= visible.top - VisibilityTolerancePx &&
+        bottomRight.x <= visible.right + VisibilityTolerancePx &&
+        bottomRight.y <= visible.bottom + VisibilityTolerancePx
 }
